@@ -4,38 +4,73 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        {{-- CAMBIO 1: Usamos una clase CSS personalizada 'sidebar-naranja' --}}
+        <flux:sidebar sticky stashable class="sidebar-naranja text-white">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                 <x-app-logo />
             </a>
 
-            <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+            <flux:navlist>
+                <flux:navlist.group :heading="__('Plataforma')" class="grid">
+                    {{-- CAMBIO 2: Aplicamos las clases de texto a TODOS los items --}}
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate 
+                        class="text-white hover:bg-white/10 focus:bg-white/10">
+                        {{ __('Inicio') }}
+                    </flux:navlist.item>
+                    
+                    <flux:navlist.item icon="building-storefront" :href="route('establecimientos.index')" :current="request()->routeIs('establecimientos.*')" wire:navigate
+                        class="text-white hover:bg-white/10 focus:bg-white/10">
+                        {{ __('Establecimientos') }}
+                    </flux:navlist.item>
+                    
+                    <flux:navlist.item icon="tag" :href="route('promociones.index')" :current="request()->routeIs('promociones.*')" wire:navigate
+                        class="text-white hover:bg-white/10 focus:bg-white/10">
+                        {{ __('Promociones') }}
+                    </flux:navlist.item>
+                    
+                    <flux:navlist.item icon="photo" :href="route('banners.index')" :current="request()->routeIs('banners.*')" wire:navigate
+                        class="text-white hover:bg-white/10 focus:bg-white/10">
+                        {{ __('Banners') }}
+                    </flux:navlist.item>
+                    
+                    <flux:navlist.item icon="bell" :href="route('notificaciones.index')" :current="request()->routeIs('notificaciones.*')" wire:navigate
+                        class="text-white hover:bg-white/10 focus:bg-white/10">
+                        {{ __('Notificaciones') }}
+                    </flux:navlist.item>
+                    
+                    <flux:navlist.item icon="credit-card" :href="route('subscripcion.index')" :current="request()->routeIs('subscripcion.*')" wire:navigate
+                        class="text-white hover:bg-white/10 focus:bg-white/10">
+                        {{ __('Subscripción') }}
+                    </flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
 
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
+            {{-- CAMBIO 3: Quitamos 'variant="outline"' y aplicamos clases --}}
+            <flux:navlist>
+                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank"
+                    class="text-white hover:bg-white/10 focus:bg-white/10">
+                    {{ __('Repositorio') }}
                 </flux:navlist.item>
 
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
+                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank"
+                    class="text-white hover:bg-white/10 focus:bg-white/10">
+                    {{ __('Documentación') }}
                 </flux:navlist.item>
             </flux:navlist>
 
             <!-- Desktop User Menu -->
+            {{-- CAMBIO 4: Aplicamos clases al botón de perfil --}}
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
                 <flux:profile
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
                     icon:trailing="chevrons-up-down"
                     data-test="sidebar-menu-button"
+                    class="text-white hover:bg-white/10 focus:bg-white/10"
                 />
 
                 <flux:menu class="w-[220px]">
@@ -61,7 +96,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Configuración') }}</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -69,7 +104,7 @@
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full" data-test="logout-button">
-                            {{ __('Log Out') }}
+                            {{ __('Cerrar Sesión') }}
                         </flux:menu.item>
                     </form>
                 </flux:menu>
@@ -111,7 +146,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Configuración') }}</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -119,14 +154,17 @@
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full" data-test="logout-button">
-                            {{ __('Log Out') }}
+                            {{ __('Cerrar Sesión') }}
                         </flux:menu.item>
                     </form>
                 </flux:menu>
             </flux:dropdown>
         </flux:header>
 
-        {{ $slot }}
+        <!-- Contenido Principal (esto es lo importante) -->
+        <div class="lg:pl-72">
+            {{ $slot }}
+        </div>
 
         @fluxScripts
     </body>

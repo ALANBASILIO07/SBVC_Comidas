@@ -32,9 +32,27 @@
     .dark {
         --color-accent: var(--color-white);
         --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        --color-accent-foreground: var(--color-neutral-8G00);
     }
 }
+
+/* --- CAMBIO AQUÍ --- */
+/* Hacemos el selector más específico para ganar la "guerra de especificidad" */
+@layer components {
+    /* Apuntamos al elemento con el atributo data-flux-sidebar Y nuestra clase */
+    [data-flux-sidebar].sidebar-naranja {
+        background-color: #F7941D !important;
+        /* Aseguramos que el borde también se quite */
+        border-right: none !important; 
+    }
+
+    /* Forzamos el color del heading "Plataforma" a blanco */
+    .sidebar-naranja [data-flux-group-heading] {
+        color: white !important;
+    }
+}
+/* --- FIN DEL CAMBIO --- */
+
 
 @layer base {
 
