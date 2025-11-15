@@ -39,6 +39,11 @@
                         class="text-white hover:bg-white/10 focus:bg-white/10">
                         {{ __('Notificaciones') }}
                     </flux:navlist.item>
+
+                    <flux:navlist.item icon="star" :href="route('calificaciones.index')" :current="request()->routeIs('calificaciones.*')" wire:navigate
+                        class="text-white hover:bg-white/10 focus:bg-white/10">
+                        {{ __('Calificaciones') }} 
+                    </flux:navlist.item>
                     
                     <flux:navlist.item icon="credit-card" :href="route('subscripcion.index')" :current="request()->routeIs('subscripcion.*')" wire:navigate
                         class="text-white hover:bg-white/10 focus:bg-white/10">

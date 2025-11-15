@@ -78,6 +78,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('notificaciones.edit', ['id' => $id]);
     })->name('notificaciones.edit');
     
+    //calificaciones
+    Route::get('calificaciones', function () {
+        return view('calificaciones.index');
+    })->name('calificaciones.index');
+
     // Subscripción
     Route::get('subscripcion', function () {
         return view('subscripcion.index');
