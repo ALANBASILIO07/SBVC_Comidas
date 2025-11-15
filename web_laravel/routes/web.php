@@ -3,14 +3,25 @@
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BannerController;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::get('completar-registro', function () {
+    return view('clientes.complete_profile');
+})->middleware(['auth'])->name('registro.completar');
+
+// Ruta POST para procesar el formulario (necesitarás crear el controlador)
+Route::post('completar-registro', [ClienteController::class, 'store'])
+    ->middleware(['auth'])
+    ->name('clientes.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Establecimientos
@@ -48,21 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('promociones.edit');
     
     // Banners
-    Route::get('banners', function () {
-        return view('banners.index');
-    })->name('banners.index');
-    
-    Route::get('banners/create', function () {
-        return view('banners.create');
-    })->name('banners.create');
-    
-    Route::get('banners/{id}', function ($id) {
-        return view('banners.show', ['id' => $id]);
-    })->name('banners.show');
-    
-    Route::get('banners/{id}/edit', function ($id) {
-        return view('banners.edit', ['id' => $id]);
-    })->name('banners.edit');
+    Route::resource('banners', BannerController::class);
     
     // Notificaciones
     Route::get('notificaciones', function () {
