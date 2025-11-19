@@ -14,49 +14,27 @@ return new class extends Migration
     {
         Schema::create('clientes', function (Blueprint $table) {
             $table->id();
-            
-            // Llave foránea (de tu 3er ejemplo)
             $table->foreignId('user_id')
-                  ->constrained('users')
-                  ->onDelete('cascade'); // Si se borra el usuario, se borra su cliente
-
-            // Información básica del negocio (de tu 1er ejemplo)
-            $table->string('nombre_negocio');
-            $table->string('tipo_negocio'); // Restaurante, Cafetería, etc.
-            $table->enum('formalidad', ['formal', 'informal']);
-            $table->enum('tipo_cuenta', ['basica', 'premium'])->default('basica');
-            $table->string('telefono', 20);
-            
-            // Información fiscal (nullable para negocios informales)
-            $table->string('rfc', 13)->nullable();
-            $table->string('razon_social')->nullable();
-            $table->text('direccion_fiscal')->nullable();
-            $table->boolean('ofrece_facturacion')->default(false);
-            
-            // Dirección del establecimiento
-            $table->text('direccion_completa');
-            $table->string('ciudad');
-            $table->string('estado');
-            $table->string('codigo_postal', 10);
-            
-            // Métodos de pago y horarios (JSON)
-            $table->json('metodos_pago')->nullable();
-            $table->json('horarios')->nullable();
-            $table->boolean('cierra_dias_festivos')->default(false);
-            
-            // Estado del negocio
-            $table->boolean('activo')->default(true);
-            $table->boolean('verificado')->default(false);
-
-            // Soft Deletes (de tu 2do ejemplo)
+                  ->unique()->constrained('users')
+                  ->onDelete('cascade');
+    
+            // Datos del titular de la cuenta (la persona o empresa que paga)
+            $table->string('nombre_titular');                    // Nombre del cliente real
+            $table->string('email_contacto')->unique();          // Email de contacto (puede ser diferente al de login)
+            $table->string('telefono', 10);
+    
+            // Plan y suscripción
+            $table->enum('plan', ['basico', 'estandar', 'premium'])->default('estandar');
+            $table->timestamp('fecha_inicio_suscripcion')->useCurrent();
+            $table->timestamp('fecha_fin_suscripcion')->nullable(); // Para control de vencimiento
+            $table->boolean('suscripcion_activa')->default(true); // Se modifica en segundo plano
+    
+            // Datos fiscales del TITULAR (no del negocio)
+            $table->string('rfc_titular', 13)->nullable();
+            $table->string('razon_social_titular')->nullable();
+    
             $table->softDeletes();
-            
             $table->timestamps();
-            
-            // Índices para búsquedas
-            $table->index('ciudad');
-            $table->index('estado');
-            $table->index('tipo_negocio');
         });
     }
 

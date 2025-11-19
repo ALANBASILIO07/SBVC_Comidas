@@ -78,10 +78,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('notificaciones.edit', ['id' => $id]);
     })->name('notificaciones.edit');
     
-    //calificaciones
+    // Calificaciones
     Route::get('calificaciones', function () {
         return view('calificaciones.index');
     })->name('calificaciones.index');
+
+    Route::get('calificaciones/create', function () {
+        return view('calificaciones.create');
+    })->name('calificaciones.create');
+    
+    Route::get('calificaciones/{id}', function ($id) {
+        return view('calificaciones.show', ['id' => $id]);
+    })->name('calificaciones.show');
+    
+    Route::get('calificaciones/{id}/edit', function ($id) {
+        return view('calificaciones.edit', ['id' => $id]);
+    })->name('calificaciones.edit');
 
     // Subscripción
     Route::get('subscripcion', function () {
