@@ -13,7 +13,6 @@ return new class extends Migration
 
             // Quién creó el establecimiento (CLIENTE)
             $table->foreignId('cliente_id')
-                  ->after('id')
                   ->constrained('clientes')
                   ->onDelete('cascade');
 
@@ -28,7 +27,7 @@ return new class extends Migration
             // =================================================================
             $table->text('direccion_completa_establecimiento');
             $table->decimal('lat', 10, 8)->nullable();   // 19.4326077
-            $table->decimal('lng', 10, 8)->nullable();   // -99.1332080
+            $table->decimal('lng', 11, 8)->nullable();   // -99.1332080 (cambiado a 11,8 para longitud correcta)
             $table->string('colonia')->nullable();
             $table->string('municipio')->nullable();
             $table->string('estado')->nullable();
@@ -100,8 +99,8 @@ return new class extends Migration
             $table->index('activo');
             $table->index('categoria_id');
             $table->index(['lat', 'lng']);
-            $table->spatialIndex(['lat', 'lng']); // para búsquedas geográficas rápidas
-            $table->fullText(['nombre_establecimiento', 'direccion_completa_establecimiento']);
+            // ELIMINADO: $table->spatialIndex(['lat', 'lng']); ← No funciona en SQLite
+            // ELIMINADO: $table->fullText([...]); ← No funciona en SQLite
         });
     }
 
