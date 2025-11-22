@@ -58,12 +58,12 @@
             <flux:navlist>
                 <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank"
                     class="text-white hover:bg-white/10 focus:bg-white/10">
-                    {{ __('Repositorio') }}
+                    {{ __('Términos y Condiciones') }}
                 </flux:navlist.item>
 
                 <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank"
                     class="text-white hover:bg-white/10 focus:bg-white/10">
-                    {{ __('Documentación') }}
+                    {{ __('Aviso de Privacidad') }}
                 </flux:navlist.item>
             </flux:navlist>
 

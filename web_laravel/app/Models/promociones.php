@@ -3,35 +3,31 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
 
 /**
- * Modelo Banner
+ * Modelo Promocion
  * 
- * Representa un banner publicitario de un establecimiento.
- * Incluye validación de vigencia, estado activo y gestión de imágenes.
+ * Representa una promoción o descuento ofrecido por un establecimiento.
+ * Incluye validación de vigencia y estado activo.
  */
-class Banner extends Model
+class Promocion extends Model
 {
-    use SoftDeletes;
-
     /**
      * La tabla asociada al modelo.
      */
-    protected $table = 'banners';
+    protected $table = 'promociones';
 
     /**
      * Los atributos que son asignables en masa.
      */
     protected $fillable = [
-        'establecimiento_id',
-        'titulo_banner',
-        'descripcion_banner',
-        'imagen_banner',
-        'url_destino',
+        'establecimientos_id',
+        'titulo',
+        'descripcion',
         'fecha_inicio',
-        'fecha_fin',
+        'fecha_final',
         'activo',
     ];
 
@@ -40,69 +36,78 @@ class Banner extends Model
      */
     protected $casts = [
         'fecha_inicio' => 'datetime',
-        'fecha_fin' => 'datetime',
+        'fecha_final' => 'datetime',
         'activo' => 'boolean',
-        'deleted_at' => 'datetime',
     ];
 
     /**
-     * Relación con el establecimiento al que pertenece el banner.
+     * Relación con el establecimiento al que pertenece la promoción.
      */
     public function establecimiento(): BelongsTo
     {
-        return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
+        return $this->belongsTo(Establecimiento::class, 'establecimientos_id');
     }
 
     /**
-     * Scope para filtrar solo banners activos.
+     * Scope para filtrar solo promociones activas.
      */
-    public function scopeActivos($query)
+    public function scopeActivas($query)
     {
         return $query->where('activo', true);
     }
 
     /**
-     * Scope para filtrar banners vigentes (dentro del rango de fechas).
+     * Scope para filtrar promociones vigentes (dentro del rango de fechas).
      */
     public function scopeVigentes($query)
     {
         $ahora = now();
         return $query->where('fecha_inicio', '<=', $ahora)
-                    ->where('fecha_fin', '>=', $ahora);
+                    ->where('fecha_final', '>=', $ahora);
     }
 
     /**
-     * Scope para banners activos y vigentes.
+     * Scope para promociones activas y vigentes.
      */
     public function scopeDisponibles($query)
     {
-        return $query->activos()->vigentes();
+        return $query->activas()->vigentes();
     }
 
     /**
-     * Scope para banners de un establecimiento específico.
+     * Scope para promociones de un establecimiento específico.
      */
     public function scopePorEstablecimiento($query, int $establecimientoId)
     {
-        return $query->where('establecimiento_id', $establecimientoId);
+        return $query->where('establecimientos_id', $establecimientoId);
     }
 
     /**
-     * Scope para banners próximos a vencer (dentro de X días).
+     * Scope para promociones próximas a iniciar (dentro de X días).
      */
-    public function scopeProximosVencer($query, int $dias = 3)
+    public function scopeProximasIniciar($query, int $dias = 7)
     {
-        return $query->where('fecha_fin', '>', now())
-                    ->where('fecha_fin', '<=', now()->addDays($dias))
-                    ->orderBy('fecha_fin');
+        return $query->where('fecha_inicio', '>', now())
+                    ->where('fecha_inicio', '<=', now()->addDays($dias))
+                    ->orderBy('fecha_inicio');
     }
 
     /**
-     * Scope para banners expirados.
+     * Scope para promociones próximas a vencer (dentro de X días).
      */
-    public function scopeExpirados($query)
+    public function scopeProximasVencer($query, int $dias = 3)
     {
-        return $query->where('fecha_fin', '<', now());
+        return $query->where('fecha_final', '>', now())
+                    ->where('fecha_final', '<=', now()->addDays($dias))
+                    ->orderBy('fecha_final');
+    }
+
+    /**
+     * Scope para promociones expiradas.
+     */
+    public function scopeExpiradas($query)
+    {
+        return $query->where('fecha_final', '<', now());
     }
 
     /**
@@ -114,16 +119,16 @@ class Banner extends Model
     }
 
     /**
-     * Verifica si el banner está vigente actualmente.
+     * Verifica si la promoción está vigente actualmente.
      */
     public function estaVigente(): bool
     {
         $ahora = now();
-        return $this->fecha_inicio <= $ahora && $this->fecha_fin >= $ahora;
+        return $this->fecha_inicio <= $ahora && $this->fecha_final >= $ahora;
     }
 
     /**
-     * Verifica si el banner está disponible (activo y vigente).
+     * Verifica si la promoción está disponible (activa y vigente).
      */
     public function estaDisponible(): bool
     {
@@ -131,15 +136,15 @@ class Banner extends Model
     }
 
     /**
-     * Verifica si el banner ya expiró.
+     * Verifica si la promoción ya expiró.
      */
     public function haExpirado(): bool
     {
-        return $this->fecha_fin < now();
+        return $this->fecha_final < now();
     }
 
     /**
-     * Verifica si el banner aún no ha iniciado.
+     * Verifica si la promoción aún no ha iniciado.
      */
     public function noHaIniciado(): bool
     {
@@ -147,7 +152,7 @@ class Banner extends Model
     }
 
     /**
-     * Obtiene los días restantes del banner.
+     * Obtiene los días restantes de la promoción.
      * Retorna null si ya expiró o no ha iniciado.
      */
     public function diasRestantes(): ?int
@@ -156,11 +161,11 @@ class Banner extends Model
             return null;
         }
 
-        return now()->diffInDays($this->fecha_fin, false);
+        return now()->diffInDays($this->fecha_final, false);
     }
 
     /**
-     * Obtiene las horas restantes del banner.
+     * Obtiene las horas restantes de la promoción.
      * Retorna null si ya expiró o no ha iniciado.
      */
     public function horasRestantes(): ?int
@@ -169,43 +174,43 @@ class Banner extends Model
             return null;
         }
 
-        return now()->diffInHours($this->fecha_fin, false);
+        return now()->diffInHours($this->fecha_final, false);
     }
 
     /**
-     * Obtiene el estado del banner como texto.
+     * Obtiene el estado de la promoción como texto.
      */
     public function estadoTexto(): string
     {
         if (!$this->activo) {
-            return 'Inactivo';
+            return 'Inactiva';
         }
 
         if ($this->noHaIniciado()) {
-            return 'Programado';
+            return 'Próximamente';
         }
 
         if ($this->haExpirado()) {
-            return 'Expirado';
+            return 'Expirada';
         }
 
         if ($this->estaVigente()) {
-            return 'Activo';
+            return 'Vigente';
         }
 
         return 'Desconocido';
     }
 
     /**
-     * Obtiene la duración total del banner en días.
+     * Obtiene la duración total de la promoción en días.
      */
     public function duracionDias(): int
     {
-        return $this->fecha_inicio->diffInDays($this->fecha_fin);
+        return $this->fecha_inicio->diffInDays($this->fecha_final);
     }
 
     /**
-     * Verifica si el banner está por vencer (menos de X días).
+     * Verifica si la promoción está por vencer (menos de X días).
      */
     public function estaPorVencer(int $diasUmbral = 3): bool
     {
@@ -218,29 +223,7 @@ class Banner extends Model
     }
 
     /**
-     * Obtiene la URL completa de la imagen del banner.
-     */
-    public function urlImagen(): string
-    {
-        // Si ya es una URL completa, devolverla tal cual
-        if (filter_var($this->imagen_banner, FILTER_VALIDATE_URL)) {
-            return $this->imagen_banner;
-        }
-
-        // Si es una ruta relativa, construir URL
-        return asset('storage/' . $this->imagen_banner);
-    }
-
-    /**
-     * Verifica si el banner tiene URL de destino.
-     */
-    public function tieneUrlDestino(): bool
-    {
-        return !empty($this->url_destino);
-    }
-
-    /**
-     * Obtiene un resumen de la vigencia del banner.
+     * Obtiene un resumen de la vigencia de la promoción.
      */
     public function resumenVigencia(): string
     {
@@ -250,7 +233,7 @@ class Banner extends Model
         }
 
         if ($this->haExpirado()) {
-            $dias = $this->fecha_fin->diffInDays(now());
+            $dias = $this->fecha_final->diffInDays(now());
             return "Expiró hace {$dias} " . ($dias === 1 ? 'día' : 'días');
         }
 
@@ -274,35 +257,7 @@ class Banner extends Model
         return sprintf(
             'Del %s al %s',
             $this->fecha_inicio->format('d/m/Y'),
-            $this->fecha_fin->format('d/m/Y')
+            $this->fecha_final->format('d/m/Y')
         );
-    }
-
-    /**
-     * Obtiene el color de estado para UI.
-     */
-    public function colorEstado(): string
-    {
-        if (!$this->activo) {
-            return 'gray';
-        }
-
-        if ($this->noHaIniciado()) {
-            return 'blue';
-        }
-
-        if ($this->haExpirado()) {
-            return 'red';
-        }
-
-        if ($this->estaPorVencer()) {
-            return 'orange';
-        }
-
-        if ($this->estaVigente()) {
-            return 'green';
-        }
-
-        return 'gray';
     }
 }
