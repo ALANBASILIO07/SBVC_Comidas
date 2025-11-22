@@ -5,6 +5,7 @@ use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BannerController;
+use App\Http\Controllers\ClienteController;
 
 Route::get('/', function () {
     return view('welcome');
