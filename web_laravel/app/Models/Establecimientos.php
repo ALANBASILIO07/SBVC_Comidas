@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Representa un negocio o lugar de comida registrado en la plataforma.
  * Contiene información comercial, ubicación, servicios y valoraciones.
  */
-class Establecimiento extends Model
+class Establecimientos extends Model
 {
     use SoftDeletes;
 

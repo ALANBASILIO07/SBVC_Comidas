@@ -4,40 +4,69 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Models\Establecimientos;
+use App\Models\Promociones;
+use App\Models\Banner;
 
 class DashboardController extends Controller
 {
     /**
-     * Muestra el dashboard principal.
+     * Muestra el dashboard principal del usuario.
      */
     public function index()
     {
         $user = Auth::user();
+        $cliente = $user->cliente;
 
-        // --- Lógica del "Get" ---
-        
-        // TODO: Ajusta estas consultas cuando tus modelos estén listos.
-        // Por ahora, usamos valores por defecto para evitar errores.
-        
-        // Ejemplo de cómo sería (descomenta cuando lo tengas):
-        // $establecimientosCount = $user->establecimientos()->where('activo', true)->count();
-        // $promocionesCount = $user->promociones()->where('activo', true)->count();
-        // $bannersCount = $user->banners()->where('activo', true)->count();
-        // $planActual = $user->suscripcion->plan->nombre ?? 'Básico';
+        // Determinar si el registro está completo
+        $registroCompleto = $user->tieneCliente();
 
-        // Valores placeholders (temporales)
-        $establecimientosCount = 0;
-        $promocionesCount = 0;
-        $bannersCount = 0;
-        $planActual = 'Básico';
+        if ($registroCompleto) {
+            // Usuario con cliente completo - mostrar estadísticas
+            $establecimientosCount = Establecimientos::where('cliente_id', $cliente->id)->count();
+            
+            $promocionesCount = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
+                $query->where('cliente_id', $cliente->id);
+            })->count();
+            
+            $bannersCount = Banner::whereHas('establecimiento', function($query) use ($cliente) {
+                $query->where('cliente_id', $cliente->id);
+            })->count();
 
+            $planActual = $this->formatearPlan($cliente->plan ?? 'basico');
+        } else {
+            // Usuario sin cliente - mostrar ceros y plan por defecto
+            $establecimientosCount = 0;
+            $promocionesCount = 0;
+            $bannersCount = 0;
+            $planActual = 'Sin plan';
+        }
 
-        // Pasamos las variables a la vista 'dashboard.blade.php'
-        return view('dashboard', [
-            'establecimientosCount' => $establecimientosCount,
-            'promocionesCount' => $promocionesCount,
-            'bannersCount' => $bannersCount,
-            'planActual' => $planActual,
-        ]);
+        return view('dashboard.index', compact(
+            'establecimientosCount',
+            'promocionesCount',
+            'bannersCount',
+            'planActual',
+            'registroCompleto'
+        ));
+    }
+
+    /**
+     * Formatea el nombre del plan para mostrar
+     */
+    private function formatearPlan(?string $plan): string
+    {
+        if (!$plan) {
+            return 'Estándar';
+        }
+
+        $planes = [
+            'basico' => 'Plan Básico',
+            'estandar' => 'Plan Estándar',
+            'premium' => 'Plan Premium',
+        ];
+
+        return $planes[$plan] ?? ucfirst($plan);
     }
 }

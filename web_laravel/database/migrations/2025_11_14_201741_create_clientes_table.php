@@ -8,33 +8,34 @@ return new class extends Migration
 {
     /**
      * Ejecutar las migraciones.
-     * Crea la tabla 'clientes' con toda la información del negocio.
+     * Crea la tabla 'clientes' con toda la información del titular de la cuenta.
      */
     public function up(): void
     {
         Schema::create('clientes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')
-                  ->unique()->constrained('users')
+                  ->unique()
+                  ->constrained('users')
                   ->onDelete('cascade');
     
             // Datos del titular de la cuenta (la persona o empresa que paga)
-            $table->string('nombre_titular');                    // Nombre del cliente real
-            $table->string('email_contacto')->unique();          // Email de contacto (puede ser diferente al de login)
-            $table->string('telefono', 10);
+            $table->string('nombre_titular');
+            $table->string('email_contacto');  // Sin unique - se toma del user
+            $table->string('telefono', 20);    // Cambiado a 20 caracteres
     
             // Plan y suscripción
-            $table->enum('plan', ['basico', 'estandar', 'premium'])->default('estandar');
-            $table->timestamp('fecha_inicio_suscripcion')->useCurrent();
-            $table->timestamp('fecha_fin_suscripcion')->nullable(); // Para control de vencimiento
-            $table->boolean('suscripcion_activa')->default(true); // Se modifica en segundo plano
+            $table->string('plan')->default('estandar');  // Más flexible que enum
+            $table->timestamp('fecha_inicio_suscripcion')->nullable();
+            $table->timestamp('fecha_fin_suscripcion')->nullable();
+            $table->boolean('suscripcion_activa')->default(true);
     
             // Datos fiscales del TITULAR (no del negocio)
             $table->string('rfc_titular', 13)->nullable();
             $table->string('razon_social_titular')->nullable();
     
-            $table->softDeletes();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

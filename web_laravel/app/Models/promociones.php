@@ -12,7 +12,7 @@ use Carbon\Carbon;
  * Representa una promoción o descuento ofrecido por un establecimiento.
  * Incluye validación de vigencia y estado activo.
  */
-class Promocion extends Model
+class Promociones extends Model
 {
     /**
      * La tabla asociada al modelo.
@@ -45,7 +45,7 @@ class Promocion extends Model
      */
     public function establecimiento(): BelongsTo
     {
-        return $this->belongsTo(Establecimiento::class, 'establecimientos_id');
+        return $this->belongsTo(Establecimientos::class, 'establecimientos_id');
     }
 
     /**

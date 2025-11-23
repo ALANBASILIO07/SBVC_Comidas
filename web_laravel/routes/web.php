@@ -1,107 +1,313 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\EstablecimientoController;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes - SIN middleware cliente.completo
+|--------------------------------------------------------------------------
+*/
+
+// Ruta principal
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Rutas para completar registro de cliente
+Route::middleware(['auth'])->group(function () {
+    Route::get('completar-registro', function () {
+        return view('clientes.complete_profile');
+    })->name('registro.completar');
+    
+    Route::post('completar-registro', [ClienteController::class, 'store'])
+        ->name('clientes.store');
+});
+
+// Dashboard principal
 Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::get('completar-registro', function () {
-    return view('clientes.complete_profile');
-})->middleware(['auth'])->name('registro.completar');
-
-// Ruta POST para procesar el formulario (necesitarás crear el controlador)
-Route::post('completar-registro', [ClienteController::class, 'store'])
-    ->middleware(['auth'])
-    ->name('clientes.store');
-
+// Rutas protegidas solo con autenticación y verificación
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Establecimientos
-    Route::get('establecimientos', function () {
-        return view('establecimientos.index');
-    })->name('establecimientos.index');
     
-    Route::get('establecimientos/create', function () {
-        return view('establecimientos.create');
-    })->name('establecimientos.create');
+    /*
+    |--------------------------------------------------------------------------
+    | Establecimientos
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('establecimientos')->name('establecimientos.')->group(function () {
+        Route::get('/', [EstablecimientoController::class, 'index'])->name('index');
+        Route::get('/create', [EstablecimientoController::class, 'create'])->name('create');
+        Route::post('/', [EstablecimientoController::class, 'store'])->name('store');
+        Route::get('/{id}', [EstablecimientoController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [EstablecimientoController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [EstablecimientoController::class, 'update'])->name('update');
+        Route::delete('/{id}', [EstablecimientoController::class, 'destroy'])->name('destroy');
+    });
     
-    Route::get('establecimientos/{id}', function ($id) {
-        return view('establecimientos.show', ['id' => $id]);
-    })->name('establecimientos.show');
+    /*
+    |--------------------------------------------------------------------------
+    | Promociones
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('promociones')->name('promociones.')->group(function () {
+        Route::get('/', function () {
+            $cliente = auth()->user()->cliente;
+            $promociones = $cliente 
+                ? \App\Models\Promociones::whereHas('establecimiento', function($query) use ($cliente) {
+                    $query->where('cliente_id', $cliente->id);
+                  })->orderByDesc('created_at')->get()
+                : collect();
+            return view('promociones.index', compact('promociones'));
+        })->name('index');
+        
+        Route::get('/create', function () {
+            $cliente = auth()->user()->cliente;
+            $establecimientos = $cliente 
+                ? \App\Models\Establecimientos::where('cliente_id', $cliente->id)->get()
+                : collect();
+            return view('promociones.create', compact('establecimientos'));
+        })->name('create');
+        
+        Route::get('/{id}', function ($id) {
+            $promocion = \App\Models\Promociones::findOrFail($id);
+            return view('promociones.show', compact('promocion'));
+        })->name('show');
+        
+        Route::get('/{id}/edit', function ($id) {
+            $cliente = auth()->user()->cliente;
+            $promocion = \App\Models\Promociones::findOrFail($id);
+            $establecimientos = $cliente 
+                ? \App\Models\Establecimientos::where('cliente_id', $cliente->id)->get()
+                : collect();
+            return view('promociones.edit', compact('promocion', 'establecimientos'));
+        })->name('edit');
+        
+        Route::post('/', function () {
+            return redirect()->route('promociones.index');
+        })->name('store');
+        
+        Route::put('/{id}', function ($id) {
+            return redirect()->route('promociones.index');
+        })->name('update');
+        
+        Route::delete('/{id}', function ($id) {
+            return redirect()->route('promociones.index');
+        })->name('destroy');
+    });
     
-    Route::get('establecimientos/{id}/edit', function ($id) {
-        return view('establecimientos.edit', ['id' => $id]);
-    })->name('establecimientos.edit');
-    
-    // Promociones
-    Route::get('promociones', function () {
-        return view('promociones.index');
-    })->name('promociones.index');
-    
-    Route::get('promociones/create', function () {
-        return view('promociones.create');
-    })->name('promociones.create');
-    
-    Route::get('promociones/{id}', function ($id) {
-        return view('promociones.show', ['id' => $id]);
-    })->name('promociones.show');
-    
-    Route::get('promociones/{id}/edit', function ($id) {
-        return view('promociones.edit', ['id' => $id]);
-    })->name('promociones.edit');
-    
-    // Banners
+    /*
+    |--------------------------------------------------------------------------
+    | Banners
+    |--------------------------------------------------------------------------
+    */
     Route::resource('banners', BannerController::class);
     
-    // Notificaciones
-    Route::get('notificaciones', function () {
-        return view('notificaciones.index');
-    })->name('notificaciones.index');
+    /*
+    |--------------------------------------------------------------------------
+    | Notificaciones
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('notificaciones')->name('notificaciones.')->group(function () {
+        Route::get('/', function () {
+            $notificaciones = collect([
+                (object)[
+                    'id' => 1,
+                    'titulo' => 'Nueva promoción disponible',
+                    'mensaje' => 'Tu establecimiento tiene una nueva promoción activa',
+                    'fecha' => now()->subHours(2),
+                    'leida' => false
+                ],
+                (object)[
+                    'id' => 2,
+                    'titulo' => 'Calificación recibida',
+                    'mensaje' => 'Has recibido una nueva calificación de 5 estrellas',
+                    'fecha' => now()->subDays(1),
+                    'leida' => true
+                ]
+            ]);
+            return view('notificaciones.index', compact('notificaciones'));
+        })->name('index');
+        
+        Route::get('/create', function () {
+            $cliente = auth()->user()->cliente;
+            $establecimientos = $cliente 
+                ? \App\Models\Establecimientos::where('cliente_id', $cliente->id)->get()
+                : collect();
+            return view('notificaciones.create', compact('establecimientos'));
+        })->name('create');
+        
+        Route::get('/{id}', function ($id) {
+            $notificacion = (object)[
+                'id' => $id,
+                'titulo' => 'Notificación de ejemplo',
+                'mensaje' => 'Este es el contenido detallado de la notificación',
+                'fecha' => now(),
+                'establecimiento' => 'Restaurante Demo'
+            ];
+            return view('notificaciones.show', compact('notificacion'));
+        })->name('show');
+        
+        Route::get('/{id}/edit', function ($id) {
+            $notificacion = (object)[
+                'id' => $id,
+                'titulo' => 'Notificación de ejemplo',
+                'mensaje' => 'Este es el contenido de la notificación'
+            ];
+            $establecimientos = \App\Models\Establecimientos::all();
+            return view('notificaciones.edit', compact('notificacion', 'establecimientos'));
+        })->name('edit');
+    });
     
-    Route::get('notificaciones/create', function () {
-        return view('notificaciones.create');
-    })->name('notificaciones.create');
-    
-    Route::get('notificaciones/{id}', function ($id) {
-        return view('notificaciones.show', ['id' => $id]);
-    })->name('notificaciones.show');
-    
-    Route::get('notificaciones/{id}/edit', function ($id) {
-        return view('notificaciones.edit', ['id' => $id]);
-    })->name('notificaciones.edit');
-    
-    // Calificaciones
-    Route::get('calificaciones', function () {
-        return view('calificaciones.index');
-    })->name('calificaciones.index');
+    /*
+    |--------------------------------------------------------------------------
+    | Calificaciones
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('calificaciones')->name('calificaciones.')->group(function () {
+        Route::get('/', function () {
+            $calificaciones = collect([
+                (object)[
+                    'id' => 1,
+                    'establecimiento' => 'Restaurante La Marquesa',
+                    'cliente_nombre' => 'Juan Pérez',
+                    'puntuacion' => 5,
+                    'comentario' => 'Excelente servicio y comida deliciosa',
+                    'fecha' => now()->subDays(1)
+                ],
+                (object)[
+                    'id' => 2,
+                    'establecimiento' => 'Cafetería Central',
+                    'cliente_nombre' => 'María García',
+                    'puntuacion' => 4,
+                    'comentario' => 'Buen café, ambiente agradable',
+                    'fecha' => now()->subDays(2)
+                ],
+                (object)[
+                    'id' => 3,
+                    'establecimiento' => 'Food Truck Express',
+                    'cliente_nombre' => 'Carlos López',
+                    'puntuacion' => 5,
+                    'comentario' => 'Rápido y sabroso',
+                    'fecha' => now()->subDays(3)
+                ]
+            ]);
+            return view('calificaciones.index', compact('calificaciones'));
+        })->name('index');
 
-    Route::get('calificaciones/create', function () {
-        return view('calificaciones.create');
-    })->name('calificaciones.create');
-    
-    Route::get('calificaciones/{id}', function ($id) {
-        return view('calificaciones.show', ['id' => $id]);
-    })->name('calificaciones.show');
-    
-    Route::get('calificaciones/{id}/edit', function ($id) {
-        return view('calificaciones.edit', ['id' => $id]);
-    })->name('calificaciones.edit');
+        Route::get('/create', function () {
+            $cliente = auth()->user()->cliente;
+            $establecimientos = $cliente 
+                ? \App\Models\Establecimientos::where('cliente_id', $cliente->id)->get()
+                : collect();
+            return view('calificaciones.create', compact('establecimientos'));
+        })->name('create');
+        
+        Route::get('/{id}', function ($id) {
+            $calificacion = (object)[
+                'id' => $id,
+                'establecimiento' => 'Restaurante Demo',
+                'cliente_nombre' => 'Cliente Demo',
+                'puntuacion' => 5,
+                'comentario' => 'Excelente servicio',
+                'fecha' => now(),
+                'respuesta' => null
+            ];
+            return view('calificaciones.show', compact('calificacion'));
+        })->name('show');
+        
+        Route::get('/{id}/edit', function ($id) {
+            $calificacion = (object)[
+                'id' => $id,
+                'puntuacion' => 5,
+                'comentario' => 'Excelente servicio',
+                'respuesta' => 'Gracias por su comentario'
+            ];
+            return view('calificaciones.edit', compact('calificacion'));
+        })->name('edit');
+    });
 
-    // Subscripción
-    Route::get('subscripcion', function () {
-        return view('subscripcion.index');
-    })->name('subscripcion.index');
+    /*
+    |--------------------------------------------------------------------------
+    | Subscripción
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('subscripcion')->name('subscripcion.')->group(function () {
+        Route::get('/', function () {
+            $cliente = auth()->user()->cliente ?? null;
+            $plan_actual = $cliente ? $cliente->plan : 'basico';
+            
+            $planes = [
+                'basico' => [
+                    'nombre' => 'Plan Básico',
+                    'precio' => 0,
+                    'caracteristicas' => [
+                        '1 Establecimiento',
+                        '5 Promociones al mes',
+                        'Soporte por email'
+                    ]
+                ],
+                'estandar' => [
+                    'nombre' => 'Plan Estándar',
+                    'precio' => 299,
+                    'caracteristicas' => [
+                        '1 Establecimiento',
+                        'Promociones ilimitadas',
+                        'Estadísticas básicas',
+                        'Soporte prioritario'
+                    ]
+                ],
+                'premium' => [
+                    'nombre' => 'Plan Premium',
+                    'precio' => 599,
+                    'caracteristicas' => [
+                        'Establecimientos ilimitados',
+                        'Promociones ilimitadas',
+                        'Estadísticas avanzadas',
+                        'Soporte 24/7',
+                        'API Access'
+                    ]
+                ]
+            ];
+            
+            return view('subscripcion.index', compact('cliente', 'plan_actual', 'planes'));
+        })->name('index');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Clientes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('clientes')->name('clientes.')->group(function () {
+        Route::get('/', function () {
+            $clientes = \App\Models\Cliente::with('user')->orderByDesc('created_at')->get();
+            return view('clientes.index', compact('clientes'));
+        })->name('index');
+        
+        Route::get('/{id}', function ($id) {
+            $cliente = \App\Models\Cliente::with('user')->findOrFail($id);
+            return view('clientes.show', compact('cliente'));
+        })->name('show');
+        
+        Route::get('/{id}/edit', function ($id) {
+            $cliente = \App\Models\Cliente::findOrFail($id);
+            return view('clientes.edit', compact('cliente'));
+        })->name('edit');
+    });
 });
 
+/*
+|--------------------------------------------------------------------------
+| Configuración de usuario (Settings)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -109,14 +315,43 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('user-password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
 
-    Volt::route('settings/two-factor', 'settings.two-factor')
-        ->middleware(
-            when(
-                Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
-                ['password.confirm'],
-                [],
-            ),
-        )
-        ->name('two-factor.show');
+    // Two-factor authentication
+    if (class_exists('Laravel\Fortify\Features')) {
+        $Features = 'Laravel\Fortify\Features';
+        
+        if ($Features::enabled($Features::twoFactorAuthentication())) {
+            $middlewares = [];
+            
+            if ($Features::optionEnabled($Features::twoFactorAuthentication(), 'confirmPassword')) {
+                $middlewares[] = 'password.confirm';
+            }
+            
+            Volt::route('settings/two-factor', 'settings.two-factor')
+                ->middleware($middlewares)
+                ->name('two-factor.show');
+        } else {
+            Route::get('settings/two-factor', function () {
+                return redirect()->route('profile.edit')
+                    ->with('info', 'La autenticación de dos factores no está habilitada en este momento.');
+            })->name('two-factor.show');
+        }
+    } else {
+        Route::get('settings/two-factor', function () {
+            return redirect()->route('profile.edit')
+                ->with('info', 'La autenticación de dos factores no está disponible.');
+        })->name('two-factor.show');
+    }
 });
+
+/*
+|--------------------------------------------------------------------------
+| Rutas públicas para términos y privacidad
+|--------------------------------------------------------------------------
+*/
+Route::get('/terminos-y-condiciones', function () {
+    return view('legal.terminos');
+})->name('terminos');
+
+Route::get('/aviso-de-privacidad', function () {
+    return view('legal.privacidad');
+})->name('privacidad');

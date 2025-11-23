@@ -50,7 +50,7 @@ class Banner extends Model
      */
     public function establecimiento(): BelongsTo
     {
-        return $this->belongsTo(Establecimiento::class, 'establecimiento_id');
+        return $this->belongsTo(Establecimientos::class, 'establecimiento_id');
     }
 
     /**

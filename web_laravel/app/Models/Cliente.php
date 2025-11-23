@@ -50,7 +50,7 @@ class Cliente extends Model
     /**
      * Relación con el usuario propietario de la cuenta.
      */
-    public function usuario(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }

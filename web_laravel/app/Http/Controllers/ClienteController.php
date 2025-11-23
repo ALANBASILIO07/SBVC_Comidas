@@ -3,214 +3,114 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
-// Asumiendo que crearás este Request. Si no, cambia 'StoreClienteRequest' por 'Request'
-use App\Http\Requests\StoreClienteRequest; 
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
-/**
- * Controlador para gestionar clientes/negocios.
- */
 class ClienteController extends Controller
 {
     /**
-     * Muestra el listado de clientes.
+     * Muestra el formulario de registro de cliente
      */
-    public function index()
+    public function create()
     {
-        //
+        // Verificar si el usuario ya tiene un cliente registrado
+        $clienteExistente = Cliente::where('user_id', Auth::id())->first();
+        
+        if ($clienteExistente) {
+            return redirect()->route('dashboard')
+                ->with('info', 'Ya has completado tu registro de cliente.');
+        }
+
+        return view('clientes.complete_profile');
     }
 
     /**
-     * Muestra el formulario para completar el registro.
+     * Guarda el nuevo cliente en la base de datos
      */
-    public function create(): View
+    public function store(Request $request)
     {
-        // AJUSTE: Apuntamos a la nueva vista 'clientes/create.blade.php'
-        return view('clientes.create');
-    }
+        // Verificar que el usuario NO tenga ya un cliente
+        $clienteExistente = Cliente::where('user_id', Auth::id())->first();
+        
+        if ($clienteExistente) {
+            return redirect()->route('dashboard')
+                ->with('warning', 'Ya tienes un registro de cliente completado.');
+        }
 
-    /**
-     * Almacena un nuevo cliente/negocio.
-     */
-    public function store(Request $request): RedirectResponse // Cambiado a 'Request' temporalmente. Usa 'StoreClienteRequest' si lo creas.
-    {
-        // Validación temporal (si no usas StoreClienteRequest)
-        // Si SÍ usas StoreClienteRequest, puedes borrar este bloque 'validate'.
-        $request->validate([
-            'nombre_negocio' => 'required|string|max:255',
-            'tipo_negocio' => 'required|string|max:255',
-            'formalidad' => 'required|in:formal,informal',
-            'tipo_cuenta' => 'required|in:basica,premium',
-            'telefono' => 'required|string|max:20',
-            'direccion_completa' => 'required|string',
-            'ciudad' => 'required|string|max:255',
-            'estado' => 'required|string|max:255',
-            'codigo_postal' => 'required|string|max:10',
-            'horarios.lunes_viernes.apertura' => 'required_with:horarios.lunes_viernes.cierre|nullable|date_format:H:i',
-            'horarios.lunes_viernes.cierre' => 'required_with:horarios.lunes_viernes.apertura|nullable|date_format:H:i',
-            // ... (agrega más reglas de validación según sea necesario)
+        // Validar los datos del formulario con reglas más estrictas
+        $validated = $request->validate([
+            'nombre_titular' => [
+                'required',
+                'string',
+                'min:3',
+                'max:255',
+                'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/'
+            ],
+            'telefono' => [
+                'required',
+                'string',
+                'min:10',
+                'max:20',
+                'regex:/^[0-9]+$/'
+            ],
+            'rfc_titular' => [
+                'nullable',
+                'string',
+                'size:13',
+                'regex:/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/'
+            ],
+            'razon_social_titular' => 'nullable|string|max:255',
+        ], [
+            'nombre_titular.required' => 'El nombre completo es obligatorio',
+            'nombre_titular.regex' => 'El nombre solo puede contener letras y espacios',
+            'nombre_titular.min' => 'El nombre debe tener al menos 3 caracteres',
+            'telefono.required' => 'El teléfono es obligatorio',
+            'telefono.regex' => 'El teléfono solo puede contener números',
+            'telefono.min' => 'El teléfono debe tener al menos 10 dígitos',
+            'telefono.max' => 'El teléfono no puede exceder 20 dígitos',
+            'rfc_titular.size' => 'El RFC debe tener exactamente 13 caracteres',
+            'rfc_titular.regex' => 'El formato del RFC no es válido (Ej: XAXX010101000)',
         ]);
 
-
+        // Crear el cliente
         try {
-            // Iniciar transacción
-            DB::beginTransaction();
-
-            // Preparar datos del cliente
-            $datosCliente = [
-                'user_id' => auth()->id(),
-                'nombre_negocio' => $request->nombre_negocio,
-                'tipo_negocio' => $request->tipo_negocio,
-                'formalidad' => $request->formalidad,
-                'tipo_cuenta' => $request->tipo_cuenta,
-                'telefono' => $request->telefono,
-                'direccion_completa' => $request->direccion_completa,
-                'ciudad' => $request->ciudad,
-                'estado' => $request->estado,
-                'codigo_postal' => $request->codigo_postal,
-                'metodos_pago' => $request->metodos_pago ?? [],
-                'cierra_dias_festivos' => $request->boolean('cierra_dias_festivos'),
-                'activo' => true,
-                'verificado' => false,
-            ];
-
-            // Agregar información fiscal si es formal
-            if ($request->formalidad === 'formal') {
-                $datosCliente['rfc'] = $request->rfc;
-                $datosCliente['razon_social'] = $request->razon_social;
-                $datosCliente['direccion_fiscal'] = $request->direccion_fiscal;
-                $datosCliente['ofrece_facturacion'] = $request->boolean('ofrece_facturacion');
-            }
-
-            // Procesar horarios
-            $datosCliente['horarios'] = $this->procesarHorarios($request);
-
-            // Crear el cliente
-            // Asegúrate de tener el modelo 'Cliente' en 'app/Models/Cliente.php'
-            // y que tenga los campos en 'protected $fillable'
-            $cliente = Cliente::create($datosCliente);
-
-            // ACTUALIZAR AL USUARIO
-            // Marcamos que el usuario ya completó el registro
-            auth()->user()->update(['registro_completo' => true]);
-
-
-            // Confirmar transacción
-            DB::commit();
-
-            // Log de éxito
-            Log::info('Cliente creado exitosamente', [
-                'cliente_id' => $cliente->id,
-                'user_id' => auth()->id(),
-                'nombre' => $cliente->nombre_negocio,
+            $cliente = Cliente::create([
+                'user_id' => Auth::id(),
+                'nombre_titular' => $validated['nombre_titular'],
+                'email_contacto' => Auth::user()->email,
+                'telefono' => $validated['telefono'],
+                'plan' => 'estandar', // ✅ Plan inicial ESTÁNDAR
+                'fecha_inicio_suscripcion' => now(),
+                'fecha_fin_suscripcion' => null,
+                'suscripcion_activa' => true,
+                'rfc_titular' => $validated['rfc_titular'] ?? null,
+                'razon_social_titular' => $validated['razon_social_titular'] ?? null,
             ]);
 
-            // Redireccionar con mensaje de éxito
-            return redirect()
-                ->route('dashboard')
-                ->with('success', '¡Registro completado exitosamente! Tu negocio ha sido registrado.');
-
+            return redirect()->route('dashboard')
+                ->with('success', '¡Registro completado exitosamente! Ahora puedes comenzar a usar todas las funciones de la plataforma.');
+                
         } catch (\Exception $e) {
-            // Revertir transacción
-            DB::rollBack();
-
-            // Log del error
-            Log::error('Error al crear cliente', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            // Redireccionar con error
-            return redirect()
-                ->back()
+            \Log::error('Error al crear cliente: ' . $e->getMessage());
+            
+            return redirect()->back()
                 ->withInput()
-                // Mostramos el error real para depuración (¡cuidado en producción!)
-                ->with('error', 'Ocurrió un error: ' . $e->getMessage());
+                ->with('error', 'Hubo un error al guardar tu información. Por favor intenta de nuevo.');
         }
     }
 
     /**
-     * Muestra un cliente específico.
+     * Muestra el perfil del cliente
      */
-    public function show(string $id)
+    public function show()
     {
-        //
-    }
+        $cliente = Auth::user()->cliente;
 
-    /**
-     * Muestra el formulario para editar un cliente.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Actualiza un cliente.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Elimina un cliente.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    /**
-     * Procesa y estructura los horarios del formulario.
-     * * @param Request $request
-     * @return array
-     */
-    private function procesarHorarios(Request $request): array // Cambiado a 'Request'
-    {
-        $horarios = [];
-
-        // Lunes a Viernes
-        if ($request->filled('horarios.lunes_viernes.apertura') && 
-            $request->filled('horarios.lunes_viernes.cierre')) {
-            $horarios['lunes_viernes'] = [
-                'apertura' => $request->input('horarios.lunes_viernes.apertura'),
-                'cierre' => $request->input('horarios.lunes_viernes.cierre'),
-            ];
+        if (!$cliente) {
+            return redirect()->route('clientes.create')
+                ->with('warning', 'Primero debes completar tu registro.');
         }
 
-        // Sábados
-        if ($request->filled('horarios.sabados.apertura') && 
-            $request->filled('horarios.sabados.cierre')) {
-            $horarios['sabados'] = [
-                'apertura' => $request->input('horarios.sabados.apertura'),
-                'cierre' => $request->input('horarios.sabados.cierre'),
-            ];
-        }
-
-        // Domingos
-        if ($request->filled('horarios.domingos.apertura') && 
-            $request->filled('horarios.domingos.cierre')) {
-            $horarios['domingos'] = [
-                'apertura' => $request->input('horarios.domingos.apertura'),
-                'cierre' => $request->input('horarios.domingos.cierre'),
-            ];
-        }
-
-        // Días festivos
-        if ($request->filled('horarios.festivos.apertura') && 
-            $request->filled('horarios.festivos.cierre')) {
-            $horarios['festivos'] = [
-                'apertura' => $request->input('horarios.festivos.apertura'),
-                'cierre' => $request->input('horarios.festivos.cierre'),
-            ];
-        }
-
-        return $horarios;
+        return view('clientes.show', compact('cliente'));
     }
 }

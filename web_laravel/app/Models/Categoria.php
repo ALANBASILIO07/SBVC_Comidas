@@ -41,7 +41,7 @@ class Categoria extends Model
      */
     public function establecimientos(): HasMany
     {
-        return $this->hasMany(Establecimiento::class, 'categoria_id');
+        return $this->hasMany(Establecimientos::class, 'categoria_id');
     }
 
     /**
