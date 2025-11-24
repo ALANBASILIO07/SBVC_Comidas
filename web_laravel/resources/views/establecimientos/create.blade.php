@@ -1,86 +1,64 @@
 <x-layouts.app :title="__('Nuevo Establecimiento')">
     <div class="py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-6xl mx-auto">
-            
-            {{-- HEADER --}}
+
+            <!-- Header -->
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-2">
                     <flux:icon.building-storefront class="size-10 text-orange-500" />
-                    <flux:heading size="xl" class="text-gray-900 dark:text-white">
-                        {{ __('Nuevo Establecimiento') }}
-                    </flux:heading>
+                    <flux:heading size="xl">Nuevo Establecimiento</flux:heading>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     Completa la información de tu establecimiento para comenzar a operar en la plataforma
                 </p>
             </div>
 
-            {{-- Mensajes de error --}}
+            <!-- Errores -->
             @if ($errors->any())
-            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
+                <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-4 mb-6">
+                    <div class="flex">
                         <flux:icon.exclamation-triangle class="h-5 w-5 text-red-400" />
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
-                            Por favor corrige los siguientes errores:
-                        </h3>
-                        <ul class="mt-2 text-sm text-red-700 dark:text-red-300 list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                        </ul>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Corrije los siguientes errores:</h3>
+                            <ul class="mt-2 text-sm text-red-700 dark:text-red-300 list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
             @endif
 
-            {{-- FORMULARIO --}}
-            <form action="{{ route('establecimientos.store') }}" method="POST" class="space-y-6">
-            @csrf
-                
-                {{-- ============================================ --}}
-                {{-- CARD 1: INFORMACIÓN GENERAL --}}
-                {{-- ============================================ --}}
-                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-orange-500 overflow-hidden">
+            <form action="{{ route('establecimientos.store') }}" method="POST" id="form-establecimiento">
+                @csrf
+
+                <!-- CARD 1: INFORMACIÓN GENERAL -->
+                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-orange-500 overflow-hidden mb-6">
                     <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
                         <div class="flex items-center gap-3">
                             <flux:icon.information-circle class="size-6 text-white" />
-                            <h3 class="text-lg font-bold text-white">
-                                Información General
-                            </h3>
+                            <h3 class="text-lg font-bold text-white">Información General</h3>
                         </div>
                     </div>
-
                     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <label for="nombre_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Nombre del establecimiento *
                             </label>
-                            <input 
-                                type="text" 
-                                id="nombre_establecimiento" 
-                                name="nombre_establecimiento"
-                                value="{{ old('nombre_establecimiento') }}"
-                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                placeholder="Ej: Mi Restaurante"
-                                minlength="3"
-                                maxlength="255"
-                                required
-                            >
+                            <input type="text" name="nombre_establecimiento" id="nombre_establecimiento"
+                                value="{{ old('nombre_establecimiento') }}" required minlength="3" maxlength="255"
+                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                                placeholder="Ej: Tacos El Tío">
+                            @error('nombre_establecimiento') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
 
                         <div>
                             <label for="tipo_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Tipo de establecimiento *
                             </label>
-                            <select 
-                                id="tipo_establecimiento" 
-                                name="tipo_establecimiento" 
-                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                required
-                            >
+                            <select id="tipo_establecimiento" name="tipo_establecimiento" required
+                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
                                 <option value="">Selecciona...</option>
                                 <option value="Restaurante" {{ old('tipo_establecimiento') == 'Restaurante' ? 'selected' : '' }}>Restaurante</option>
                                 <option value="Cafetería" {{ old('tipo_establecimiento') == 'Cafetería' ? 'selected' : '' }}>Cafetería</option>
@@ -91,306 +69,256 @@
                             </select>
                         </div>
 
+                        <!-- Campo Otro -->
+                        <div id="otro_tipo_container" class="hidden md:col-span-2">
+                            <label for="tipo_establecimiento_otro" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Especifica el tipo *
+                            </label>
+                            <input type="text" name="tipo_establecimiento_otro" id="tipo_establecimiento_otro"
+                                value="{{ old('tipo_establecimiento_otro') }}" maxlength="100"
+                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                                placeholder="Ej: Taquería, Antojitos, etc.">
+                        </div>
+
                         <div>
                             <label for="categoria_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Categoría
+                                Categoría *
                             </label>
-                            <select 
-                                id="categoria_id" 
-                                name="categoria_id" 
-                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                            >
+                            <select id="categoria_id" name="categoria_id" required
+                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
                                 <option value="">Selecciona una categoría...</option>
-                                @foreach($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
-                                        {{ $categoria->nombre }}
+                                @foreach($categorias as $cat)
+                                    <option value="{{ $cat->id }}"
+                                        data-tipo="{{ $cat->tipo_establecimiento }}"
+                                        {{ old('categoria_id') == $cat->id ? 'selected' : '' }}>
+                                        {{ $cat->nombre }}
                                     </option>
                                 @endforeach
                             </select>
+                            @error('categoria_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                         </div>
 
                         <div>
                             <label for="telefono_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Teléfono *
                             </label>
-                            <input 
-                                type="tel" 
-                                id="telefono_establecimiento" 
-                                name="telefono_establecimiento" 
-                                value="{{ old('telefono_establecimiento') }}" 
-                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                placeholder="7201234567"
-                                pattern="[0-9]{10,20}"
-                                title="Solo números, entre 10 y 20 dígitos"
-                                minlength="10"
-                                maxlength="20"
-                                required
-                            >
+                            <input type="tel" name="telefono_establecimiento" value="{{ old('telefono_establecimiento') }}"
+                                pattern="[0-9]{10,20}" required
+                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                                placeholder="7201234567">
                         </div>
 
                         <div>
                             <label for="correo_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Correo electrónico *
                             </label>
-                            <input 
-                                type="email" 
-                                id="correo_establecimiento" 
-                                name="correo_establecimiento" 
-                                value="{{ old('correo_establecimiento') }}" 
-                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                placeholder="contacto@mirestaurante.com"
-                                required
-                            >
+                            <input type="email" name="correo_establecimiento" value="{{ old('correo_establecimiento') }}" required
+                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                                placeholder="contacto@mitaqueria.com">
                         </div>
                     </div>
                 </div>
 
-                {{-- ============================================ --}}
-                {{-- CARD 2: UBICACIÓN --}}
-                {{-- ============================================ --}}
-                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-orange-500 overflow-hidden">
-                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
+                <!-- CARD 2: UBICACIÓN CON MAPA -->
+                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-orange-500 overflow-hidden mb-6">
+                    <div class="bg-gradient-to-r from-orange-500 fields to-orange-600 px-6 py-4">
                         <div class="flex items-center gap-3">
                             <flux:icon.map-pin class="size-6 text-white" />
-                            <h3 class="text-lg font-bold text-white">
-                                Ubicación
-                            </h3>
+                            <h3 class="text-lg font-bold text-white">Ubicación</h3>
                         </div>
                     </div>
+                    <div class="p-6 space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar dirección</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="search_address" placeholder="Escribe una dirección en México..."
+                                    class="flex-1 rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                                <button type="button" id="search_button" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">
+                                    <flux:icon.magnifying-glass class="size-5" />
+                                </button>
+                            </div>
+                        </div>
 
-                    <div class="p-6 space-y-4">
+                        <div id="map" class="w-full h-96 rounded-lg border-2 border-gray-300 dark:border-zinc-600"></div>
+
+                        <input type="hidden" name="lat" id="lat" value="{{ old('lat') }}" required>
+                        <input type="hidden" name="lng" id="lng" value="{{ old('lng') }}" required>
+
                         <div>
                             <label for="direccion_completa_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Dirección completa *
                             </label>
-                            <textarea 
-                                id="direccion_completa_establecimiento" 
-                                name="direccion_completa_establecimiento" 
-                                rows="2" 
-                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                placeholder="Calle, número, referencias..." 
-                                maxlength="500"
-                                required
-                            >{{ old('direccion_completa_establecimiento') }}</textarea>
+                            <textarea name="direccion_completa_establecimiento" id="direccion_completa_establecimiento" rows="2" required
+                                class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                                placeholder="Calle, número, referencias...">{{ old('direccion_completa_establecimiento') }}</textarea>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <label for="colonia" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Colonia *
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="colonia" 
-                                    name="colonia" 
-                                    value="{{ old('colonia') }}" 
-                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                    maxlength="100"
-                                    required
-                                >
-                            </div>
-
-                            <div>
-                                <label for="municipio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Municipio *
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="municipio" 
-                                    name="municipio" 
-                                    value="{{ old('municipio') }}" 
-                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                    maxlength="100"
-                                    required
-                                >
-                            </div>
-
-                            <div>
-                                <label for="estado" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Estado *
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="estado" 
-                                    name="estado" 
-                                    value="{{ old('estado') }}" 
-                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                    maxlength="100"
-                                    required
-                                >
-                            </div>
-
-                            <div>
-                                <label for="codigo_postal" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Código Postal *
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="codigo_postal" 
-                                    name="codigo_postal" 
-                                    value="{{ old('codigo_postal') }}" 
-                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                    pattern="[0-9]{5}"
-                                    title="Código postal de 5 dígitos"
-                                    minlength="5"
-                                    maxlength="5"
-                                    placeholder="00000"
-                                    required
-                                >
-                            </div>
+                            <div><label>Colonia *</label><input type="text" name="colonia" id="colonia" value="{{ old('colonia') }}" required class="w-full rounded-lg"></div>
+                            <div><label>Municipio *</label><input type="text" name="municipio" id="municipio" value="{{ old('municipio') }}" required class="w-full rounded-lg"></div>
+                            <div><label>Estado *</label><input type="text" name="estado" id="estado" value="{{ old('estado') }}" required class="w-full rounded-lg"></div>
+                            <div><label>Código Postal *</label><input type="text" name="codigo_postal" id="codigo_postal" value="{{ old('codigo_postal') }}" pattern="[0-9]{5}" maxlength="5" required class="w-full rounded-lg"></div>
                         </div>
                     </div>
                 </div>
 
-                {{-- ============================================ --}}
-                {{-- CARD 3: INFORMACIÓN FISCAL (OPCIONAL) --}}
-                {{-- ============================================ --}}
-                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-gray-300 dark:border-zinc-700 overflow-hidden">
-                    <div class="bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <flux:icon.document-text class="size-6 text-white" />
-                            <h3 class="text-lg font-bold text-white">
-                                Información Fiscal (Opcional)
-                            </h3>
-                        </div>
-                    </div>
-
-                    <div class="p-6">
-                        <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <p class="text-sm text-blue-800 dark:text-blue-200 flex items-start gap-2">
-                                <flux:icon.information-circle class="size-5 flex-shrink-0 mt-0.5" />
-                                <span>
-                                    Si tu establecimiento ofrece facturación, completa esta sección. 
-                                    De lo contrario, puedes dejarla en blanco.
-                                </span>
-                            </p>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="rfc_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        RFC del Establecimiento
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="rfc_establecimiento" 
-                                        name="rfc_establecimiento" 
-                                        value="{{ old('rfc_establecimiento') }}" 
-                                        class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500 uppercase" 
-                                        placeholder="Ej: XAXX010101000"
-                                        pattern="[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}"
-                                        title="Formato: 3-4 letras, 6 números, 3 caracteres"
-                                        minlength="13"
-                                        maxlength="13"
-                                    >
-                                </div>
-
-                                <div>
-                                    <label for="razon_social_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Razón Social
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="razon_social_establecimiento" 
-                                        name="razon_social_establecimiento" 
-                                        value="{{ old('razon_social_establecimiento') }}" 
-                                        class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                        placeholder="Nombre legal del establecimiento"
-                                        maxlength="255"
-                                    >
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="direccion_fiscal_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Dirección Fiscal
-                                </label>
-                                <textarea 
-                                    id="direccion_fiscal_establecimiento" 
-                                    name="direccion_fiscal_establecimiento" 
-                                    rows="2" 
-                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white shadow-sm focus:border-orange-500 focus:ring-orange-500" 
-                                    placeholder="Dirección registrada ante el SAT..."
-                                    maxlength="500"
-                                >{{ old('direccion_fiscal_establecimiento') }}</textarea>
-                            </div>
-
-                            <div>
-                                <label class="flex items-center">
-                                    <input 
-                                        type="checkbox" 
-                                        id="facturacion_establecimiento" 
-                                        name="facturacion_establecimiento" 
-                                        value="1" 
-                                        {{ old('facturacion_establecimiento') ? 'checked' : '' }} 
-                                        class="rounded border-gray-300 dark:border-zinc-600 text-orange-600 shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                                    >
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                        <flux:icon.receipt-percent class="inline size-4" />
-                                        Este establecimiento ofrece facturación electrónica
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- ============================================ --}}
-                {{-- CARD 4: MÉTODOS DE PAGO --}}
-                {{-- ============================================ --}}
-                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-orange-500 overflow-hidden">
+                <!-- CARD 3: HORARIOS -->
+                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-orange-500 overflow-hidden mb-6">
                     <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <flux:icon.credit-card class="size-6 text-white" />
-                            <h3 class="text-lg font-bold text-white">
-                                Métodos de Pago Aceptados
-                            </h3>
+                            <flux:icon.clock class="size-6 text-white" />
+                            <h3 class="text-lg font-bold text-white">Horarios de Atención</h3>
                         </div>
                     </div>
-
-                    <div class="p-6">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            @php 
-                                $metodos_pago = ['Efectivo', 'Tarjeta Débito', 'Tarjeta Crédito', 'Transferencia', 'PayPal', 'Mercado Pago', 'Oxxo Pay', 'Otro'];
-                                $metodos_old = old('tipos_pago_establecimiento', []);
-                            @endphp
-                            @foreach ($metodos_pago as $metodo)
-                            <label class="flex items-center p-3 border-2 border-gray-200 dark:border-zinc-700 rounded-lg hover:border-orange-300 dark:hover:border-orange-600 transition-colors cursor-pointer">
-                                <input 
-                                    type="checkbox" 
-                                    name="tipos_pago_establecimiento[]" 
-                                    value="{{ $metodo }}" 
-                                    {{ in_array($metodo, $metodos_old) ? 'checked' : '' }} 
-                                    class="rounded border-gray-300 dark:border-zinc-600 text-orange-600 shadow-sm focus:border-orange-500 focus:ring-orange-500"
-                                >
-                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $metodo }}</span>
-                            </label>
-                            @endforeach
+                    <div class="p-6 space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3 bg-gray-50 dark:bg-zinc-900 rounded-lg">
+                            <span class="text-sm font-medium">Lunes a Viernes *</span>
+                            <div class="flex items-center space-x-2">
+                                <input type="time" name="horarios[lunes_viernes][apertura]" required class="w-32 rounded border-gray-300">
+                                <span>a</span>
+                                <input type="time" name="horarios[lunes_viernes][cierre]" required class="w-32 rounded border-gray-300">
+                            </div>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3 bg-gray-50 dark:bg-zinc-900 rounded-lg">
+                            <span class="text-sm font-medium">Sábados</span>
+                            <div class="flex items-center space-x-2">
+                                <input type="time" name="horarios[sabados][apertura]" class="w-32 rounded border-gray-300">
+                                <span>a</span>
+                                <input type="time" name="horarios[sabados][cierre]" class="w-32 rounded border-gray-300">
+                            </div>
+                        </div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between p-3 bg-gray-50 dark:bg-zinc-900 rounded-lg">
+                            <span class="text-sm font-medium">Domingos</span>
+                            <div class="flex items-center space-x-2">
+                                <input type="time" name="horarios[domingos][apertura]" class="w-32 rounded border-gray-300">
+                                <span>a</span>
+                                <input type="time" name="horarios[domingos][cierre]" class="w-32 rounded border-gray-300">
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" name="cierra_dias_festivos" value="1" {{ old('cierra_dias_festivos') ? 'checked' : '' }}
+                                class="rounded text-orange-600">
+                            <span class="ml-2 text-sm">Cerramos los días festivos</span>
                         </div>
                     </div>
                 </div>
 
-                {{-- ============================================ --}}
-                {{-- BOTONES DE ACCIÓN --}}
-                {{-- ============================================ --}}
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
-                    <a 
-                        href="{{ route('establecimientos.index') }}" 
-                        class="w-full sm:w-auto px-8 py-3 bg-white dark:bg-zinc-800 border-2 border-gray-300 dark:border-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 rounded-lg transition duration-200 font-medium text-center shadow-sm"
-                    >
-                        <flux:icon.arrow-left class="inline size-5 mr-2" />
+                <!-- Métodos de pago y fiscal (los tienes bien) -->
+                <!-- ... (copia tus cards de métodos de pago y fiscal) ... -->
+
+                <!-- BOTONES -->
+                <div class="flex flex-col sm:flex-row justify-between gap-4 pt-6">
+                    <a href="{{ route('establecimientos.index') }}"
+                        class="px-8 py-3 bg-white dark:bg-zinc-800 border-2 border-gray-300 dark:border-zinc-600 rounded-lg hover:bg-gray-50 text-center font-medium">
                         Cancelar
                     </a>
-                    <button 
-                        type="submit" 
-                        class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition duration-200 font-bold text-center shadow-lg"
-                    >
-                        <flux:icon.check class="inline size-5 mr-2" />
+                    <button type="submit"
+                        class="px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg font-bold shadow-lg">
                         Guardar Establecimiento
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    @push('scripts')
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places&callback=initMap" async defer></script>
+        <script>
+            let map, marker, geocoder;
+
+            function initMap() {
+                const mexico = { lat: 23.6345, lng: -102.5528 };
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: mexico,
+                    zoom: 5,
+                });
+
+                geocoder = new google.maps.Geocoder();
+                const autocomplete = new google.maps.places.Autocomplete(
+                    document.getElementById('search_address'),
+                    { types: ['geocode'], componentRestrictions: { country: 'mx' } }
+                );
+
+                autocomplete.addListener('place_changed', () => {
+                    const place = autocomplete.getPlace();
+                    if (place.geometry) {
+                        map.setCenter(place.geometry.location);
+                        map.setZoom(17);
+                        placeMarker(place.geometry.location);
+                        fillFromPlace(place);
+                    }
+                });
+
+                map.addListener('click', e => {
+                    placeMarker(e.latLng);
+                    reverseGeocode(e.latLng);
+                });
+
+                @if(old('lat') && old('lng'))
+                    const pos = { lat: {{ old('lat') }}, lng: {{ old('lng') }} };
+                    map.setCenter(pos);
+                    map.setZoom(17);
+                    placeMarker(new google.maps.LatLng(pos.lat, pos.lng));
+                @endif
+            }
+
+            function placeMarker(latLng) {
+                if (marker) marker.setMap(null);
+                marker = new google.maps.Marker({
+                    position: latLng,
+                    map: map,
+                    draggable: true
+                });
+                document.getElementById('lat').value = latLng.lat();
+                document.getElementById('lng').value = latLng.lng();
+
+                marker.addListener('dragend', () => {
+                    const pos = marker.getPosition();
+                    document.getElementById('lat').value = pos.lat();
+                    document.getElementById('lng').value = pos.lng();
+                    reverseGeocode(pos);
+                });
+            }
+
+            function reverseGeocode(latLng) {
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                    if (status === 'OK' && results[0]) fillFromPlace(results[0]);
+                });
+            }
+
+            function fillFromPlace(place) {
+                document.getElementById('direccion_completa_establecimiento').value = place.formatted_address || '';
+                let colonia = '', municipio = '', estado = '', cp = '';
+
+                place.address_components.forEach(c => {
+                    if (c.types.includes('sublocality') || c.types.includes('neighborhood')) colonia = c.long_name;
+                    if (c.types.includes('locality')) municipio = c.long_name;
+                    if (c.types.includes('administrative_area_level_1')) estado = c.long_name;
+                    if (c.types.includes('postal_code')) cp = c.long_name;
+                });
+
+                document.getElementById('colonia').value = colonia;
+                document.getElementById('municipio').value = municipio;
+                document.getElementById('estado').value = estado;
+                document.getElementById('codigo_postal').value = cp;
+            }
+
+            // Mostrar campo "Otro"
+            document.getElementById('tipo_establecimiento').addEventListener('change', function() {
+                document.getElementById('otro_tipo_container').classList.toggle('hidden', this.value !== 'Otro');
+            });
+
+            // Filtrar categorías
+            document.getElementById('tipo_establecimiento').addEventListener('change', function() {
+                const tipo = this.value;
+                document.querySelectorAll('#categoria_id option[data-tipo]').forEach(opt => {
+                    opt.style.display = (tipo === 'Otro' || !opt.dataset.tipo || opt.dataset.tipo === tipo) ? '' : 'none';
+                });
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('tipo_establecimiento').dispatchEvent(new Event('change'));
+            });
+        </script>
+    @endpush
 </x-layouts.app>

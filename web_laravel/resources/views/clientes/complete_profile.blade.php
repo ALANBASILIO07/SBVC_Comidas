@@ -15,44 +15,6 @@
                 </p>
             </div>
 
-            {{-- Mensajes de error --}}
-            @if ($errors->any())
-            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <flux:icon.exclamation-triangle class="h-5 w-5 text-red-400" />
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
-                            Por favor corrige los siguientes errores:
-                        </h3>
-                        <ul class="mt-2 text-sm text-red-700 dark:text-red-300 list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            {{-- Mensaje de éxito --}}
-            @if (session('success'))
-            <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded-lg p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <flux:icon.check-circle class="h-5 w-5 text-green-400" />
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-green-800 dark:text-green-200">
-                            {{ session('success') }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-
             {{-- FORMULARIO --}}
             <form action="{{ route('clientes.store') }}" method="POST" class="space-y-6">
             @csrf
@@ -234,15 +196,148 @@
                         <flux:icon.arrow-left class="inline size-5 mr-2" />
                         Volver
                     </a>
-                    <button 
-                        type="submit" 
-                        class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition duration-200 font-bold text-center shadow-lg"
+                    <button
+                        type="submit"
+                        id="submit-btn"
+                        class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg transition duration-200 font-bold text-center shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <flux:icon.check class="inline size-5 mr-2" />
-                        Guardar y Continuar
+                        <span id="btn-text">Guardar y Continuar</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Validación del formulario
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando validación del formulario...');
+
+            const form = document.querySelector('form[action*="clientes.store"]');
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const nombreInput = document.getElementById('nombre_titular');
+            const telefonoInput = document.getElementById('telefono');
+            const rfcInput = document.getElementById('rfc_titular');
+
+            if (!form) {
+                console.error('No se encontró el formulario');
+                return;
+            }
+
+            if (!nombreInput || !telefonoInput) {
+                console.error('No se encontraron los campos requeridos');
+                return;
+            }
+
+            console.log('Formulario encontrado, configurando validaciones...');
+
+            // Validación en tiempo real del nombre (solo letras y espacios)
+            nombreInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                value = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
+                e.target.value = value;
+            });
+
+            // Validación en tiempo real del teléfono (solo números)
+            telefonoInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                value = value.replace(/[^0-9]/g, '');
+                if (value.length > 20) {
+                    value = value.substring(0, 20);
+                }
+                e.target.value = value;
+            });
+
+            // Validación del RFC (convertir a mayúsculas)
+            if (rfcInput) {
+                rfcInput.addEventListener('input', function(e) {
+                    let value = e.target.value.toUpperCase();
+                    value = value.replace(/[^A-ZÑ&0-9]/g, '');
+                    if (value.length > 13) {
+                        value = value.substring(0, 13);
+                    }
+                    e.target.value = value;
+                });
+            }
+
+            // Manejo del envío del formulario
+            form.addEventListener('submit', function(e) {
+                console.log('Formulario enviado, validando...');
+
+                const nombre = nombreInput.value.trim();
+                const telefono = telefonoInput.value.trim();
+
+                if (!nombre || nombre.length < 3) {
+                    e.preventDefault();
+                    console.log('Error: Nombre inválido');
+                    Swal.fire({
+                        icon: "error",
+                        title: "Campo incompleto",
+                        text: "El nombre completo debe tener al menos 3 caracteres",
+                        confirmButtonText: "Entendido",
+                        confirmButtonColor: "#ef4444"
+                    });
+                    nombreInput.focus();
+                    return false;
+                }
+
+                if (!telefono || telefono.length < 10) {
+                    e.preventDefault();
+                    console.log('Error: Teléfono inválido');
+                    Swal.fire({
+                        icon: "error",
+                        title: "Campo incompleto",
+                        text: "El teléfono debe tener al menos 10 dígitos",
+                        confirmButtonText: "Entendido",
+                        confirmButtonColor: "#ef4444"
+                    });
+                    telefonoInput.focus();
+                    return false;
+                }
+
+                const rfc = rfcInput ? rfcInput.value.trim() : '';
+                if (rfc && rfc.length > 0 && rfc.length !== 13) {
+                    e.preventDefault();
+                    console.log('Error: RFC inválido');
+                    Swal.fire({
+                        icon: "error",
+                        title: "RFC inválido",
+                        text: "El RFC debe tener exactamente 13 caracteres",
+                        confirmButtonText: "Entendido",
+                        confirmButtonColor: "#ef4444"
+                    });
+                    rfcInput.focus();
+                    return false;
+                }
+
+                console.log('Validación exitosa, enviando formulario...');
+
+                // Deshabilitar botón y mostrar loading
+                submitBtn.disabled = true;
+                btnText.textContent = 'Guardando...';
+
+                // Mostrar loader con SweetAlert2
+                Swal.fire({
+                    title: 'Guardando información...',
+                    html: 'Por favor espera mientras procesamos tus datos',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Permitir que el formulario se envíe
+                return true;
+            });
+
+            console.log('✅ Validación de formulario configurada correctamente');
+        });
+    </script>
+    @endpush
 </x-layouts.app>

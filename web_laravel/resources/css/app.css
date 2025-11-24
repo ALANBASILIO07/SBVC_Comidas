@@ -26,13 +26,29 @@
     --color-accent: var(--color-neutral-800);
     --color-accent-content: var(--color-neutral-800);
     --color-accent-foreground: var(--color-white);
+
+    /* Colores de la empresa */
+    --color-custom-blue: #241178;
+    --color-custom-blue-dark: #1a0d5a;
+    --color-custom-green: #42A958;
+    --color-custom-green-dark: #2d7a3e;
+    --color-custom-red: #EE0000;
+    --color-custom-orange: #DE6601;
 }
 
 @layer theme {
     .dark {
         --color-accent: var(--color-white);
         --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-8G00);
+        --color-accent-foreground: var(--color-neutral-800);
+
+        /* Ajustar colores de la empresa para modo oscuro */
+        --color-custom-blue: #3d2bb8;
+        --color-custom-blue-dark: #2a1d80;
+        --color-custom-green: #52c968;
+        --color-custom-green-dark: #3a9548;
+        --color-custom-red: #ff3333;
+        --color-custom-orange: #ff8533;
     }
 }
 

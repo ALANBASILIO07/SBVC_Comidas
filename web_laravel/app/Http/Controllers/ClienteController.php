@@ -72,6 +72,17 @@ class ClienteController extends Controller
             'rfc_titular.regex' => 'El formato del RFC no es válido (Ej: XAXX010101000)',
         ]);
 
+        // Log de datos antes de crear
+        \Log::info('Intentando crear cliente con datos:', [
+            'user_id' => Auth::id(),
+            'nombre_titular' => $validated['nombre_titular'],
+            'email_contacto' => Auth::user()->email,
+            'telefono' => $validated['telefono'],
+            'plan' => 'estandar',
+            'rfc_titular' => $validated['rfc_titular'] ?? null,
+            'razon_social_titular' => $validated['razon_social_titular'] ?? null,
+        ]);
+
         // Crear el cliente
         try {
             $cliente = Cliente::create([
@@ -87,15 +98,22 @@ class ClienteController extends Controller
                 'razon_social_titular' => $validated['razon_social_titular'] ?? null,
             ]);
 
+            \Log::info('Cliente creado exitosamente con ID: ' . $cliente->id);
+
             return redirect()->route('dashboard')
                 ->with('success', '¡Registro completado exitosamente! Ahora puedes comenzar a usar todas las funciones de la plataforma.');
-                
+
         } catch (\Exception $e) {
-            \Log::error('Error al crear cliente: ' . $e->getMessage());
-            
+            \Log::error('Error al crear cliente:', [
+                'mensaje' => $e->getMessage(),
+                'archivo' => $e->getFile(),
+                'linea' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Hubo un error al guardar tu información. Por favor intenta de nuevo.');
+                ->with('error', 'Hubo un error al guardar tu información. Error: ' . $e->getMessage());
         }
     }
 

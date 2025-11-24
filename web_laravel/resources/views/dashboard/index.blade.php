@@ -34,23 +34,7 @@
                 </div>
             @endif
 
-            {{-- Mensaje de bienvenida si ya completó el registro --}}
-            @if ($registroCompleto)
-                @if (session('success'))
-                    <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded-lg p-4 mb-6">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <flux:icon.check-circle class="h-5 w-5 text-green-400" />
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-medium text-green-800 dark:text-green-200">
-                                    {{ session('success') }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-            @endif
+            {{-- Las notificaciones ahora se manejan por SweetAlert2 en el componente sweetalert-notifications --}}
 
             <!-- Grid de 4 tarjetas -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">

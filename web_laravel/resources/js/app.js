@@ -1,3 +1,72 @@
+// ===== IMPORTAR SWEETALERT2 =====
+import Swal from 'sweetalert2';
+
+// Hacer SweetAlert2 disponible globalmente
+window.Swal = Swal;
+
+// Configuración global de SweetAlert2
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+});
+
+// Hacer Toast disponible globalmente
+window.Toast = Toast;
+
+// Helper functions para notificaciones
+window.showSuccess = function(message, title = '¡Éxito!') {
+    Toast.fire({
+        icon: 'success',
+        title: title,
+        text: message
+    });
+};
+
+window.showError = function(message, title = 'Error') {
+    Toast.fire({
+        icon: 'error',
+        title: title,
+        text: message
+    });
+};
+
+window.showWarning = function(message, title = 'Advertencia') {
+    Toast.fire({
+        icon: 'warning',
+        title: title,
+        text: message
+    });
+};
+
+window.showInfo = function(message, title = 'Información') {
+    Toast.fire({
+        icon: 'info',
+        title: title,
+        text: message
+    });
+};
+
+// Confirmación con SweetAlert2
+window.confirmDelete = function(message = '¿Estás seguro de que deseas eliminar este elemento?') {
+    return Swal.fire({
+        title: '¿Estás seguro?',
+        text: message,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+};
+
 // --- Lógica para la página de "Completar Perfil de Cliente" ---
 // "Gating": Solo se ejecuta si encontramos el selector de formalidad.
 const formalidadSelect = document.getElementById('formalidad');

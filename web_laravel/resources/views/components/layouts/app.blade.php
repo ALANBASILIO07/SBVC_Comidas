@@ -164,6 +164,10 @@
             {{ $slot }}
         </div>
 
+        {{-- Notificaciones SweetAlert2 --}}
+        <x-sweetalert-notifications />
+
         @fluxScripts
+        @stack('scripts')
     </body>
 </html>
