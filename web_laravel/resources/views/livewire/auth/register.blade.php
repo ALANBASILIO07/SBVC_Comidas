@@ -50,6 +50,29 @@
                 viewable
             />
 
+            <!-- Términos y Condiciones -->
+            <flux:field variant="inline">
+                <flux:checkbox name="terms" required />
+                <flux:label>
+                    Acepto los
+                    <a href="{{ route('terminos') }}" target="_blank" class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
+                        Términos y Condiciones
+                    </a>
+                </flux:label>
+                <flux:error name="terms" />
+            </flux:field>
+
+            <flux:field variant="inline">
+                <flux:checkbox name="privacy" required />
+                <flux:label>
+                    Acepto el
+                    <a href="{{ route('privacidad') }}" target="_blank" class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
+                        Aviso de Privacidad
+                    </a>
+                </flux:label>
+                <flux:error name="privacy" />
+            </flux:field>
+
             <div class="flex items-center justify-end">
                 <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
                     {{ __('Crear cuenta') }}
