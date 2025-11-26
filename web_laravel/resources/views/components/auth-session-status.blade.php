@@ -3,7 +3,17 @@
 ])
 
 @if ($status)
-    <div {{ $attributes->merge(['class' => 'font-medium text-sm text-green-600']) }}>
-        {{ $status }}
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "¡Éxito!",
+                text: "{{ $status }}",
+                icon: "success",
+                confirmButtonText: "Aceptar",
+                confirmButtonColor: "#42A958",
+                draggable: true
+            });
+        });
+    </script>
 @endif

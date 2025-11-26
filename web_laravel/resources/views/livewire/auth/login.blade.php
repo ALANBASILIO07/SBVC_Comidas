@@ -1,6 +1,9 @@
 <x-layouts.auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Inicio de Sesión')" :description="__('Ingresa tu correo electrónico y contraseña')" />
+        <x-auth-header
+            :title="__('Ingresar a tu cuenta')"
+            :description="__('Ingresa tu correo electrónico y contraseña a continuación para iniciar sesión')"
+        />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -16,7 +19,7 @@
                 required
                 autofocus
                 autocomplete="email"
-                placeholder="correo@ejemplo.com"
+                placeholder="email@gmail.com"
             />
 
             <!-- Password -->
@@ -32,26 +35,34 @@
                 />
 
                 @if (Route::has('password.request'))
-                    <flux:link class="absolute top-0 text-sm end-0" :href="route('password.request')" wire:navigate>
+                    <flux:link class="absolute top-0 text-sm end-0 text-custom-orange hover:text-custom-orange/80" :href="route('password.request')" wire:navigate>
                         {{ __('¿Olvidaste tu contraseña?') }}
                     </flux:link>
                 @endif
             </div>
 
             <!-- Remember Me -->
-            <flux:checkbox name="remember" :label="__('Recuérdame')" :checked="old('remember')" />
+            <flux:checkbox name="remember" :label="__('Recordarme')" :checked="old('remember')" />
 
             <div class="flex items-center justify-end">
-                <flux:button variant="primary" type="submit" class="w-full" data-test="login-button">
+                <flux:button
+                    icon="arrow-right-start-on-rectangle"
+                    icon-variant="outline"
+                    variant="primary"
+                    type="submit"
+                    class="w-full"
+                    data-test="login-button">
                     {{ __('Iniciar sesión') }}
                 </flux:button>
             </div>
         </form>
 
         @if (Route::has('register'))
-            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
+            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-black/60 dark:text-white/60">
                 <span>{{ __('¿No tienes una cuenta?') }}</span>
-                <flux:link :href="route('register')" wire:navigate>{{ __('Regístrate') }}</flux:link>
+                <flux:link :href="route('register')" wire:navigate class="text-custom-orange hover:text-custom-orange/80">
+                    {{ __('Regístrate') }}
+                </flux:link>
             </div>
         @endif
     </div>

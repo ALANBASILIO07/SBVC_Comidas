@@ -28,7 +28,8 @@
                 text: "{{ session('error') }}",
                 showConfirmButton: true,
                 confirmButtonText: "Entendido",
-                confirmButtonColor: "#ef4444"
+                confirmButtonColor: "#ef4444",
+                draggable: true
             });
         });
     </script>
@@ -45,11 +46,7 @@
                 showConfirmButton: true,
                 confirmButtonText: "Entendido",
                 confirmButtonColor: "#f59e0b",
-                toast: true,
-                position: "top-end",
-                timer: 5000,
-                timerProgressBar: true,
-                showCloseButton: true
+                draggable: true
             });
         });
     </script>
@@ -111,7 +108,8 @@
                 title: "Errores de validación",
                 html: `<div style="text-align: left;"><p><strong>Por favor corrige los siguientes errores:</strong></p><ul style="margin: 10px 0;">${errorList}</ul></div>`,
                 confirmButtonText: "Entendido",
-                confirmButtonColor: "#ef4444"
+                confirmButtonColor: "#ef4444",
+                draggable: true
             });
         });
     </script>

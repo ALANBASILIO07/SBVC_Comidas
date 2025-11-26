@@ -46,8 +46,8 @@
                 </div>
             </div>
 
-            <a href="{{ route('home') }}" class="text-sm text-black dark:text-white hover:underline underline-offset-4 decoration-custom-orange decoration-2 transition-all">
-                Volver al inicio
+            <a href="javascript:history.back()" class="text-sm text-black dark:text-white hover:underline underline-offset-4 decoration-custom-orange decoration-2 transition-all">
+                Volver
             </a>
         </div>
 
@@ -177,6 +177,7 @@
         {{-- Footer --}}
         <div class="text-center text-xs text-black/60 dark:text-white/60 pt-6 border-t border-zinc-200 dark:border-zinc-700">
             <p>&copy; {{ now()->year }} SBVC Comidas. Todos los derechos reservados.</p>
+            <p>Plataforma de gestión de establecimientos de comida y promociones.</p>
         </div>
 
     </main>

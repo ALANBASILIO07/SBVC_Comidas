@@ -15,7 +15,7 @@
                 required
                 autofocus
                 autocomplete="name"
-                :placeholder="__('Nombre completo')"
+                :placeholder="__('Juan Pérez')"
             />
 
             <!-- Email Address -->
@@ -25,7 +25,7 @@
                 type="email"
                 required
                 autocomplete="email"
-                placeholder="correo@ejemplo.com"
+                placeholder="email@gmail.com"
             />
 
             <!-- Password -->
@@ -42,40 +42,42 @@
             <!-- Confirm Password -->
             <flux:input
                 name="password_confirmation"
-                :label="__('Confirma tu contraseña')"
+                :label="__('Confirmar contraseña')"
                 type="password"
                 required
                 autocomplete="new-password"
-                :placeholder="__('Confirma tu contraseña')"
+                :placeholder="__('Confirmar contraseña')"
                 viewable
             />
 
             <!-- Términos y Condiciones -->
-            <flux:field variant="inline">
-                <flux:checkbox name="terms" required />
-                <flux:label>
-                    Acepto los
-                    <a href="{{ route('terminos') }}" target="_blank" class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
-                        Términos y Condiciones
-                    </a>
-                </flux:label>
-                <flux:error name="terms" />
-            </flux:field>
+            <div class="space-y-4">
+                <flux:field variant="inline">
+                    <flux:checkbox name="terms" required />
+                    <flux:label>
+                        Acepto los
+                        <a href="{{ route('terminos') }}" wire:navigate class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
+                            Términos y Condiciones
+                        </a>
+                    </flux:label>
+                    <flux:error name="terms" />
+                </flux:field>
 
-            <flux:field variant="inline">
-                <flux:checkbox name="privacy" required />
-                <flux:label>
-                    Acepto el
-                    <a href="{{ route('privacidad') }}" target="_blank" class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
-                        Aviso de Privacidad
-                    </a>
-                </flux:label>
-                <flux:error name="privacy" />
-            </flux:field>
+                <flux:field variant="inline">
+                    <flux:checkbox name="privacy" required />
+                    <flux:label>
+                        Acepto el
+                        <a href="{{ route('privacidad') }}" wire:navigate class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
+                            Aviso de Privacidad
+                        </a>
+                    </flux:label>
+                    <flux:error name="privacy" />
+                </flux:field>
+            </div>
 
             <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Crear cuenta') }}
+                <flux:button icon="user-plus" icon-variant="outline" type="submit" variant="primary" class="w-full" data-test="register-user-button">
+                    {{ __('Registrarse') }}
                 </flux:button>
             </div>
         </form>

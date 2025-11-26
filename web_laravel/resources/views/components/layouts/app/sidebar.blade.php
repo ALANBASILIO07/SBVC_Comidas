@@ -84,26 +84,6 @@
 
         <flux:spacer />
 
-        <flux:navlist>
-            <flux:navlist.item 
-                icon="document-text" 
-                href="/terminos-y-condiciones" 
-                target="_blank"
-                class="text-white hover:bg-white/10">
-                {{ __('Términos y Condiciones') }}
-            </flux:navlist.item>
-
-            <flux:navlist.item 
-                icon="shield-check" 
-                href="/aviso-de-privacidad" 
-                target="_blank"
-                class="text-white hover:bg-white/10">
-                {{ __('Aviso de Privacidad') }}
-            </flux:navlist.item>
-        </flux:navlist>
-
-        <flux:spacer />
-
         <!-- User Menu Desktop -->
         <flux:dropdown class="hidden lg:block" position="top" align="start">
             <flux:profile
@@ -127,6 +107,14 @@
                     {{ __('Configuración') }}
                 </flux:menu.item>
 
+                <flux:menu.item :href="route('privacidad')" icon="shield-check" wire:navigate>
+                    {{ __('Aviso de Privacidad') }}
+                </flux:menu.item>
+
+                <flux:menu.item :href="route('terminos')" icon="document-text" wire:navigate>
+                    {{ __('Términos y Condiciones') }}
+                </flux:menu.item>
+
                 <flux:menu.separator />
 
                 <form method="POST" action="{{ route('logout') }}">
@@ -146,10 +134,30 @@
         <flux:spacer />
         <flux:dropdown>
             <flux:profile :initials="auth()->user()->initials()" />
-            <flux:menu>
+            <flux:menu class="w-64">
+                <flux:menu.radio.group>
+                    <div class="px-3 py-2 text-sm text-gray-600">
+                        <div class="font-medium text-gray-900 dark:text-white">{{ auth()->user()->name }}</div>
+                        <div class="text-xs">{{ auth()->user()->email }}</div>
+                    </div>
+                </flux:menu.radio.group>
+
+                <flux:menu.separator />
+
                 <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
                     {{ __('Configuración') }}
                 </flux:menu.item>
+
+                <flux:menu.item :href="route('privacidad')" icon="shield-check" wire:navigate>
+                    {{ __('Aviso de Privacidad') }}
+                </flux:menu.item>
+
+                <flux:menu.item :href="route('terminos')" icon="document-text" wire:navigate>
+                    {{ __('Términos y Condiciones') }}
+                </flux:menu.item>
+
+                <flux:menu.separator />
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle">

@@ -29,13 +29,9 @@
         .slider-container {
             position: relative;
             width: 100%;
-            max-width: 1000px;
             height: 600px;
             background: #f5f5f5;
-            box-shadow: 0 30px 50px #dbdbdb;
-            margin: 0 auto;
             overflow: hidden;
-            border-radius: 20px;
         }
 
         .slide-wrapper .slide-item {
@@ -106,6 +102,16 @@
             margin-bottom: 20px;
             opacity: 0;
             animation: slideAnimate 1s ease-in-out 0.3s 1 forwards;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .slide-content .slide-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: slideAnimate 1s ease-in-out 0.2s 1 forwards;
         }
 
         @keyframes slideAnimate {
@@ -184,129 +190,70 @@
         </div>
     </header>
 
+    {{-- Slider de Categorías y Establecimientos --}}
+    <div class="slider-container">
+        <div class="slide-wrapper">
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.pexels.com/photos/1581384/pexels-photo-1581384.jpeg?auto=compress&cs=tinysrgb&w=1920');">
+                <div class="slide-content">
+                    <img src="{{ asset('images/logo_comidas.png') }}" alt="SBVC Comidas Logo" class="slide-logo">
+                    <div class="slide-name">Bienvenido a SBVC Comidas</div>
+                    <div class="slide-desc">La plataforma integral para descubrir y gestionar establecimientos de comida. Conecta con los mejores restaurantes, cafeterías y más.</div>
+                </div>
+            </div>
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.pexels.com/photos/34832557/pexels-photo-34832557.jpeg?auto=compress&cs=tinysrgb&w=1920');">
+                <div class="slide-content">
+                    <div class="slide-name">Gestión Completa</div>
+                    <div class="slide-desc">Administra tu establecimiento con herramientas profesionales. Controla horarios, promociones, métodos de pago y toda la información de tu negocio en un solo lugar.</div>
+                </div>
+            </div>
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.pexels.com/photos/2553651/pexels-photo-2553651.jpeg?auto=compress&cs=tinysrgb&w=1920');">
+                <div class="slide-content">
+                    <div class="slide-name">Promociones Efectivas</div>
+                    <div class="slide-desc">Crea promociones atractivas que aumenten tus ventas. Conecta con clientes potenciales y fideliza a tus clientes actuales con ofertas especiales y descuentos exclusivos.</div>
+                </div>
+            </div>
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.pexels.com/photos/19833909/pexels-photo-19833909.jpeg?auto=compress&cs=tinysrgb&w=1920');">
+                <div class="slide-content">
+                    <div class="slide-name">Comida Mexicana</div>
+                    <div class="slide-desc">Descubre los auténticos sabores de México. Encuentra restaurantes tradicionales con los platillos más representativos de la gastronomía mexicana en tu zona.</div>
+                </div>
+            </div>
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.pexels.com/photos/19834043/pexels-photo-19834043.jpeg?auto=compress&cs=tinysrgb&w=1920');">
+                <div class="slide-content">
+                    <div class="slide-name">Cafeterías Premium</div>
+                    <div class="slide-desc">Relájate en los mejores espacios cafeteros. Descubre cafeterías especializadas con baristas expertos, granos selectos y ambientes acogedores perfectos para trabajar o socializar.</div>
+                </div>
+            </div>
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.pexels.com/photos/16258092/pexels-photo-16258092.jpeg?auto=compress&cs=tinysrgb&w=1920');">
+                <div class="slide-content">
+                    <div class="slide-name">Alta Cocina</div>
+                    <div class="slide-desc">Experiencias gastronómicas únicas. Explora restaurantes de alta cocina con chefs reconocidos, ingredientes premium y maridajes excepcionales para ocasiones especiales.</div>
+                </div>
+            </div>
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.pexels.com/photos/2128109/pexels-photo-2128109.jpeg?auto=compress&cs=tinysrgb&w=1920');">
+                <div class="slide-content">
+                    <div class="slide-name">Postres Artesanales</div>
+                    <div class="slide-desc">Endulza tu día con creaciones únicas. Encuentra reposterías artesanales con pasteles, tartas, galletas y postres elaborados con recetas tradicionales y técnicas innovadoras.</div>
+                </div>
+            </div>
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.pexels.com/photos/4542998/pexels-photo-4542998.jpeg?auto=compress&cs=tinysrgb&w=1920');">
+                <div class="slide-content">
+                    <div class="slide-name">Cocina Internacional</div>
+                    <div class="slide-desc">Viaja por el mundo a través del sabor. Explora establecimientos con auténtica comida italiana, asiática, mediterránea y más culturas culinarias sin salir de tu ciudad.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slider-buttons">
+            <button class="prev-btn"><i class="fa-solid fa-arrow-left"></i></button>
+            <button class="next-btn"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+
     {{-- Contenido Principal --}}
     <main class="flex-grow container mx-auto px-6 py-16">
-        {{-- Hero Section --}}
-        <div class="text-center mb-16">
-            <flux:heading level="2" size="xl" class="text-4xl md:text-5xl font-extrabold mb-4 text-custom-blue dark:text-white">
-                ¡Bienvenido a SBVC Comidas!
-            </flux:heading>
-
-            <flux:text class="text-lg md:text-xl text-black/70 dark:text-white/70 max-w-3xl mx-auto leading-relaxed">
-                La plataforma integral para gestionar tu establecimiento de comida. Administra tus promociones,
-                conecta con tus clientes y haz crecer tu negocio de manera simple y efectiva.
-            </flux:text>
-        </div>
-
-        {{-- Características Principales --}}
-        <div class="mb-16">
-            <flux:heading level="3" size="lg" class="text-2xl md:text-3xl font-semibold mb-8 text-center text-custom-blue dark:text-white">
-                ¿Qué ofrecemos?
-            </flux:heading>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {{-- Tarjeta 1: Gestión de Establecimientos --}}
-                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md p-6 border border-zinc-200 dark:border-zinc-700 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-center w-16 h-16 bg-custom-blue/10 rounded-full mb-4 mx-auto">
-                        <svg class="w-8 h-8 text-custom-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                        </svg>
-                    </div>
-                    <flux:heading level="4" size="lg" class="text-xl font-bold mb-3 text-center text-custom-blue dark:text-white">
-                        Gestión de Establecimientos
-                    </flux:heading>
-                    <flux:text class="text-black/70 dark:text-white/70 text-center">
-                        Administra tu negocio, horarios, métodos de pago y toda la información de tu establecimiento en un solo lugar.
-                    </flux:text>
-                </div>
-
-                {{-- Tarjeta 2: Promociones --}}
-                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md p-6 border-2 border-custom-green hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-center w-16 h-16 bg-custom-green/10 rounded-full mb-4 mx-auto">
-                        <svg class="w-8 h-8 text-custom-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <flux:heading level="4" size="lg" class="text-xl font-bold mb-3 text-center text-custom-green dark:text-white">
-                        Promociones Efectivas
-                    </flux:heading>
-                    <flux:text class="text-black/70 dark:text-white/70 text-center">
-                        Crea y gestiona promociones atractivas para tus clientes. Aumenta tus ventas con ofertas especiales.
-                    </flux:text>
-                </div>
-
-                {{-- Tarjeta 3: Calificaciones --}}
-                <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md p-6 border border-zinc-200 dark:border-zinc-700 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-center w-16 h-16 bg-custom-orange/10 rounded-full mb-4 mx-auto">
-                        <svg class="w-8 h-8 text-custom-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                        </svg>
-                    </div>
-                    <flux:heading level="4" size="lg" class="text-xl font-bold mb-3 text-center text-custom-orange dark:text-white">
-                        Calificaciones y Reseñas
-                    </flux:heading>
-                    <flux:text class="text-black/70 dark:text-white/70 text-center">
-                        Recibe feedback de tus clientes y mejora continuamente la experiencia que ofreces.
-                    </flux:text>
-                </div>
-            </div>
-        </div>
-
-        {{-- Slider de Categorías y Establecimientos --}}
-        <div class="mb-16">
-            <flux:heading level="3" size="lg" class="text-2xl md:text-3xl font-semibold mb-8 text-center text-black dark:text-white">
-                Descubre Establecimientos por Categoría
-            </flux:heading>
-
-            <div class="slider-container">
-                <div class="slide-wrapper">
-                    <div class="slide-item" style="background-image: url('https://images.pexels.com/photos/19833909/pexels-photo-19833909.jpeg?auto=compress&cs=tinysrgb&w=1200');">
-                        <div class="slide-content">
-                            <div class="slide-name">Comida Mexicana</div>
-                            <div class="slide-desc">Encuentra los mejores restaurantes de comida mexicana tradicional en tu zona.</div>
-                        </div>
-                    </div>
-                    <div class="slide-item" style="background-image: url('https://images.pexels.com/photos/19834043/pexels-photo-19834043.jpeg?auto=compress&cs=tinysrgb&w=1200');">
-                        <div class="slide-content">
-                            <div class="slide-name">Comida Rápida</div>
-                            <div class="slide-desc">Descubre establecimientos de comida rápida con las mejores promociones.</div>
-                        </div>
-                    </div>
-                    <div class="slide-item" style="background-image: url('https://images.pexels.com/photos/16258092/pexels-photo-16258092.jpeg?auto=compress&cs=tinysrgb&w=1200');">
-                        <div class="slide-content">
-                            <div class="slide-name">Restaurantes</div>
-                            <div class="slide-desc">Explora restaurantes de alta cocina y experiencias gastronómicas únicas.</div>
-                        </div>
-                    </div>
-                    <div class="slide-item" style="background-image: url('https://images.pexels.com/photos/16235564/pexels-photo-16235564.jpeg?auto=compress&cs=tinysrgb&w=1200');">
-                        <div class="slide-content">
-                            <div class="slide-name">Cafeterías</div>
-                            <div class="slide-desc">Encuentra las mejores cafeterías y espacios para disfrutar tu bebida favorita.</div>
-                        </div>
-                    </div>
-                    <div class="slide-item" style="background-image: url('https://images.pexels.com/photos/2128109/pexels-photo-2128109.jpeg?auto=compress&cs=tinysrgb&w=1200');">
-                        <div class="slide-content">
-                            <div class="slide-name">Postres y Repostería</div>
-                            <div class="slide-desc">Descubre establecimientos especializados en postres artesanales y repostería.</div>
-                        </div>
-                    </div>
-                    <div class="slide-item" style="background-image: url('https://images.pexels.com/photos/4542998/pexels-photo-4542998.jpeg?auto=compress&cs=tinysrgb&w=1200');">
-                        <div class="slide-content">
-                            <div class="slide-name">Comida Internacional</div>
-                            <div class="slide-desc">Explora sabores del mundo en establecimientos de cocina internacional.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="slider-buttons">
-                    <button class="prev-btn"><i class="fa-solid fa-arrow-left"></i></button>
-                    <button class="next-btn"><i class="fa-solid fa-arrow-right"></i></button>
-                </div>
-            </div>
-        </div>
-
         {{-- Beneficios Adicionales --}}
-        <div class="mt-16">
+        <div class="mb-16">
             <flux:heading level="3" size="lg" class="text-2xl md:text-3xl font-semibold mb-8 text-center text-custom-blue dark:text-white">
                 Beneficios de usar nuestra plataforma
             </flux:heading>
@@ -374,6 +321,167 @@
                             Nuevas funcionalidades y mejoras continuas para mantener tu negocio competitivo.
                         </flux:text>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Planes de Suscripción --}}
+        <div class="mt-16">
+            <flux:heading level="3" size="lg" class="text-2xl md:text-3xl font-semibold mb-8 text-center text-custom-blue dark:text-white">
+                Planes de Suscripción
+            </flux:heading>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                {{-- Plan Básico --}}
+                <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-lg p-8 border-2 border-zinc-200 dark:border-zinc-700 hover:shadow-xl transition-all hover:-translate-y-1">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-custom-blue/10 rounded-full mb-4">
+                            <svg class="w-8 h-8 text-custom-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <flux:heading level="4" class="text-2xl font-bold mb-2 text-custom-blue dark:text-white">
+                            Plan Básico
+                        </flux:heading>
+                        <flux:text class="text-sm text-black/60 dark:text-white/60">
+                            Perfecto para comenzar
+                        </flux:text>
+                    </div>
+
+                    <div class="mb-6 text-center">
+                        <span class="text-4xl font-extrabold text-black dark:text-white">$299</span>
+                        <span class="text-black/60 dark:text-white/60 text-sm">/mes</span>
+                    </div>
+
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-custom-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-black/70 dark:text-white/70">
+                                Gestión de 1 establecimiento
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-custom-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-black/70 dark:text-white/70">
+                                Hasta 5 promociones activas
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-custom-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-black/70 dark:text-white/70">
+                                Soporte por correo electrónico
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-custom-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-black/70 dark:text-white/70">
+                                Estadísticas básicas
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-custom-green flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-black/70 dark:text-white/70">
+                                Actualizaciones mensuales
+                            </flux:text>
+                        </li>
+                    </ul>
+
+                    <flux:button variant="primary" class="w-full bg-custom-blue hover:bg-custom-blue/90 text-white">
+                        Comenzar ahora
+                    </flux:button>
+                </div>
+
+                {{-- Plan Premium --}}
+                <div class="bg-gradient-to-br from-custom-orange to-custom-orange/80 dark:from-custom-orange dark:to-custom-orange/90 rounded-2xl shadow-xl p-8 border-2 border-custom-orange hover:shadow-2xl transition-all hover:-translate-y-1 relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-custom-green text-white px-4 py-1 rounded-full text-xs font-bold uppercase shadow-lg">
+                            Recomendado
+                        </span>
+                    </div>
+
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                        </div>
+                        <flux:heading level="4" class="text-2xl font-bold mb-2 text-white">
+                            Plan Premium
+                        </flux:heading>
+                        <flux:text class="text-sm text-white/80">
+                            Funcionalidades completas
+                        </flux:text>
+                    </div>
+
+                    <div class="mb-6 text-center">
+                        <span class="text-4xl font-extrabold text-white">$599</span>
+                        <span class="text-white/80 text-sm">/mes</span>
+                    </div>
+
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-white flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-white">
+                                Establecimientos ilimitados
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-white flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-white">
+                                Promociones ilimitadas
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-white flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-white">
+                                Soporte prioritario 24/7
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-white flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-white">
+                                Análisis avanzado y reportes
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-white flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-white">
+                                Personalización completa
+                            </flux:text>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-white flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <flux:text class="text-sm text-white">
+                                API de integración
+                            </flux:text>
+                        </li>
+                    </ul>
+
+                    <flux:button variant="primary" class="w-full bg-white text-custom-orange hover:bg-white/90 font-bold">
+                        Elegir Premium
+                    </flux:button>
                 </div>
             </div>
         </div>
