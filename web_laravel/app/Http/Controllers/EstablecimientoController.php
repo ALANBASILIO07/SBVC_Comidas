@@ -6,6 +6,7 @@ use App\Models\Establecimientos;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class EstablecimientoController extends Controller
 {
@@ -18,7 +19,11 @@ class EstablecimientoController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Registro incompleto',
+                    'text' => 'Primero debes completar tu registro de cliente.',
+                ]);
         }
 
         $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
@@ -37,7 +42,11 @@ class EstablecimientoController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Registro incompleto',
+                    'text' => 'Primero debes completar tu registro de cliente.',
+                ]);
         }
 
         // Verificar límite según el plan
@@ -46,14 +55,18 @@ class EstablecimientoController extends Controller
         $limitesPorPlan = [
             'basico' => 1,
             'estandar' => 1,
-            'premium' => 999, // Sin límite
+            'premium' => 999,
         ];
 
         $limite = $limitesPorPlan[$cliente->plan] ?? 1;
 
         if ($establecimientosCount >= $limite) {
             return redirect()->route('establecimientos.index')
-                ->with('warning', "Has alcanzado el límite de establecimientos para tu plan {$cliente->plan}. Actualiza tu plan para agregar más.");
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Limite alcanzado',
+                    'text' => "Has alcanzado el limite de establecimientos para tu plan {$cliente->plan}. Actualiza tu plan para agregar mas.",
+                ]);
         }
 
         $categorias = Categoria::all();
@@ -70,95 +83,135 @@ class EstablecimientoController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Registro incompleto',
+                    'text' => 'Primero debes completar tu registro de cliente.',
+                ]);
         }
 
-        // Validar
-        $validated = $request->validate([
-            'nombre_establecimiento' => [
-                'required',
-                'string',
-                'min:3',
-                'max:255',
-            ],
-            'tipo_establecimiento' => 'required|in:Restaurante,Cafetería,Food Truck,Panadería,Bar,Otro',
-            'direccion_completa_establecimiento' => 'required|string|max:500',
-            'colonia' => 'required|string|max:100',
-            'municipio' => 'required|string|max:100',
-            'estado' => 'required|string|max:100',
-            'codigo_postal' => [
-                'required',
-                'string',
-                'size:5',
-                'regex:/^[0-9]{5}$/'
-            ],
-            'telefono_establecimiento' => [
-                'required',
-                'string',
-                'min:10',
-                'max:20',
-                'regex:/^[0-9]+$/'
-            ],
-            'correo_establecimiento' => 'required|email|max:255',
-            'rfc_establecimiento' => [
-                'nullable',
-                'string',
-                'size:13',
-                'regex:/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/'
-            ],
-            'razon_social_establecimiento' => 'nullable|string|max:255',
-            'direccion_fiscal_establecimiento' => 'nullable|string|max:500',
-            'facturacion_establecimiento' => 'boolean',
-            'tipos_pago_establecimiento' => 'array',
-            'categoria_id' => 'nullable|exists:categorias,id',
-        ], [
-            'nombre_establecimiento.required' => 'El nombre del establecimiento es obligatorio',
-            'nombre_establecimiento.min' => 'El nombre debe tener al menos 3 caracteres',
-            'tipo_establecimiento.required' => 'Debes seleccionar un tipo de establecimiento',
-            'direccion_completa_establecimiento.required' => 'La dirección es obligatoria',
-            'telefono_establecimiento.required' => 'El teléfono es obligatorio',
-            'telefono_establecimiento.regex' => 'El teléfono solo puede contener números',
-            'correo_establecimiento.required' => 'El correo es obligatorio',
-            'correo_establecimiento.email' => 'Debes ingresar un correo válido',
-            'codigo_postal.size' => 'El código postal debe tener 5 dígitos',
-            'codigo_postal.regex' => 'El código postal solo puede contener números',
-            'rfc_establecimiento.size' => 'El RFC debe tener exactamente 13 caracteres',
-            'rfc_establecimiento.regex' => 'El formato del RFC no es válido',
+        Log::info('INTENTO DE CREAR ESTABLECIMIENTO', [
+            'cliente_id' => $cliente->id,
+            'datos_recibidos' => $request->except(['_token'])
         ]);
 
         try {
-            $establecimiento = Establecimientos::create([
-                'cliente_id' => $cliente->id,
-                'nombre_establecimiento' => $validated['nombre_establecimiento'],
-                'tipo_establecimiento' => $validated['tipo_establecimiento'],
-                'direccion_completa_establecimiento' => $validated['direccion_completa_establecimiento'],
-                'colonia' => $validated['colonia'],
-                'municipio' => $validated['municipio'],
-                'estado' => $validated['estado'],
-                'codigo_postal' => $validated['codigo_postal'],
-                'telefono_establecimiento' => $validated['telefono_establecimiento'],
-                'correo_establecimiento' => $validated['correo_establecimiento'],
-                'rfc_establecimiento' => $validated['rfc_establecimiento'] ?? null,
-                'razon_social_establecimiento' => $validated['razon_social_establecimiento'] ?? null,
-                'direccion_fiscal_establecimiento' => $validated['direccion_fiscal_establecimiento'] ?? null,
-                'verificacion_establecimiento' => false,
-                'facturacion_establecimiento' => $request->has('facturacion_establecimiento'),
-                'tipos_pago_establecimiento' => $validated['tipos_pago_establecimiento'] ?? [],
-                'categoria_id' => $validated['categoria_id'] ?? null,
-                'activo' => true,
-                'grado_confianza' => 50,
-                'cantidad_reportes' => 0,
+            $validated = $request->validate([
+                'nombre_establecimiento' => 'required|string|min:3|max:255',
+                'tipo_establecimiento' => 'required|in:Restaurante,Cafeteria,Food Truck,Panaderia,Bar,Otro',
+                'tipo_establecimiento_otro' => 'nullable|string|max:100',
+                'lat' => 'required|numeric|between:-90,90',
+                'lng' => 'required|numeric|between:-180,180',
+                'direccion_completa_establecimiento' => 'required|string|max:500',
+                'colonia' => 'required|string|max:100',
+                'municipio' => 'required|string|max:100',
+                'estado' => 'required|string|max:100',
+                'codigo_postal' => 'required|string|size:5|regex:/^[0-9]{5}$/',
+                'telefono_establecimiento' => 'required|string|min:10|max:20|regex:/^[0-9]+$/',
+                'correo_establecimiento' => 'required|email|max:255',
+                'rfc_establecimiento' => 'nullable|string|size:13|regex:/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/',
+                'razon_social_establecimiento' => 'nullable|string|max:255',
+                'direccion_fiscal_establecimiento' => 'nullable|string|max:500',
+                'facturacion_establecimiento' => 'nullable|boolean',
+                'tipos_pago_establecimiento' => 'nullable|array',
+                'categoria_id' => 'nullable|exists:categorias,id',
+                'horarios' => 'nullable|array',
+            ], [
+                'nombre_establecimiento.required' => 'El nombre del establecimiento es obligatorio',
+                'nombre_establecimiento.min' => 'El nombre debe tener al menos 3 caracteres',
+                'tipo_establecimiento.required' => 'Debes seleccionar un tipo de establecimiento',
+                'lat.required' => 'Debes seleccionar la ubicacion en el mapa',
+                'lng.required' => 'Debes seleccionar la ubicacion en el mapa',
+                'direccion_completa_establecimiento.required' => 'La direccion es obligatoria',
+                'telefono_establecimiento.required' => 'El telefono es obligatorio',
+                'telefono_establecimiento.regex' => 'El telefono solo puede contener numeros',
+                'correo_establecimiento.required' => 'El correo es obligatorio',
+                'correo_establecimiento.email' => 'Debes ingresar un correo valido',
+                'codigo_postal.size' => 'El codigo postal debe tener 5 digitos',
+                'codigo_postal.regex' => 'El codigo postal solo puede contener numeros',
+                'rfc_establecimiento.size' => 'El RFC debe tener exactamente 13 caracteres',
+                'rfc_establecimiento.regex' => 'El formato del RFC no es valido',
             ]);
 
-            return redirect()->route('establecimientos.index')
-                ->with('success', '¡Establecimiento creado exitosamente! Ahora puedes comenzar a agregar tu menú y promociones.');
+            Log::info('Validacion exitosa', ['validated' => $validated]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Error de validacion', [
+                'errores' => $e->errors()
+            ]);
+            throw $e;
+        }
+
+        $tipoFinal = $validated['tipo_establecimiento'];
+        if ($tipoFinal === 'Otro' && !empty($validated['tipo_establecimiento_otro'])) {
+            $tipoFinal = $validated['tipo_establecimiento_otro'];
+        }
+
+        $datosEstablecimiento = [
+            'cliente_id' => $cliente->id,
+            'nombre_establecimiento' => $validated['nombre_establecimiento'],
+            'tipo_establecimiento' => $tipoFinal,
+            'lat' => $validated['lat'],
+            'lng' => $validated['lng'],
+            'direccion_completa_establecimiento' => $validated['direccion_completa_establecimiento'],
+            'colonia' => $validated['colonia'],
+            'municipio' => $validated['municipio'],
+            'estado' => $validated['estado'],
+            'codigo_postal' => $validated['codigo_postal'],
+            'telefono_establecimiento' => $validated['telefono_establecimiento'],
+            'correo_establecimiento' => $validated['correo_establecimiento'],
+            'rfc_establecimiento' => $validated['rfc_establecimiento'] ?? null,
+            'razon_social_establecimiento' => $validated['razon_social_establecimiento'] ?? null,
+            'direccion_fiscal_establecimiento' => $validated['direccion_fiscal_establecimiento'] ?? null,
+            'facturacion_establecimiento' => $request->has('facturacion_establecimiento'),
+            'tipos_pago_establecimiento' => $validated['tipos_pago_establecimiento'] ?? [],
+            'horarios_establecimiento' => $validated['horarios'] ?? [],
+            'categoria_id' => $validated['categoria_id'] ?? null,
+            'verificacion_establecimiento' => false,
+            'activo' => true,
+            'grado_confianza' => 50,
+            'cantidad_reportes' => 0,
+            'valoracion_promedio' => 0,
+            'total_resenas' => 0,
+        ];
+
+        Log::info('Datos preparados para insercion', $datosEstablecimiento);
+
+        try {
+            $establecimiento = Establecimientos::create($datosEstablecimiento);
+            
+            Log::info('ESTABLECIMIENTO CREADO EXITOSAMENTE', [
+                'id' => $establecimiento->id,
+                'nombre' => $establecimiento->nombre_establecimiento
+            ]);
+
+            return redirect()
+                ->route('establecimientos.index')
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => 'Establecimiento creado',
+                    'text' => "'{$establecimiento->nombre_establecimiento}' ha sido registrado exitosamente.",
+                    'showConfirmButton' => true,
+                    'timer' => 3000
+                ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error al crear establecimiento: ' . $e->getMessage());
+            Log::error('ERROR AL CREAR ESTABLECIMIENTO', [
+                'mensaje' => $e->getMessage(),
+                'archivo' => $e->getFile(),
+                'linea' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->withInput()
-                ->with('error', 'Hubo un error al guardar el establecimiento. Por favor intenta de nuevo.');
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Error al guardar',
+                    'text' => 'Detalles: ' . $e->getMessage(),
+                    'showConfirmButton' => true
+                ]);
         }
     }
 
@@ -171,7 +224,11 @@ class EstablecimientoController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Registro incompleto',
+                    'text' => 'Primero debes completar tu registro de cliente.',
+                ]);
         }
 
         $establecimiento = Establecimientos::where('cliente_id', $cliente->id)
@@ -182,7 +239,7 @@ class EstablecimientoController extends Controller
     }
 
     /**
-     * Muestra el formulario de edición
+     * Muestra el formulario de edicion
      */
     public function edit($id)
     {
@@ -190,7 +247,11 @@ class EstablecimientoController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Registro incompleto',
+                    'text' => 'Primero debes completar tu registro de cliente.',
+                ]);
         }
 
         $establecimiento = Establecimientos::where('cliente_id', $cliente->id)
@@ -211,57 +272,55 @@ class EstablecimientoController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Registro incompleto',
+                    'text' => 'Primero debes completar tu registro de cliente.',
+                ]);
         }
 
         $establecimiento = Establecimientos::where('cliente_id', $cliente->id)
             ->where('id', $id)
             ->firstOrFail();
 
-        // Validar
-        $validated = $request->validate([
-            'nombre_establecimiento' => [
-                'required',
-                'string',
-                'min:3',
-                'max:255',
-            ],
-            'tipo_establecimiento' => 'required|in:Restaurante,Cafetería,Food Truck,Panadería,Bar,Otro',
-            'direccion_completa_establecimiento' => 'required|string|max:500',
-            'colonia' => 'required|string|max:100',
-            'municipio' => 'required|string|max:100',
-            'estado' => 'required|string|max:100',
-            'codigo_postal' => [
-                'required',
-                'string',
-                'size:5',
-                'regex:/^[0-9]{5}$/'
-            ],
-            'telefono_establecimiento' => [
-                'required',
-                'string',
-                'min:10',
-                'max:20',
-                'regex:/^[0-9]+$/'
-            ],
-            'correo_establecimiento' => 'required|email|max:255',
-            'rfc_establecimiento' => [
-                'nullable',
-                'string',
-                'size:13',
-                'regex:/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/'
-            ],
-            'razon_social_establecimiento' => 'nullable|string|max:255',
-            'direccion_fiscal_establecimiento' => 'nullable|string|max:500',
-            'facturacion_establecimiento' => 'boolean',
-            'tipos_pago_establecimiento' => 'array',
-            'categoria_id' => 'nullable|exists:categorias,id',
+        Log::info('INTENTO DE ACTUALIZAR ESTABLECIMIENTO', [
+            'establecimiento_id' => $establecimiento->id,
+            'datos_recibidos' => $request->except(['_token', '_method'])
         ]);
 
         try {
+            $validated = $request->validate([
+                'nombre_establecimiento' => 'required|string|min:3|max:255',
+                'tipo_establecimiento' => 'required|in:Restaurante,Cafeteria,Food Truck,Panaderia,Bar,Otro',
+                'tipo_establecimiento_otro' => 'nullable|string|max:100',
+                'lat' => 'required|numeric|between:-90,90',
+                'lng' => 'required|numeric|between:-180,180',
+                'direccion_completa_establecimiento' => 'required|string|max:500',
+                'colonia' => 'required|string|max:100',
+                'municipio' => 'required|string|max:100',
+                'estado' => 'required|string|max:100',
+                'codigo_postal' => 'required|string|size:5|regex:/^[0-9]{5}$/',
+                'telefono_establecimiento' => 'required|string|min:10|max:20|regex:/^[0-9]+$/',
+                'correo_establecimiento' => 'required|email|max:255',
+                'rfc_establecimiento' => 'nullable|string|size:13|regex:/^[A-ZÑ&]{3,4}[0-9]{6}[A-Z0-9]{3}$/',
+                'razon_social_establecimiento' => 'nullable|string|max:255',
+                'direccion_fiscal_establecimiento' => 'nullable|string|max:500',
+                'facturacion_establecimiento' => 'nullable|boolean',
+                'tipos_pago_establecimiento' => 'nullable|array',
+                'categoria_id' => 'nullable|exists:categorias,id',
+                'horarios' => 'nullable|array',
+            ]);
+
+            $tipoFinal = $validated['tipo_establecimiento'];
+            if ($tipoFinal === 'Otro' && !empty($validated['tipo_establecimiento_otro'])) {
+                $tipoFinal = $validated['tipo_establecimiento_otro'];
+            }
+
             $establecimiento->update([
                 'nombre_establecimiento' => $validated['nombre_establecimiento'],
-                'tipo_establecimiento' => $validated['tipo_establecimiento'],
+                'tipo_establecimiento' => $tipoFinal,
+                'lat' => $validated['lat'],
+                'lng' => $validated['lng'],
                 'direccion_completa_establecimiento' => $validated['direccion_completa_establecimiento'],
                 'colonia' => $validated['colonia'],
                 'municipio' => $validated['municipio'],
@@ -274,18 +333,40 @@ class EstablecimientoController extends Controller
                 'direccion_fiscal_establecimiento' => $validated['direccion_fiscal_establecimiento'] ?? null,
                 'facturacion_establecimiento' => $request->has('facturacion_establecimiento'),
                 'tipos_pago_establecimiento' => $validated['tipos_pago_establecimiento'] ?? [],
+                'horarios_establecimiento' => $validated['horarios'] ?? [],
                 'categoria_id' => $validated['categoria_id'] ?? null,
             ]);
 
-            return redirect()->route('establecimientos.index')
-                ->with('success', '¡Establecimiento actualizado exitosamente!');
+            Log::info('ESTABLECIMIENTO ACTUALIZADO EXITOSAMENTE', [
+                'id' => $establecimiento->id
+            ]);
+
+            return redirect()
+                ->route('establecimientos.index')
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => 'Establecimiento actualizado',
+                    'text' => 'Los cambios se han guardado exitosamente.',
+                    'showConfirmButton' => true,
+                    'timer' => 3000
+                ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error al actualizar establecimiento: ' . $e->getMessage());
+            Log::error('ERROR AL ACTUALIZAR ESTABLECIMIENTO', [
+                'establecimiento_id' => $establecimiento->id,
+                'mensaje' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->withInput()
-                ->with('error', 'Hubo un error al actualizar el establecimiento. Por favor intenta de nuevo.');
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Error al actualizar',
+                    'text' => 'Hubo un error al actualizar el establecimiento. Por favor intenta de nuevo.',
+                    'showConfirmButton' => true
+                ]);
         }
     }
 
@@ -298,7 +379,11 @@ class EstablecimientoController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Registro incompleto',
+                    'text' => 'Primero debes completar tu registro de cliente.',
+                ]);
         }
 
         $establecimiento = Establecimientos::where('cliente_id', $cliente->id)
@@ -306,16 +391,39 @@ class EstablecimientoController extends Controller
             ->firstOrFail();
 
         try {
+            $nombreEstablecimiento = $establecimiento->nombre_establecimiento;
             $establecimiento->delete();
 
-            return redirect()->route('establecimientos.index')
-                ->with('success', 'Establecimiento eliminado exitosamente.');
+            Log::info('ESTABLECIMIENTO ELIMINADO', [
+                'id' => $id,
+                'nombre' => $nombreEstablecimiento
+            ]);
+
+            return redirect()
+                ->route('establecimientos.index')
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => 'Establecimiento eliminado',
+                    'text' => "'{$nombreEstablecimiento}' ha sido eliminado exitosamente.",
+                    'showConfirmButton' => true,
+                    'timer' => 3000
+                ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error al eliminar establecimiento: ' . $e->getMessage());
+            Log::error('ERROR AL ELIMINAR ESTABLECIMIENTO', [
+                'establecimiento_id' => $id,
+                'mensaje' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
-            return redirect()->back()
-                ->with('error', 'Hubo un error al eliminar el establecimiento. Por favor intenta de nuevo.');
+            return redirect()
+                ->back()
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Error al eliminar',
+                    'text' => 'Hubo un error al eliminar el establecimiento. Por favor intenta de nuevo.',
+                    'showConfirmButton' => true
+                ]);
         }
     }
 }

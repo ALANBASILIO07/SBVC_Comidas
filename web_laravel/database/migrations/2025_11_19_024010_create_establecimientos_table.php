@@ -11,87 +11,67 @@ return new class extends Migration
         Schema::create('establecimientos', function (Blueprint $table) {
             $table->id();
 
-            // Quién creó el establecimiento (CLIENTE)
+            // Quien creo el establecimiento (CLIENTE)
             $table->foreignId('cliente_id')
                   ->constrained('clientes')
                   ->onDelete('cascade');
 
-            // =================================================================
-            // Datos básicos
-            // =================================================================
+            // Datos basicos
             $table->string('nombre_establecimiento');
-            $table->enum('tipo_establecimiento', ['formal', 'informal'])->default('informal');
+            $table->string('tipo_establecimiento')->default('Restaurante');
 
-            // =================================================================
-            // Ubicación y geolocalización (imprescindible para búsquedas cercanas)
-            // =================================================================
+            // Ubicacion y geolocalizacion
             $table->text('direccion_completa_establecimiento');
-            $table->decimal('lat', 10, 8)->nullable();   // 19.4326077
-            $table->decimal('lng', 11, 8)->nullable();   // -99.1332080 (cambiado a 11,8 para longitud correcta)
+            $table->decimal('lat', 10, 8)->nullable();
+            $table->decimal('lng', 11, 8)->nullable();
             $table->string('colonia')->nullable();
             $table->string('municipio')->nullable();
             $table->string('estado')->nullable();
             $table->string('codigo_postal', 5)->nullable();
 
-            // =================================================================
             // Contacto
-            // =================================================================
-            $table->string('telefono_establecimiento', 10)->nullable();
+            $table->string('telefono_establecimiento', 20)->nullable();
             $table->string('correo_establecimiento')->nullable();
 
-            // =================================================================
-            // Datos fiscales (solo formales)
-            // =================================================================
+            // Datos fiscales (opcionales)
             $table->string('rfc_establecimiento', 13)->nullable();
             $table->string('razon_social_establecimiento')->nullable();
             $table->text('direccion_fiscal_establecimiento')->nullable();
 
-            // =================================================================
-            // Confianza y verificación comunitaria
-            // =================================================================
+            // Confianza y verificacion comunitaria
             $table->boolean('verificacion_establecimiento')->default(false);
-            $table->unsignedTinyInteger('grado_confianza')->default(0);      // 0-100
-            $table->unsignedInteger('cantidad_reportes')->default(0);       // cuántos usuarios lo confirmaron
+            $table->unsignedTinyInteger('grado_confianza')->default(50);
+            $table->unsignedInteger('cantidad_reportes')->default(0);
 
-            // =================================================================
-            // Servicios y operación
-            // =================================================================
-            $table->json('tipos_pago_establecimiento');     // ["efectivo", "tarjeta_credito", "otro:oxxo"]
+            // Servicios y operacion (JSON nullable)
+            $table->json('tipos_pago_establecimiento')->nullable();
             $table->boolean('facturacion_establecimiento')->default(false);
             $table->json('horarios_establecimiento')->nullable();
             $table->json('menu_establecimiento')->nullable();
 
-            // =================================================================
-            // Categoría y valoraciones
-            // =================================================================
+            // Categoria (nullable)
             $table->foreignId('categoria_id')
+                  ->nullable()
                   ->constrained('categorias')
-                  ->onDelete('restrict');
+                  ->onDelete('set null');
 
-            $table->decimal('valoracion_promedio', 3, 2)->default(0.00);  // 4.82
+            // Valoraciones
+            $table->decimal('valoracion_promedio', 3, 2)->default(0.00);
             $table->unsignedInteger('total_resenas')->default(0);
 
-            // =================================================================
-            // Imágenes
-            // =================================================================
-            $table->string('imagen_portada')->nullable();           // ruta o URL de la foto principal
-            $table->json('galeria_imagenes')->nullable();           // ["img1.jpg", "img2.jpg", ...]
+            // Imagenes
+            $table->string('imagen_portada')->nullable();
+            $table->json('galeria_imagenes')->nullable();
 
-            // =================================================================
             // Estado general
-            // =================================================================
             $table->boolean('activo')->default(true);
             $table->timestamp('fecha_verificacion')->nullable();
 
-            // =================================================================
-            // Auditoría
-            // =================================================================
+            // Auditoria
             $table->timestamps();
             $table->softDeletes();
 
-            // =================================================================
-            // Índices de rendimiento
-            // =================================================================
+            // Indices de rendimiento
             $table->index('cliente_id');
             $table->index('nombre_establecimiento');
             $table->index('tipo_establecimiento');
@@ -99,8 +79,6 @@ return new class extends Migration
             $table->index('activo');
             $table->index('categoria_id');
             $table->index(['lat', 'lng']);
-            // ELIMINADO: $table->spatialIndex(['lat', 'lng']); ← No funciona en SQLite
-            // ELIMINADO: $table->fullText([...]); ← No funciona en SQLite
         });
     }
 

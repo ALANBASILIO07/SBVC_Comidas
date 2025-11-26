@@ -50,30 +50,35 @@
                 viewable
             />
 
+        <div class="space-y-4">
             <!-- Términos y Condiciones -->
-            <div class="space-y-4">
-                <flux:field variant="inline">
-                    <flux:checkbox name="terms" required />
-                    <flux:label>
-                        Acepto los
-                        <a href="{{ route('terminos') }}" wire:navigate class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
-                            Términos y Condiciones
-                        </a>
-                    </flux:label>
-                    <flux:error name="terms" />
-                </flux:field>
-
-                <flux:field variant="inline">
-                    <flux:checkbox name="privacy" required />
-                    <flux:label>
-                        Acepto el
-                        <a href="{{ route('privacidad') }}" wire:navigate class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
-                            Aviso de Privacidad
-                        </a>
-                    </flux:label>
-                    <flux:error name="privacy" />
-                </flux:field>
+            <div class="flex items-start gap-3">
+                <flux:checkbox name="terms" required class="mt-1" />
+                <label class="text-sm text-gray-700 leading-relaxed">
+                    Acepto los 
+                    <a href="{{ route('terminos') }}" 
+                        wire:navigate 
+                        class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
+                        Términos y Condiciones
+                    </a>
+                </label>
+                <flux:error name="terms" />
             </div>
+
+            <!-- Aviso de Privacidad -->
+            <div class="flex items-start gap-3">
+                <flux:checkbox name="privacy" required class="mt-1" />
+                <label class="text-sm text-gray-700 leading-relaxed">
+                    Acepto el 
+                    <a href="{{ route('privacidad') }}" 
+                        wire:navigate                             
+                        class="text-custom-orange hover:underline decoration-custom-orange decoration-2 font-semibold">
+                        Aviso de Privacidad
+                    </a>
+                </label>
+                <flux:error name="privacy" />
+            </div>
+        </div>
 
             <div class="flex items-center justify-end">
                 <flux:button icon="user-plus" icon-variant="outline" type="submit" variant="primary" class="w-full" data-test="register-user-button">

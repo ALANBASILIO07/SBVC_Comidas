@@ -23,14 +23,17 @@ class Categoria extends Model
      * Los atributos que son asignables en masa.
      */
     protected $fillable = [
-        'nombre_categoria',
-        'descripcion_categoria',
+        'nombre',
+        'tipo_establecimiento',
+        'descripcion',
+        'activo',
     ];
 
     /**
      * Los atributos que deben ser casteados a tipos nativos.
      */
     protected $casts = [
+        'activo' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -49,7 +52,7 @@ class Categoria extends Model
      */
     public function scopeBuscar($query, string $termino)
     {
-        return $query->where('nombre_categoria', 'like', "%{$termino}%");
+        return $query->where('nombre', 'like', "%{$termino}%");
     }
 
     /**
@@ -57,7 +60,23 @@ class Categoria extends Model
      */
     public function scopeAlfabetico($query)
     {
-        return $query->orderBy('nombre_categoria');
+        return $query->orderBy('nombre');
+    }
+
+    /**
+     * Scope para filtrar por tipo de establecimiento.
+     */
+    public function scopePorTipo($query, string $tipo)
+    {
+        return $query->where('tipo_establecimiento', $tipo);
+    }
+
+    /**
+     * Scope para categorías activas.
+     */
+    public function scopeActivas($query)
+    {
+        return $query->where('activo', true);
     }
 
     /**
@@ -117,7 +136,7 @@ class Categoria extends Model
      */
     public function slug(): string
     {
-        return Str::slug($this->nombre_categoria);
+        return Str::slug($this->nombre);
     }
 
     /**
@@ -125,7 +144,7 @@ class Categoria extends Model
      */
     public function nombreFormateado(): string
     {
-        return Str::title($this->nombre_categoria);
+        return Str::title($this->nombre);
     }
 
     /**
@@ -179,8 +198,8 @@ class Categoria extends Model
     {
         $total = $this->totalEstablecimientosActivos();
         $nombrePlural = $total === 1 ? 'establecimiento' : 'establecimientos';
-        
-        return "{$this->nombre_categoria} - {$total} {$nombrePlural}";
+
+        return "{$this->nombre} - {$total} {$nombrePlural}";
     }
 
     /**
@@ -188,11 +207,11 @@ class Categoria extends Model
      */
     public function descripcionCorta(int $caracteres = 100): ?string
     {
-        if (empty($this->descripcion_categoria)) {
+        if (empty($this->descripcion)) {
             return null;
         }
 
-        return Str::limit($this->descripcion_categoria, $caracteres);
+        return Str::limit($this->descripcion, $caracteres);
     }
 
     /**

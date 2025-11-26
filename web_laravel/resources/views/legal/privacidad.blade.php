@@ -2,7 +2,7 @@
 * Nombre de la vista           : privacidad.blade.php
 * Descripción de la vista      : Página de Aviso de Privacidad del servicio SBVC Comidas
 * Fecha de creación            : 24/11/2025
-* Elaboró                      : Claude Code
+* Elaboró                      : Alan Osvaldo Basilio Delgado
 * Fecha de liberación          : 24/11/2025
 * Versión                      : 1.0
 * Fecha de mantenimiento       :
@@ -176,8 +176,13 @@
 
         {{-- Footer --}}
         <div class="text-center text-xs text-black/60 dark:text-white/60 pt-6 border-t border-zinc-200 dark:border-zinc-700">
-            <p>&copy; {{ now()->year }} SBVC Comidas. Todos los derechos reservados.</p>
-            <p>Plataforma de gestión de establecimientos de comida y promociones.</p>
+            <flux:text class="text-xs text-black/60 dark:text-white/60">
+                &copy; {{ now()->year }} SBVC Comidas. Todos los derechos reservados.
+            </flux:text>
+
+            <flux:text class="text-xs text-black/60 dark:text-white/60">
+                El logotipo y nombre "SAT" pertenecen a la SHCP; se incluyen con fines ilustrativos.
+            </flux:text>
         </div>
 
     </main>
