@@ -26,8 +26,16 @@ class Promociones extends Model
         'establecimientos_id',
         'titulo',
         'descripcion',
+        'tipo_promocion',
+        'valor_descuento',
+        'precio_promocion',
         'fecha_inicio',
         'fecha_final',
+        'dias_semana',
+        'hora_inicio',
+        'hora_fin',
+        'terminos_condiciones',
+        'imagen',
         'activo',
     ];
 
@@ -37,6 +45,9 @@ class Promociones extends Model
     protected $casts = [
         'fecha_inicio' => 'datetime',
         'fecha_final' => 'datetime',
+        'dias_semana' => 'array',
+        'valor_descuento' => 'decimal:2',
+        'precio_promocion' => 'decimal:2',
         'activo' => 'boolean',
     ];
 

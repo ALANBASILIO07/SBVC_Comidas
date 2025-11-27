@@ -68,24 +68,30 @@ class PromocionController extends Controller
         }
 
         $validated = $request->validate([
-            'establecimiento_id' => 'required|exists:establecimientos,id',
+            'establecimientos_id' => 'required|exists:establecimientos,id',
             'titulo' => 'required|string|min:3|max:255',
             'descripcion' => 'required|string|min:10|max:1000',
-            'tipo_promocion' => 'required|in:descuento,2x1,precio_fijo,envio_gratis,otro',
-            'valor_descuento' => 'nullable|numeric|min:0|max:100',
-            'precio_promocion' => 'nullable|numeric|min:0',
             'fecha_inicio' => 'required|date|after_or_equal:today',
-            'fecha_fin' => 'required|date|after:fecha_inicio',
-            'dias_semana' => 'nullable|array',
-            'hora_inicio' => 'nullable|date_format:H:i',
-            'hora_fin' => 'nullable|date_format:H:i|after:hora_inicio',
-            'terminos_condiciones' => 'nullable|string|max:500',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'fecha_final' => 'required|date|after:fecha_inicio',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'activo' => 'boolean'
+        ], [
+            'establecimientos_id.required' => 'Debes seleccionar un establecimiento',
+            'establecimientos_id.exists' => 'El establecimiento seleccionado no es válido',
+            'titulo.required' => 'El título es obligatorio',
+            'titulo.min' => 'El título debe tener al menos 3 caracteres',
+            'descripcion.required' => 'La descripción es obligatoria',
+            'descripcion.min' => 'La descripción debe tener al menos 10 caracteres',
+            'fecha_inicio.required' => 'La fecha de inicio es obligatoria',
+            'fecha_inicio.after_or_equal' => 'La fecha de inicio no puede ser anterior a hoy',
+            'fecha_final.required' => 'La fecha final es obligatoria',
+            'fecha_final.after' => 'La fecha final debe ser posterior a la fecha de inicio',
+            'imagen.image' => 'El archivo debe ser una imagen',
+            'imagen.max' => 'La imagen no debe pesar más de 2MB',
         ]);
 
         // Verificar que el establecimiento pertenece al cliente
-        $establecimiento = Establecimientos::where('id', $validated['establecimiento_id'])
+        $establecimiento = Establecimientos::where('id', $validated['establecimientos_id'])
             ->where('cliente_id', $cliente->id)
             ->first();
 
@@ -98,7 +104,7 @@ class PromocionController extends Controller
         $promocionesActivas = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->where('activo', true)
-          ->whereDate('fecha_fin', '>=', now())
+          ->whereDate('fecha_final', '>=', now())
           ->count();
 
         $limitesPorPlan = [
@@ -125,23 +131,32 @@ class PromocionController extends Controller
 
             // Asegurar que activo tenga un valor
             $data['activo'] = $request->has('activo');
-            
-            // Convertir días de la semana a JSON
-            if (isset($data['dias_semana'])) {
-                $data['dias_semana'] = json_encode($data['dias_semana']);
-            }
 
             $promocion = Promociones::create($data);
 
             return redirect()->route('promociones.index')
-                ->with('success', '¡Promoción creada exitosamente!');
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => '¡Éxito!',
+                    'text' => '¡Promoción creada exitosamente!',
+                    'confirmButtonText' => 'Aceptar',
+                    'confirmButtonColor' => '#42A958',
+                    'draggable' => true
+                ]);
 
         } catch (\Exception $e) {
             \Log::error('Error al crear promoción: ' . $e->getMessage());
-            
+
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Hubo un error al crear la promoción. Por favor intenta de nuevo.');
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => '¡Error!',
+                    'text' => 'Hubo un error al crear la promoción: ' . $e->getMessage(),
+                    'confirmButtonText' => 'Entendido',
+                    'confirmButtonColor' => '#ef4444',
+                    'draggable' => true
+                ]);
         }
     }
 
@@ -205,19 +220,12 @@ class PromocionController extends Controller
         })->findOrFail($id);
 
         $validated = $request->validate([
-            'establecimiento_id' => 'required|exists:establecimientos,id',
+            'establecimientos_id' => 'required|exists:establecimientos,id',
             'titulo' => 'required|string|min:3|max:255',
             'descripcion' => 'required|string|min:10|max:1000',
-            'tipo_promocion' => 'required|in:descuento,2x1,precio_fijo,envio_gratis,otro',
-            'valor_descuento' => 'nullable|numeric|min:0|max:100',
-            'precio_promocion' => 'nullable|numeric|min:0',
             'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after:fecha_inicio',
-            'dias_semana' => 'nullable|array',
-            'hora_inicio' => 'nullable|date_format:H:i',
-            'hora_fin' => 'nullable|date_format:H:i|after:hora_inicio',
-            'terminos_condiciones' => 'nullable|string|max:500',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'fecha_final' => 'required|date|after:fecha_inicio',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'activo' => 'boolean'
         ]);
 
@@ -237,11 +245,6 @@ class PromocionController extends Controller
 
             // Asegurar que activo tenga un valor
             $data['activo'] = $request->has('activo');
-            
-            // Convertir días de la semana a JSON
-            if (isset($data['dias_semana'])) {
-                $data['dias_semana'] = json_encode($data['dias_semana']);
-            }
 
             $promocion->update($data);
 

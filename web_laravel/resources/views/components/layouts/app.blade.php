@@ -49,10 +49,10 @@
                 <flux:navlist.item icon="building-storefront" :href="route('establecimientos.index')" :current="request()->routeIs('establecimientos.*')" wire:navigate>
                     {{ __('Establecimientos') }}
                 </flux:navlist.item>
-                <flux:navlist.item icon="tag" :href="route('promociones.index')" :current="request()->routeIs('promociones.*')" wire:navigate>
+                <flux:navlist.item icon="gift" :href="route('promociones.index')" :current="request()->routeIs('promociones.*')" wire:navigate>
                     {{ __('Promociones') }}
                 </flux:navlist.item>
-                <flux:navlist.item icon="photo" :href="route('banners.index')" :current="request()->routeIs('banners.*')" wire:navigate>
+                <flux:navlist.item icon="megaphone" :href="route('banners.index')" :current="request()->routeIs('banners.*')" wire:navigate>
                     {{ __('Banners') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="star" :href="route('calificaciones.index')" :current="request()->routeIs('calificaciones.*')" wire:navigate>

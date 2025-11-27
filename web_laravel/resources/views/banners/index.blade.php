@@ -1,18 +1,17 @@
 <x-layouts.app :title="__('Banners')">
     <div class="py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto space-y-6">
-            
+
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <div class="flex items-center gap-3">
-                    <flux:icon.photo class="size-8 text-orange-500" />
-                    <flux:heading size="xl">{{ __('BANNERS') }}</flux:heading>
+                    <flux:icon.megaphone class="size-8 text-orange-500" />
+                    <flux:heading size="xl">{{ __('MIS BANNERS') }}</flux:heading>
                 </div>
 
-                <flux:button 
-                    {{-- Corregí la ruta para que apunte a banners --}}
-                    :href="route('banners.create')" 
+                <flux:button
+                    :href="route('banners.create')"
                     wire:navigate
-                    variant="primary" 
+                    variant="primary"
                     icon="plus"
                     class="bg-orange-500 hover:bg-orange-600 text-white"
                 >
@@ -20,136 +19,178 @@
                 </flux:button>
             </div>
 
-            <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800">
-                
-                <nav class="border-b border-zinc-200 dark:border-zinc-700 px-6">
-                    <div class="flex flex-wrap items-center gap-x-8 gap-y-2">
-                        <a href="#" wire:navigate class="py-4 text-sm font-medium text-orange-600 border-b-2 border-orange-500">
-                            {{ __('Todos') }}
-                        </a>
-                        <a href="#" wire:navigate class="py-4 text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 border-b-2 border-transparent">
-                            {{ __('Activos') }}
-                        </a>
-                        <a href="#" wire:navigate class="py-4 text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 border-b-2 border-transparent">
-                            {{ __('Pausados') }}
-                        </a>
-                        <a href="#" wire:navigate class="py-4 text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 border-b-2 border-transparent">
-                            {{ __('Finalizados') }}
-                        </a>
+            @if(count($banners) === 0)
+                {{-- ESTADO VACÍO --}}
+                <div class="text-center py-12">
+                    <flux:icon.megaphone class="mx-auto size-20 text-gray-300 dark:text-zinc-700" />
+                    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+                        No tienes banners aún
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        Comienza creando tu primer banner publicitario
+                    </p>
+                    <div class="mt-6">
+                        <flux:button
+                            :href="route('banners.create')"
+                            wire:navigate
+                            class="bg-orange-500 hover:bg-orange-600 text-white"
+                        >
+                            <flux:icon.plus class="inline size-5 mr-2" />
+                            Crear mi primer banner
+                        </flux:button>
                     </div>
-                </nav>
+                </div>
+            @else
+                {{-- LISTA DE BANNERS --}}
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-                <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <div class="lg:col-span-4 space-y-4">
+                        @foreach($banners as $banner)
+                            <div class="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl p-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:from-orange-500 hover:to-orange-600">
+                                <div class="flex items-center gap-6">
 
-                    {{-- 
-                      AQUÍ COMIENZA EL BUCLE 
-                      Asumimos que pasas una variable $banners a la vista
-                    --}}
-                    @forelse ($banners as $banner)
-                    <div class="p-6 flex items-center flex-wrap gap-6">
-                        
-                        {{-- 
-                          AQUÍ ESTÁ LA LÓGICA DE IMAGEN (TOMADA DE 'PROMOCIONES')
-                          Usa 'imagen_url' o el nombre del campo en tu modelo Banner
-                        --}}
-                        @if ($banner->imagen_url)
-                            <img 
-                                src="{{ $banner->imagen_url }}" 
-                                alt="{{ $banner->nombre }}" 
-                                class="size-16 rounded-lg object-cover flex-shrink-0"
-                            >
-                        @else
-                            {{-- Este es tu placeholder (estilo de 'promociones' adaptado) --}}
-                            <div class="bg-orange-200/50 rounded-lg size-16 flex-shrink-0 flex items-center justify-center p-2 text-center">
-                                <span class="text-xs font-semibold text-orange-800">Sin Imagen</span>
+                                    {{-- IMAGEN --}}
+                                    <div class="bg-orange-200/50 rounded-xl size-20 flex-shrink-0 flex items-center justify-center p-2 text-center overflow-hidden">
+                                        @if($banner->imagen_banner)
+                                            <img
+                                                src="{{ asset('storage/' . $banner->imagen_banner) }}"
+                                                alt="{{ $banner->titulo_banner }}"
+                                                class="w-full h-full object-cover rounded-lg"
+                                            >
+                                        @else
+                                            <span class="text-xs font-semibold text-orange-800">Sin Imagen</span>
+                                        @endif
+                                    </div>
+
+                                    {{-- CONTENIDO --}}
+                                    <div class="flex-grow">
+                                        <h3 class="text-xl font-bold text-white mb-1">
+                                            {{ $banner->titulo_banner }}
+                                        </h3>
+                                        <p class="text-sm text-orange-100 mb-2">
+                                            {{ Str::limit($banner->descripcion_banner, 100) }}
+                                        </p>
+                                        <div class="flex items-center gap-4 text-xs text-orange-100">
+                                            <span class="flex items-center gap-1">
+                                                <flux:icon.building-storefront class="size-4" />
+                                                {{ $banner->establecimiento->nombre_establecimiento }}
+                                            </span>
+                                            <span class="flex items-center gap-1">
+                                                <flux:icon.calendar class="size-4" />
+                                                {{ $banner->fecha_inicio->format('d/m/Y') }} - {{ $banner->fecha_fin->format('d/m/Y') }}
+                                            </span>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
+                                                {{ $banner->estaDisponible() ? 'bg-green-500 text-white' :
+                                                   ($banner->haExpirado() ? 'bg-red-500 text-white' : 'bg-gray-400 text-white') }}">
+                                                {{ $banner->estadoTexto() }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {{-- ACCIONES --}}
+                                    <div class="flex gap-2 flex-shrink-0">
+                                        <flux:button
+                                            :href="route('banners.edit', $banner->id)"
+                                            wire:navigate
+                                            size="sm"
+                                            variant="ghost"
+                                            icon="pencil"
+                                            class="text-white bg-white/10 hover:bg-white/25"
+                                            title="Editar banner"
+                                        />
+                                        <form action="{{ route('banners.destroy', $banner->id) }}" method="POST" class="inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <flux:button
+                                                type="button"
+                                                size="sm"
+                                                variant="ghost"
+                                                icon="trash"
+                                                class="text-white bg-white/10 hover:bg-white/25 delete-btn"
+                                                title="Eliminar banner"
+                                            />
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
-                        @endif
-                        
-                        <div class="flex-grow min-w-0">
-                            <h3 class="text-lg font-bold text-zinc-900 dark:text-white truncate">
-                                {{ $banner->nombre }}
+                        @endforeach
+                    </div>
+
+                    {{-- SIDEBAR ESTADÍSTICAS --}}
+                    <div class="lg:col-span-1">
+                        <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 border border-zinc-200 dark:border-zinc-800 sticky top-6">
+                            <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-6">
+                                Estadísticas
                             </h3>
-                            <p class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <span class="font-medium">Establecimiento:</span> {{ $banner->establecimiento->nombre ?? 'N/A' }}
-                            </p>
-                            <p class="text-sm text-zinc-600 dark:text-zinc-400">
-                                {{-- Formatea las fechas (requiere que sean objetos Carbon en el modelo) --}}
-                                <span class="font-medium">Vigencia:</span> 
-                                {{ $banner->fecha_inicio->format('d M, Y') }} - {{ $banner->fecha_fin->format('d M, Y') }}
-                            </p>
-                        </div>
-                        
-                        <div class="flex items-center flex-wrap gap-3 ml-auto flex-shrink-0">
-                            
-                            {{-- Lógica de Estado (asumiendo un campo 'estado') --}}
-                            @if ($banner->estado === 'activo')
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                    Activo
-                                </span>
-                            @elseif ($banner->estado === 'pausado')
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-                                    Pausado
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-300">
-                                    Finalizado
-                                </span>
-                            @endif
 
-                            {{-- Botones Dinámicos --}}
-                            <flux:button 
-                                :href="route('banners.edit', $banner)" 
-                                wire:navigate 
-                                size="sm" 
-                                variant="primary" 
-                                class="bg-blue-600 hover:bg-blue-700"
-                            >
-                                Editar
-                            </flux:button>
-                            
-                            @if ($banner->estado === 'activo')
-                                <flux:button 
-                                    wire:click="pausar({{ $banner->id }})"
-                                    size="sm" 
-                                    variant="primary" 
-                                    class="bg-red-600 hover:bg-red-700"
-                                >
-                                    Pausar
-                                </flux:button>
-                            @else
-                                <flux:button 
-                                    wire:click="activar({{ $banner->id }})"
-                                    size="sm" 
-                                    variant="primary" 
-                                    class="bg-green-600 hover:bg-green-700"
-                                >
-                                    Activar
-                                </flux:button>
-                            @endif
-                            
-                            <flux:button 
-                                wire:click="eliminar({{ $banner->id }})"
-                                wire:confirm="¿Estás seguro de eliminar este banner?"
-                                size="sm" 
-                                variant="ghost" 
-                                class="bg-zinc-200 hover:bg-zinc-300 text-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 dark:text-zinc-200" 
-                                icon="trash" 
-                                title="Eliminar" 
-                            />
+                            <div class="space-y-4">
+                                <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                    <p class="text-sm text-green-700 dark:text-green-300 font-medium mb-1">Activos</p>
+                                    <p class="text-3xl font-bold text-green-600">
+                                        {{ collect($banners)->filter(fn($b) => $b->estaDisponible())->count() }}
+                                    </p>
+                                </div>
+
+                                <div class="p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg">
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 font-medium mb-1">Total</p>
+                                    <p class="text-3xl font-bold text-gray-900 dark:text-white">
+                                        {{ count($banners) }}
+                                    </p>
+                                </div>
+
+                                <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                                    <p class="text-sm text-red-700 dark:text-red-300 font-medium mb-1">Expirados</p>
+                                    <p class="text-3xl font-bold text-red-600">
+                                        {{ collect($banners)->filter(fn($b) => $b->haExpirado())->count() }}
+                                    </p>
+                                </div>
+
+                                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                    <p class="text-sm text-blue-700 dark:text-blue-300 font-medium mb-1">Programados</p>
+                                    <p class="text-3xl font-bold text-blue-600">
+                                        {{ collect($banners)->filter(fn($b) => $b->noHaIniciado())->count() }}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    @empty
-                    {{-- Mensaje si no hay banners --}}
-                    <div class="p-6 text-center">
-                        <p class="text-zinc-500 dark:text-zinc-400">No hay banners para mostrar.</p>
-                    </div>
-                    @endforelse
 
                 </div>
-
-            </div>
+            @endif
 
         </div>
     </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Manejar eliminación con SweetAlert2
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('.delete-form');
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¿Estás seguro?',
+                    text: 'Esta acción eliminará el banner permanentemente',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    draggable: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+@endpush
 </x-layouts.app>
