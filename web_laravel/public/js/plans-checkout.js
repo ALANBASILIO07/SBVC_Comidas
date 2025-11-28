@@ -142,21 +142,6 @@ function initPlansCheckout(config)
 
                 selectedPlan = checked.value;
 
-                // No permitir pagar el plan básico (es gratis)
-                if (selectedPlan === 'basico')
-                {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Plan Básico Gratuito',
-                        text: 'El plan básico es gratuito, no requiere pago',
-                        confirmButtonColor: '#F7941D',
-                        confirmButtonText: 'Entendido',
-                        draggable: true
-                    });
-
-                    return actions.reject();
-                }
-
                 return actions.resolve();
             },
 

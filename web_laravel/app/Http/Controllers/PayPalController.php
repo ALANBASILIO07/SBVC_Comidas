@@ -34,7 +34,7 @@ class PayPalController extends Controller
             'plan' => [
                 'required',
                 'string',
-                'in:basico,estandar,premium'
+                'in:basico,premium'
             ],
         ]);
 
@@ -49,20 +49,12 @@ class PayPalController extends Controller
 
         // Precios de los planes
         $prices = [
-            'basico' => 0.00,      // Gratis
-            'estandar' => 299.00,  // $299 MXN
+            'basico' => 299.00,    // $299 MXN
             'premium' => 599.00    // $599 MXN
         ];
 
         $planName = $data['plan'];
         $amount = $prices[$planName];
-
-        // Si es plan básico, no requiere pago
-        if ($amount == 0) {
-            return response()->json([
-                'message' => 'El plan básico es gratuito',
-            ], 422);
-        }
 
         // MODO DEMO: Simular creación de orden
         if (config('paypal.mode') === 'demo') {

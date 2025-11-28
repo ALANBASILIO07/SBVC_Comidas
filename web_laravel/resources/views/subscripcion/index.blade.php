@@ -18,14 +18,12 @@
                 <flux:heading size="xl">{{ __('PLANES Y SUSCRIPCIÓN') }}</flux:heading>
             </div>
 
-            @if($plan_actual !== 'basico')
             <div class="flex items-center gap-2 px-4 py-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
                 <flux:icon.check-circle class="size-6 text-orange-500" />
                 <span class="text-sm font-semibold text-orange-700 dark:text-orange-400">
                     Plan Actual: {{ ucfirst($plan_actual) }}
                 </span>
             </div>
-            @endif
         </div>
 
         {{-- Modo DEMO Alert --}}
@@ -48,12 +46,12 @@
         @endif
 
         {{-- Cards de Planes --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
 
             {{-- PLAN BÁSICO --}}
-            <div class="plan-card rounded-2xl p-8 transition-all duration-300 cursor-pointer
+            <div class="plan-card rounded-2xl p-8 transition-all duration-300 cursor-pointer relative
                         @if($plan_actual === 'basico')
-                            bg-gradient-to-br from-gray-500 to-gray-600 border-4 border-gray-700
+                            bg-gradient-to-br from-blue-500 to-blue-600 border-4 border-blue-700
                         @else
                             bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 hover:border-orange-400 hover:shadow-xl
                         @endif"
@@ -63,9 +61,9 @@
                        @if($plan_actual === 'basico') checked @endif />
 
                 @if($plan_actual === 'basico')
-                <div class="absolute -top-3 -right-3">
-                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                        ✓ ACTUAL
+                <div class="mb-4">
+                    <span class="inline-block bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                        ✓ PLAN ACTUAL
                     </span>
                 </div>
                 @endif
@@ -76,31 +74,40 @@
                     </h3>
                     <div class="flex items-baseline justify-center gap-1 mb-2">
                         <span class="text-4xl font-bold @if($plan_actual === 'basico') text-white @else text-orange-500 @endif">
-                            GRATIS
+                            $299
+                        </span>
+                        <span class="text-lg @if($plan_actual === 'basico') text-blue-100 @else text-zinc-600 dark:text-zinc-400 @endif">
+                            /mes
                         </span>
                     </div>
-                    <p class="text-sm @if($plan_actual === 'basico') text-gray-200 @else text-zinc-600 dark:text-zinc-400 @endif">
-                        Perfecto para comenzar
+                    <p class="text-sm @if($plan_actual === 'basico') text-blue-100 @else text-zinc-600 dark:text-zinc-400 @endif">
+                        Para negocios en crecimiento
                     </p>
                 </div>
 
                 <ul class="space-y-3 mb-6">
                     <li class="flex items-start gap-2">
                         <flux:icon.check class="size-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span class="text-sm @if($plan_actual === 'basico') text-white @else text-zinc-700 dark:text-zinc-300 @endif">
+                        <span class="text-sm @if($plan_actual === 'basico') text-white font-semibold @else text-zinc-700 dark:text-zinc-300 @endif">
                             1 Establecimiento
                         </span>
                     </li>
                     <li class="flex items-start gap-2">
                         <flux:icon.check class="size-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span class="text-sm @if($plan_actual === 'basico') text-white @else text-zinc-700 dark:text-zinc-300 @endif">
-                            5 Promociones al mes
+                        <span class="text-sm @if($plan_actual === 'basico') text-white font-semibold @else text-zinc-700 dark:text-zinc-300 @endif">
+                            Promociones ilimitadas
                         </span>
                     </li>
                     <li class="flex items-start gap-2">
                         <flux:icon.check class="size-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span class="text-sm @if($plan_actual === 'basico') text-white @else text-zinc-700 dark:text-zinc-300 @endif">
-                            Soporte por email
+                        <span class="text-sm @if($plan_actual === 'basico') text-white font-semibold @else text-zinc-700 dark:text-zinc-300 @endif">
+                            Estadísticas básicas
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <flux:icon.check class="size-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span class="text-sm @if($plan_actual === 'basico') text-white font-semibold @else text-zinc-700 dark:text-zinc-300 @endif">
+                            Soporte prioritario
                         </span>
                     </li>
                 </ul>
@@ -109,88 +116,13 @@
                 <flux:button class="w-full bg-white/20 text-white cursor-not-allowed" disabled>
                     Plan Actual
                 </flux:button>
-                @else
-                <flux:button class="w-full bg-gray-300 hover:bg-gray-400 text-gray-700">
-                    Plan Gratuito
-                </flux:button>
-                @endif
-            </div>
-
-            {{-- PLAN ESTÁNDAR --}}
-            <div class="plan-card rounded-2xl p-8 transition-all duration-300 cursor-pointer
-                        @if($plan_actual === 'estandar')
-                            bg-gradient-to-br from-blue-500 to-blue-600 border-4 border-blue-700
-                        @else
-                            bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 hover:border-orange-400 hover:shadow-xl
-                        @endif"
-                 data-plan="estandar">
-
-                <input type="radio" name="plan" value="estandar" class="hidden"
-                       @if($plan_actual === 'estandar') checked @endif />
-
-                @if($plan_actual === 'estandar')
-                <div class="absolute -top-3 -right-3">
-                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                        ✓ ACTUAL
-                    </span>
-                </div>
-                @endif
-
-                <div class="text-center mb-6">
-                    <h3 class="text-2xl font-bold @if($plan_actual === 'estandar') text-white @else text-zinc-900 dark:text-white @endif mb-2">
-                        Plan Estándar
-                    </h3>
-                    <div class="flex items-baseline justify-center gap-1 mb-2">
-                        <span class="text-4xl font-bold @if($plan_actual === 'estandar') text-white @else text-orange-500 @endif">
-                            $299
-                        </span>
-                        <span class="text-lg @if($plan_actual === 'estandar') text-blue-100 @else text-zinc-600 dark:text-zinc-400 @endif">
-                            /mes
-                        </span>
-                    </div>
-                    <p class="text-sm @if($plan_actual === 'estandar') text-blue-100 @else text-zinc-600 dark:text-zinc-400 @endif">
-                        Para negocios en crecimiento
-                    </p>
-                </div>
-
-                <ul class="space-y-3 mb-6">
-                    <li class="flex items-start gap-2">
-                        <flux:icon.check class="size-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span class="text-sm @if($plan_actual === 'estandar') text-white font-semibold @else text-zinc-700 dark:text-zinc-300 @endif">
-                            1 Establecimiento
-                        </span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <flux:icon.check class="size-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span class="text-sm @if($plan_actual === 'estandar') text-white font-semibold @else text-zinc-700 dark:text-zinc-300 @endif">
-                            Promociones ilimitadas
-                        </span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <flux:icon.check class="size-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span class="text-sm @if($plan_actual === 'estandar') text-white font-semibold @else text-zinc-700 dark:text-zinc-300 @endif">
-                            Estadísticas básicas
-                        </span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <flux:icon.check class="size-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span class="text-sm @if($plan_actual === 'estandar') text-white font-semibold @else text-zinc-700 dark:text-zinc-300 @endif">
-                            Soporte prioritario
-                        </span>
-                    </li>
-                </ul>
-
-                @if($plan_actual === 'estandar')
-                <flux:button class="w-full bg-white/20 text-white cursor-not-allowed" disabled>
-                    Plan Actual
-                </flux:button>
                 @elseif($plan_actual === 'premium')
                 <flux:button class="w-full bg-gray-300 hover:bg-gray-400 text-gray-700">
-                    Cambiar a Estándar
+                    Cambiar a Básico
                 </flux:button>
                 @else
                 <flux:button class="w-full bg-blue-500 hover:bg-blue-600 text-white">
-                    Actualizar a Estándar
+                    Actualizar a Básico
                 </flux:button>
                 @endif
             </div>
@@ -207,16 +139,16 @@
                 <input type="radio" name="plan" value="premium" class="hidden"
                        @if($plan_actual === 'premium') checked @endif />
 
-                @if($plan_actual !== 'premium')
-                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span class="bg-yellow-400 text-zinc-900 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
-                        ⭐ RECOMENDADO
+                @if($plan_actual === 'premium')
+                <div class="mb-4">
+                    <span class="inline-block bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                        ✓ PLAN ACTUAL
                     </span>
                 </div>
                 @else
-                <div class="absolute -top-3 -right-3">
-                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                        ✓ ACTUAL
+                <div class="mb-4">
+                    <span class="inline-block bg-yellow-400 text-zinc-900 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                        ⭐ RECOMENDADO
                     </span>
                 </div>
                 @endif
@@ -302,41 +234,45 @@
                     <thead>
                         <tr class="border-b-2 border-zinc-200 dark:border-zinc-700">
                             <th class="text-left py-4 px-4 text-zinc-900 dark:text-white font-bold">Característica</th>
-                            <th class="text-center py-4 px-4 text-zinc-900 dark:text-white font-bold">Básico</th>
-                            <th class="text-center py-4 px-4 text-blue-600 dark:text-blue-400 font-bold">Estándar</th>
+                            <th class="text-center py-4 px-4 text-blue-600 dark:text-blue-400 font-bold">Básico</th>
                             <th class="text-center py-4 px-4 text-orange-600 dark:text-orange-400 font-bold">Premium</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
                         <tr>
+                            <td class="py-4 px-4 text-zinc-900 dark:text-white">Precio</td>
+                            <td class="text-center py-4 px-4 text-blue-600 dark:text-blue-400 font-bold">$299/mes</td>
+                            <td class="text-center py-4 px-4 text-orange-600 dark:text-orange-400 font-bold">$599/mes</td>
+                        </tr>
+                        <tr>
                             <td class="py-4 px-4 text-zinc-900 dark:text-white">Establecimientos</td>
-                            <td class="text-center py-4 px-4 text-zinc-600 dark:text-zinc-400">1</td>
                             <td class="text-center py-4 px-4 text-zinc-600 dark:text-zinc-400">1</td>
                             <td class="text-center py-4 px-4 text-orange-600 dark:text-orange-400 font-bold">Ilimitados</td>
                         </tr>
                         <tr>
                             <td class="py-4 px-4 text-zinc-900 dark:text-white">Promociones</td>
-                            <td class="text-center py-4 px-4 text-zinc-600 dark:text-zinc-400">5/mes</td>
                             <td class="text-center py-4 px-4 text-blue-600 dark:text-blue-400 font-bold">Ilimitadas</td>
                             <td class="text-center py-4 px-4 text-orange-600 dark:text-orange-400 font-bold">Ilimitadas</td>
                         </tr>
                         <tr>
                             <td class="py-4 px-4 text-zinc-900 dark:text-white">Banners</td>
-                            <td class="text-center py-4 px-4"><span class="text-red-600 text-xl">✗</span></td>
                             <td class="text-center py-4 px-4"><span class="text-green-600 text-xl">✓</span></td>
                             <td class="text-center py-4 px-4"><span class="text-green-600 text-xl">✓</span></td>
                         </tr>
                         <tr>
                             <td class="py-4 px-4 text-zinc-900 dark:text-white">Estadísticas</td>
                             <td class="text-center py-4 px-4 text-zinc-600 dark:text-zinc-400">Básicas</td>
-                            <td class="text-center py-4 px-4 text-zinc-600 dark:text-zinc-400">Básicas</td>
                             <td class="text-center py-4 px-4 text-orange-600 dark:text-orange-400 font-bold">Avanzadas</td>
                         </tr>
                         <tr>
                             <td class="py-4 px-4 text-zinc-900 dark:text-white">Soporte</td>
-                            <td class="text-center py-4 px-4 text-zinc-600 dark:text-zinc-400">Email</td>
                             <td class="text-center py-4 px-4 text-zinc-600 dark:text-zinc-400">Prioritario</td>
                             <td class="text-center py-4 px-4 text-orange-600 dark:text-orange-400 font-bold">24/7</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-4 text-zinc-900 dark:text-white">API Access</td>
+                            <td class="text-center py-4 px-4"><span class="text-red-600 text-xl">✗</span></td>
+                            <td class="text-center py-4 px-4"><span class="text-green-600 text-xl">✓</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -352,7 +288,7 @@
 // Configuración del checkout
 const checkoutConfig = {
     createOrderUrl: '{{ route('paypal.create') }}',
-    captureOrderUrl: '{{ route('paypal.capture') }}',
+    captureOrderUrl: '{{ url('paypal/orders') }}',
     csrfToken: '{{ csrf_token() }}',
     demoMode: {{ config('paypal.mode') === 'demo' ? 'true' : 'false' }},
     currentPlan: '{{ $plan_actual }}'
@@ -394,11 +330,6 @@ if (checkoutConfig.demoMode) {
 
         function showDemoButton() {
             if (!selectedPlan || selectedPlan === checkoutConfig.currentPlan) {
-                demoButton.innerHTML = '';
-                return;
-            }
-
-            if (selectedPlan === 'basico') {
                 demoButton.innerHTML = '';
                 return;
             }
