@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EstablecimientoController;
+use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\PromocionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,51 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     | Promociones
     |--------------------------------------------------------------------------
     */
-    Route::prefix('promociones')->name('promociones.')->group(function () {
-        Route::get('/', function () {
-            $cliente = auth()->user()->cliente;
-            $promociones = $cliente 
-                ? \App\Models\Promociones::whereHas('establecimiento', function($query) use ($cliente) {
-                    $query->where('cliente_id', $cliente->id);
-                  })->orderByDesc('created_at')->get()
-                : collect();
-            return view('promociones.index', compact('promociones'));
-        })->name('index');
-        
-        Route::get('/create', function () {
-            $cliente = auth()->user()->cliente;
-            $establecimientos = $cliente 
-                ? \App\Models\Establecimientos::where('cliente_id', $cliente->id)->get()
-                : collect();
-            return view('promociones.create', compact('establecimientos'));
-        })->name('create');
-        
-        Route::get('/{id}', function ($id) {
-            $promocion = \App\Models\Promociones::findOrFail($id);
-            return view('promociones.show', compact('promocion'));
-        })->name('show');
-        
-        Route::get('/{id}/edit', function ($id) {
-            $cliente = auth()->user()->cliente;
-            $promocion = \App\Models\Promociones::findOrFail($id);
-            $establecimientos = $cliente 
-                ? \App\Models\Establecimientos::where('cliente_id', $cliente->id)->get()
-                : collect();
-            return view('promociones.edit', compact('promocion', 'establecimientos'));
-        })->name('edit');
-        
-        Route::post('/', function () {
-            return redirect()->route('promociones.index');
-        })->name('store');
-        
-        Route::put('/{id}', function ($id) {
-            return redirect()->route('promociones.index');
-        })->name('update');
-        
-        Route::delete('/{id}', function ($id) {
-            return redirect()->route('promociones.index');
-        })->name('destroy');
-    });
+    Route::resource('promociones', PromocionController::class);
     
     /*
     |--------------------------------------------------------------------------
@@ -242,7 +200,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', function () {
             $cliente = auth()->user()->cliente ?? null;
             $plan_actual = $cliente ? $cliente->plan : 'basico';
-            
+
             $planes = [
                 'basico' => [
                     'nombre' => 'Plan Básico',
@@ -275,9 +233,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ]
                 ]
             ];
-            
+
             return view('subscripcion.index', compact('cliente', 'plan_actual', 'planes'));
         })->name('index');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PayPal - Pagos
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('paypal')->name('paypal.')->group(function () {
+        Route::post('/create-order', [PayPalController::class, 'create'])->name('create');
+        Route::post('/orders/{orderId}/capture', [PayPalController::class, 'capture'])->name('capture');
     });
 
     /*

@@ -25,22 +25,24 @@ class DashboardController extends Controller
         if ($registroCompleto) {
             // Usuario con cliente completo - mostrar estadísticas
             $establecimientosCount = Establecimientos::where('cliente_id', $cliente->id)->count();
-            
+
             $promocionesCount = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
                 $query->where('cliente_id', $cliente->id);
             })->count();
-            
+
             $bannersCount = Banner::whereHas('establecimiento', function($query) use ($cliente) {
                 $query->where('cliente_id', $cliente->id);
             })->count();
 
             $planActual = $this->formatearPlan($cliente->plan ?? 'basico');
+            $planRaw = $cliente->plan ?? 'basico';
         } else {
             // Usuario sin cliente - mostrar ceros y plan por defecto
             $establecimientosCount = 0;
             $promocionesCount = 0;
             $bannersCount = 0;
             $planActual = 'Sin plan';
+            $planRaw = 'basico';
         }
 
         return view('dashboard.index', compact(
@@ -48,6 +50,7 @@ class DashboardController extends Controller
             'promocionesCount',
             'bannersCount',
             'planActual',
+            'planRaw',
             'registroCompleto'
         ));
     }
