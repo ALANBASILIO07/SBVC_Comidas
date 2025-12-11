@@ -87,12 +87,19 @@
                             <select id="categoria_id" name="categoria_id" required
                                 class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
                                 <option value="">Selecciona una categoría...</option>
-                                @foreach($categorias as $cat)
-                                    <option value="{{ $cat->id }}"
-                                        data-tipo="{{ $cat->tipo_establecimiento }}"
-                                        {{ old('categoria_id') == $cat->id ? 'selected' : '' }}>
-                                        {{ $cat->nombre }}
-                                    </option>
+                                @php
+                                    $categoriasAgrupadas = $categorias->groupBy('tipo_establecimiento');
+                                @endphp
+                                @foreach($categoriasAgrupadas as $tipo => $cats)
+                                    <optgroup label="{{ $tipo }}">
+                                        @foreach($cats as $cat)
+                                            <option value="{{ $cat->id }}"
+                                                data-tipo="{{ $cat->tipo_establecimiento }}"
+                                                {{ old('categoria_id') == $cat->id ? 'selected' : '' }}>
+                                                {{ $cat->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
                                 @endforeach
                             </select>
                             @error('categoria_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
