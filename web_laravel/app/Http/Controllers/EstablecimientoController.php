@@ -13,7 +13,7 @@ class EstablecimientoController extends Controller
     /**
      * Muestra la lista de establecimientos
      */
-    public function index()
+    public function index(Request $request)
     {
         $cliente = Auth::user()->cliente;
 
@@ -26,11 +26,32 @@ class EstablecimientoController extends Controller
                 ]);
         }
 
-        $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
-            ->orderByDesc('created_at')
-            ->get();
+        // Query base
+        $query = Establecimientos::where('cliente_id', $cliente->id);
 
-        return view('establecimientos.index', compact('establecimientos'));
+        // Filtro por categoría
+        if ($request->filled('categoria')) {
+            $query->where('categoria_id', $request->categoria);
+        }
+
+        // Filtro por tipo de establecimiento
+        if ($request->filled('tipo')) {
+            $query->where('tipo_establecimiento', $request->tipo);
+        }
+
+        // Ordenamiento
+        $query->orderByDesc('created_at');
+
+        $establecimientos = $query->get();
+
+        // Obtener categorías para el filtro
+        $categorias = Categoria::where('activo', true)
+            ->orderBy('tipo_establecimiento')
+            ->orderBy('nombre')
+            ->get()
+            ->groupBy('tipo_establecimiento');
+
+        return view('establecimientos.index', compact('establecimientos', 'categorias'));
     }
 
     /**
