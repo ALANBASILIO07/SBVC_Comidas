@@ -129,66 +129,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('calificaciones')->name('calificaciones.')->group(function () {
-        Route::get('/', function () {
-            $calificaciones = collect([
-                (object)[
-                    'id' => 1,
-                    'establecimiento' => 'Restaurante La Marquesa',
-                    'cliente_nombre' => 'Juan Pérez',
-                    'puntuacion' => 5,
-                    'comentario' => 'Excelente servicio y comida deliciosa',
-                    'fecha' => now()->subDays(1)
-                ],
-                (object)[
-                    'id' => 2,
-                    'establecimiento' => 'Cafetería Central',
-                    'cliente_nombre' => 'María García',
-                    'puntuacion' => 4,
-                    'comentario' => 'Buen café, ambiente agradable',
-                    'fecha' => now()->subDays(2)
-                ],
-                (object)[
-                    'id' => 3,
-                    'establecimiento' => 'Food Truck Express',
-                    'cliente_nombre' => 'Carlos López',
-                    'puntuacion' => 5,
-                    'comentario' => 'Rápido y sabroso',
-                    'fecha' => now()->subDays(3)
-                ]
-            ]);
-            return view('calificaciones.index', compact('calificaciones'));
-        })->name('index');
-
-        Route::get('/create', function () {
-            $cliente = auth()->user()->cliente;
-            $establecimientos = $cliente 
-                ? \App\Models\Establecimientos::where('cliente_id', $cliente->id)->get()
-                : collect();
-            return view('calificaciones.create', compact('establecimientos'));
-        })->name('create');
-        
-        Route::get('/{id}', function ($id) {
-            $calificacion = (object)[
-                'id' => $id,
-                'establecimiento' => 'Restaurante Demo',
-                'cliente_nombre' => 'Cliente Demo',
-                'puntuacion' => 5,
-                'comentario' => 'Excelente servicio',
-                'fecha' => now(),
-                'respuesta' => null
-            ];
-            return view('calificaciones.show', compact('calificacion'));
-        })->name('show');
-        
-        Route::get('/{id}/edit', function ($id) {
-            $calificacion = (object)[
-                'id' => $id,
-                'puntuacion' => 5,
-                'comentario' => 'Excelente servicio',
-                'respuesta' => 'Gracias por su comentario'
-            ];
-            return view('calificaciones.edit', compact('calificacion'));
-        })->name('edit');
+        Route::get('/', [App\Http\Controllers\CalificacionController::class, 'index'])->name('index');
+        Route::get('/todas', [App\Http\Controllers\CalificacionController::class, 'todas'])->name('todas');
     });
 
     /*

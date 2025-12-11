@@ -94,6 +94,13 @@ class Establecimientos extends Model
         return $this->belongsTo(Categoria::class, 'categoria_id');
     }
 
+    /**
+     * Relación con las reseñas del establecimiento.
+     */
+    public function resenas(): HasMany
+    {
+        return $this->hasMany(Resena::class, 'establecimiento_id');
+    }
 
     /**
      * Scope para filtrar solo establecimientos activos.
