@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : EstablecimientoController.php
+* Descripción de la clase    : Controlador para gestionar el CRUD de establecimientos de comida,
+*                               incluyendo filtros, categorización y validaciones.
+* Fecha de creación          : 23/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 26/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.2
+* Fecha de mantenimiento     : 10/12/2024
+* Folio de mantenimiento     : SBVC-002
+* Tipo de mantenimiento      : Agregar filtros funcionales en vista
+* Descripción del mantenimiento : Se agregaron filtros por categoría y tipo de establecimiento
+* Responsable                : Maileth Patiño Ensastegui
+* Revisor                    : Alan Osvaldo Basilio Delgado
+*/
 
 namespace App\Http\Controllers;
 

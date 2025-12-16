@@ -1,4 +1,22 @@
+/*
+* Nombre de la clase         : plan_management_screen.dart
+* Descripción de la clase    : Pantalla para gestión de planes de suscripción, permite seleccionar
+*                               entre plan básico (gratis) y plan premium (funciones avanzadas).
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
 import 'package:flutter/material.dart';
+import '../../core/constants/app_colors.dart';
 
 class PlanManagementScreen extends StatefulWidget {
   const PlanManagementScreen({super.key});
@@ -15,8 +33,8 @@ class _PlanManagementScreenState extends State<PlanManagementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestión de Plan'),
-        backgroundColor: const Color(0xFF241178),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.secondary,
+        foregroundColor: AppColors.textOnSecondary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -28,7 +46,7 @@ class _PlanManagementScreenState extends State<PlanManagementScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF272800),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 20),
@@ -74,14 +92,16 @@ class _PlanManagementScreenState extends State<PlanManagementScreen> {
                   _showConfirmationDialog(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFDC6601),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textOnPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
-                  _selectedPlan == 'premium' ? 'Suscribirse al Plan Premium' : 'Continuar con Plan Básico',
+                  _selectedPlan == 'premium'
+                      ? 'Suscribirse al Plan Premium'
+                      : 'Continuar con Plan Básico',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -101,11 +121,13 @@ class _PlanManagementScreenState extends State<PlanManagementScreen> {
   }) {
     return Card(
       elevation: 3,
-      color: _selectedPlan == planType ? const Color(0xFF241178).withOpacity(0.1) : Colors.white,
+      color: _selectedPlan == planType
+          ? AppColors.secondary.withOpacity(0.1)
+          : AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: _selectedPlan == planType ? const Color(0xFF241178) : Colors.grey.shade300,
+          color: _selectedPlan == planType ? AppColors.secondary : AppColors.border,
           width: _selectedPlan == planType ? 2 : 1,
         ),
       ),
@@ -122,7 +144,9 @@ class _PlanManagementScreenState extends State<PlanManagementScreen> {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: _selectedPlan == planType ? const Color(0xFF241178) : const Color(0xFF272800),
+                    color: _selectedPlan == planType
+                        ? AppColors.secondary
+                        : AppColors.textPrimary,
                   ),
                 ),
                 Radio(
@@ -133,48 +157,48 @@ class _PlanManagementScreenState extends State<PlanManagementScreen> {
                       _selectedPlan = value.toString();
                     });
                   },
-                  activeColor: const Color(0xFF241178),
+                  activeColor: AppColors.secondary,
                 ),
               ],
             ),
             Text(
               price,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFFDC6601),
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               description,
               style: const TextStyle(
-                color: Color(0xFF272800),
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 12),
             ...features.map((feature) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: const Color(0xFF241178),
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      feature,
-                      style: const TextStyle(
-                        color: Color(0xFF272800),
-                        fontSize: 14,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle,
+                        color: AppColors.success,
+                        size: 16,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          feature,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )),
+                )),
           ],
         ),
       ),
@@ -186,24 +210,25 @@ class _PlanManagementScreenState extends State<PlanManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          _selectedPlan == 'premium' ? 'Confirmar Suscripción Premium' : 'Continuar con Plan Básico',
-          style: const TextStyle(color: Color(0xFF272800)),
+          _selectedPlan == 'premium'
+              ? 'Confirmar Suscripción Premium'
+              : 'Continuar con Plan Básico',
+          style: const TextStyle(color: AppColors.textPrimary),
         ),
         content: Text(
           _selectedPlan == 'premium'
               ? '¿Estás seguro de que deseas suscribirte al Plan Premium por \$9.99 al mes?'
               : 'Continuarás disfrutando de las funciones básicas de forma gratuita.',
-          style: const TextStyle(color: Color(0xFF272800)),
+          style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFEE0000))),
+            child: const Text('Cancelar', style: TextStyle(color: AppColors.error)),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // Aquí iría la lógica de suscripción
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -211,14 +236,17 @@ class _PlanManagementScreenState extends State<PlanManagementScreen> {
                         ? '¡Suscripción Premium activada!'
                         : 'Plan Básico confirmado',
                   ),
-                  backgroundColor: const Color(0xFF241178),
+                  backgroundColor: AppColors.secondary,
                 ),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF241178),
+              backgroundColor: AppColors.secondary,
             ),
-            child: const Text('Confirmar', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Confirmar',
+              style: TextStyle(color: AppColors.textOnSecondary),
+            ),
           ),
         ],
       ),

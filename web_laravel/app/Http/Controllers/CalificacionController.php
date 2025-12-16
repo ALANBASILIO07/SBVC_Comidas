@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : CalificacionController.php
+* Descripción de la clase    : Controlador para gestionar el sistema de calificaciones y reseñas
+*                               de establecimientos con filtros funcionales.
+* Fecha de creación          : 10/12/2024
+* Elaboró                    : Maileth Patiño Ensastegui
+* Fecha de liberación        : 10/12/2024
+* Autorizó                   : Alan Osvaldo Basilio Delgado
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 namespace App\Http\Controllers;
 

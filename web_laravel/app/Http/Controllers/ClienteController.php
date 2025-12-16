@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : ClienteController.php
+* Descripción de la clase    : Controlador para gestionar el perfil de clientes propietarios
+*                               de establecimientos, incluyendo registro y edición.
+* Fecha de creación          : 14/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 24/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 namespace App\Http\Controllers;
 

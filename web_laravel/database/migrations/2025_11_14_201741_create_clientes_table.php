@@ -1,4 +1,19 @@
 <?php
+/*
+* Nombre de la clase         : 2025_11_14_201741_create_clientes_table.php
+* Descripción de la clase    : Migración para crear la tabla de clientes propietarios de establecimientos.
+* Fecha de creación          : 14/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 22/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

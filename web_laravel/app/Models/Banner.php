@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : Banner.php
+* Descripción de la clase    : Modelo Eloquent para gestionar banners publicitarios de establecimientos,
+*                               con validación de vigencia, estado activo y gestión de imágenes.
+* Fecha de creación          : 14/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 23/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 namespace App\Models;
 
@@ -8,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Modelo Banner
- * 
+ *
  * Representa un banner publicitario de un establecimiento.
  * Incluye validación de vigencia, estado activo y gestión de imágenes.
  */

@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : DashboardController.php
+* Descripción de la clase    : Controlador para gestionar el panel de control principal
+*                               del sistema, mostrando estadísticas y resumen de datos.
+* Fecha de creación          : 23/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 27/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 namespace App\Http\Controllers;
 

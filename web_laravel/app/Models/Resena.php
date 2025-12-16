@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : Resena.php
+* Descripción de la clase    : Modelo Eloquent para gestionar reseñas y calificaciones de establecimientos,
+*                               con validación de rangos y filtros funcionales.
+* Fecha de creación          : 10/12/2024
+* Elaboró                    : Maileth Patiño Ensastegui
+* Fecha de liberación        : 10/12/2024
+* Autorizó                   : Alan Osvaldo Basilio Delgado
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 namespace App\Models;
 

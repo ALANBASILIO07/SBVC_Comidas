@@ -1,4 +1,22 @@
+/*
+* Nombre de la clase         : edit_profile_screen.dart
+* Descripción de la clase    : Pantalla para edición de información personal del usuario,
+*                               incluyendo nombre, apellidos, email y foto de perfil.
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
 import 'package:flutter/material.dart';
+import '../../core/constants/app_colors.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -18,14 +36,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar Perfil'),
-        backgroundColor: const Color(0xFF241178),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.secondary,
+        foregroundColor: AppColors.textOnSecondary,
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                // Guardar cambios
                 Navigator.pop(context);
               }
             },
@@ -41,17 +58,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // Avatar
               GestureDetector(
                 onTap: () {
-                  // Cambiar foto de perfil
+                  // TODO: Implementar cambio de foto de perfil
                 },
                 child: Stack(
                   children: [
                     const CircleAvatar(
                       radius: 50,
-                      backgroundColor: Color(0xFF241178),
+                      backgroundColor: AppColors.secondary,
                       child: Icon(
                         Icons.person,
                         size: 50,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                     Positioned(
@@ -60,13 +77,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
-                          color: Color(0xFFDC6601),
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Icons.camera_alt,
                           size: 16,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
@@ -80,15 +97,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'Nombre',
-                  labelStyle: const TextStyle(color: Color(0xFF272800)),
-                  prefixIcon: const Icon(Icons.person, color: Color(0xFFDC6601)),
+                  labelStyle: const TextStyle(color: AppColors.textPrimary),
+                  prefixIcon: const Icon(Icons.person, color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF241178)),
+                    borderSide: const BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFDC6601)),
+                    borderSide: const BorderSide(color: AppColors.primary),
                   ),
                 ),
                 validator: (value) {
@@ -105,15 +122,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _lastNameController,
                 decoration: InputDecoration(
                   labelText: 'Apellidos',
-                  labelStyle: const TextStyle(color: Color(0xFF272800)),
-                  prefixIcon: const Icon(Icons.person_outline, color: Color(0xFFDC6601)),
+                  labelStyle: const TextStyle(color: AppColors.textPrimary),
+                  prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF241178)),
+                    borderSide: const BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFDC6601)),
+                    borderSide: const BorderSide(color: AppColors.primary),
                   ),
                 ),
                 validator: (value) {
@@ -130,15 +147,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Correo electrónico',
-                  labelStyle: const TextStyle(color: Color(0xFF272800)),
-                  prefixIcon: const Icon(Icons.email, color: Color(0xFFDC6601)),
+                  labelStyle: const TextStyle(color: AppColors.textPrimary),
+                  prefixIcon: const Icon(Icons.email, color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF241178)),
+                    borderSide: const BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFDC6601)),
+                    borderSide: const BorderSide(color: AppColors.primary),
                   ),
                 ),
                 validator: (value) {
@@ -160,13 +177,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Guardar cambios
                       Navigator.pop(context);
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF241178),
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.textOnSecondary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

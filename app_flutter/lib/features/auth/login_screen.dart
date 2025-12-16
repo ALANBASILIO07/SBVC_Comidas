@@ -1,5 +1,23 @@
+/*
+* Nombre de la clase         : login_screen.dart
+* Descripción de la clase    : Pantalla de inicio de sesión para usuarios del sistema SBVC_Comidas,
+*                               permite autenticación mediante email y contraseña.
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
 import 'package:flutter/material.dart';
-import 'map_screen.dart';
+import '../../core/constants/app_colors.dart';
+import '../map/map_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -7,19 +25,19 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo - Reemplazar con tu imagen
+              // Logo
               Container(
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF241178), // Azul oscuro del logo
+                  color: AppColors.secondary,
                   borderRadius: BorderRadius.circular(60),
                   image: const DecorationImage(
                     image: AssetImage('web/icons/logo_comidas.jpg'),
@@ -29,8 +47,8 @@ class LoginScreen extends StatelessWidget {
                 child: const Icon(
                   Icons.restaurant,
                   size: 60,
-                  color: Colors.white,
-                ), // Fallback si no hay imagen
+                  color: AppColors.white,
+                ),
               ),
               const SizedBox(height: 40),
 
@@ -40,7 +58,7 @@ class LoginScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF241178), // Azul oscuro
+                  color: AppColors.secondary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -48,7 +66,7 @@ class LoginScreen extends StatelessWidget {
                 'Encuentra los mejores restaurantes',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color(0xFF272800), // Verde oscuro
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 40),
@@ -57,15 +75,15 @@ class LoginScreen extends StatelessWidget {
               TextField(
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  labelStyle: const TextStyle(color: Color(0xFF272800)),
-                  prefixIcon: const Icon(Icons.email, color: Color(0xFFDC6601)),
+                  labelStyle: const TextStyle(color: AppColors.textPrimary),
+                  prefixIcon: const Icon(Icons.email, color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF241178)),
+                    borderSide: const BorderSide(color: AppColors.secondary),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFDC6601)),
+                    borderSide: const BorderSide(color: AppColors.primary),
                   ),
                 ),
               ),
@@ -76,15 +94,15 @@ class LoginScreen extends StatelessWidget {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Contraseña',
-                  labelStyle: const TextStyle(color: Color(0xFF272800)),
-                  prefixIcon: const Icon(Icons.lock, color: Color(0xFFDC6601)),
+                  labelStyle: const TextStyle(color: AppColors.textPrimary),
+                  prefixIcon: const Icon(Icons.lock, color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF241178)),
+                    borderSide: const BorderSide(color: AppColors.secondary),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFDC6601)),
+                    borderSide: const BorderSide(color: AppColors.primary),
                   ),
                 ),
               ),
@@ -102,8 +120,8 @@ class LoginScreen extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF241178), // Azul oscuro
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: AppColors.textOnSecondary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -120,12 +138,12 @@ class LoginScreen extends StatelessWidget {
               // Opción de registro
               TextButton(
                 onPressed: () {
-                  // Mock: ir a registro
+                  // TODO: Implementar navegación a registro
                 },
                 child: const Text(
                   '¿No tienes cuenta? Regístrate',
                   style: TextStyle(
-                    color: Color(0xFFDC6601), // Naranja
+                    color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

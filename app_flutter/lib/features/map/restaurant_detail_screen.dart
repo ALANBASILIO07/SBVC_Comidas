@@ -1,6 +1,23 @@
+/*
+* Nombre de la clase         : restaurant_detail_screen.dart
+* Descripción de la clase    : Pantalla de detalles completos de un restaurante, muestra información
+*                               detallada, horarios, métodos de pago, comidas y sistema de calificación.
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:sistemadecomidas/screens/login_screen.dart';
+import '../../core/constants/app_colors.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   final String restaurantName;
@@ -18,7 +35,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('¡Valoración enviada con éxito!'),
-        backgroundColor: const Color(0xFF241178),
+        backgroundColor: AppColors.secondary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -32,8 +49,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.restaurantName),
-        backgroundColor: const Color(0xFF241178),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.secondary,
+        foregroundColor: AppColors.textOnSecondary,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -65,11 +82,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF241178).withOpacity(0.1),
+                    color: AppColors.secondary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: const Color(0xFF241178)),
+                    border: Border.all(color: AppColors.secondary),
                   ),
-                  child: const Icon(Icons.restaurant, color: Color(0xFF241178), size: 30),
+                  child: const Icon(
+                    Icons.restaurant,
+                    color: AppColors.secondary,
+                    size: 30,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -81,41 +102,53 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF272800),
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF241178),
+                              color: AppColors.secondary,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Text(
                               'Abierto',
-                              style: TextStyle(color: Colors.white, fontSize: 12),
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
                           const Icon(Icons.star, color: Colors.amber, size: 16),
                           const SizedBox(width: 4),
-                          const Text('4.3'),
+                          const Text(
+                            '4.3',
+                            style: TextStyle(color: AppColors.textPrimary),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFDC6601).withOpacity(0.1),
+                          color: AppColors.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFDC6601)),
+                          border: Border.all(color: AppColors.primary),
                         ),
                         child: const Text(
                           'Negocio Formal',
                           style: TextStyle(
-                            color: Color(0xFFDC6601),
+                            color: AppColors.primary,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -129,22 +162,22 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             const SizedBox(height: 16),
             const Row(
               children: [
-                Icon(Icons.location_on, size: 16, color: Color(0xFF241178)),
+                Icon(Icons.location_on, size: 16, color: AppColors.secondary),
                 SizedBox(width: 4),
                 Text(
                   'Av. Principal 123, Lima',
-                  style: TextStyle(color: Color(0xFF272800)),
+                  style: TextStyle(color: AppColors.textPrimary),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             const Row(
               children: [
-                Icon(Icons.phone, size: 16, color: Color(0xFF241178)),
+                Icon(Icons.phone, size: 16, color: AppColors.secondary),
                 SizedBox(width: 4),
                 Text(
                   '+51 987 654 321',
-                  style: TextStyle(color: Color(0xFF272800)),
+                  style: TextStyle(color: AppColors.textPrimary),
                 ),
               ],
             ),
@@ -163,14 +196,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           children: [
             const Row(
               children: [
-                Icon(Icons.schedule, color: Color(0xFF241178)),
+                Icon(Icons.schedule, color: AppColors.secondary),
                 SizedBox(width: 8),
                 Text(
                   'Horarios',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF272800),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -191,12 +224,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(days, style: const TextStyle(color: Color(0xFF272800))),
+          Text(
+            days,
+            style: const TextStyle(color: AppColors.textPrimary),
+          ),
           Text(
             hours,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Color(0xFF241178),
+              color: AppColors.secondary,
             ),
           ),
         ],
@@ -213,14 +249,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           children: [
             const Row(
               children: [
-                Icon(Icons.payment, color: Color(0xFF241178)),
+                Icon(Icons.payment, color: AppColors.secondary),
                 SizedBox(width: 8),
                 Text(
                   'Métodos de Pago',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF272800),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -240,12 +276,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             const SizedBox(height: 8),
             const Row(
               children: [
-                Icon(Icons.receipt, size: 16, color: Color(0xFFDC6601)),
+                Icon(Icons.receipt, size: 16, color: AppColors.primary),
                 SizedBox(width: 4),
                 Text(
                   'Facturación disponible',
                   style: TextStyle(
-                    color: Color(0xFF272800),
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -262,11 +298,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       label: Text(
         method,
         style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.white,
           fontSize: 12,
         ),
       ),
-      backgroundColor: const Color(0xFF241178),
+      backgroundColor: AppColors.secondary,
     );
   }
 
@@ -279,14 +315,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           children: [
             const Row(
               children: [
-                Icon(Icons.restaurant_menu, color: Color(0xFF241178)),
+                Icon(Icons.restaurant_menu, color: AppColors.secondary),
                 SizedBox(width: 8),
                 Text(
                   'Comidas Disponibles',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF272800),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -317,11 +353,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       label: Text(
         food,
         style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.white,
           fontSize: 12,
         ),
       ),
-      backgroundColor: const Color(0xFFDC6601),
+      backgroundColor: AppColors.primary,
     );
   }
 
@@ -334,14 +370,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           children: [
             const Row(
               children: [
-                Icon(Icons.star, color: Color(0xFF241178)),
+                Icon(Icons.star, color: AppColors.secondary),
                 SizedBox(width: 8),
                 Text(
                   'Calificar Restaurante',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF272800),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -363,7 +399,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   setState(() {
                     _currentRating = rating;
                   });
-                  print('Rating: $rating');
                 },
               ),
             ),
@@ -375,8 +410,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   _showRatingSuccess();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF241178),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: AppColors.textOnSecondary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

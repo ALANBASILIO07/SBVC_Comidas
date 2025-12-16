@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : Establecimientos.php
+* Descripción de la clase    : Modelo Eloquent principal para gestionar establecimientos de comida,
+*                               con geolocalización, categorización, valoraciones y scopes avanzados.
+* Fecha de creación          : 22/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 26/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.1
+* Fecha de mantenimiento     : 10/12/2024
+* Folio de mantenimiento     : SBVC-004
+* Tipo de mantenimiento      : Mejoras en sistema de calificaciones
+* Descripción del mantenimiento : Se optimizaron las reseñas y valoraciones
+* Responsable                : Maileth Patiño Ensastegui
+* Revisor                    : Alan Osvaldo Basilio Delgado
+*/
 
 namespace App\Models;
 
@@ -9,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Modelo Establecimiento
- * 
+ *
  * Representa un negocio o lugar de comida registrado en la plataforma.
  * Contiene información comercial, ubicación, servicios y valoraciones.
  */

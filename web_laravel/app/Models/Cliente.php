@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : Cliente.php
+* Descripción de la clase    : Modelo Eloquent para gestionar clientes propietarios de establecimientos,
+*                               incluyendo suscripciones, planes y datos de contacto.
+* Fecha de creación          : 14/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 23/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 namespace App\Models;
 
@@ -8,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Modelo Cliente
- * 
+ *
  * Representa al titular de una cuenta/suscripción en la plataforma.
  * Contiene información del cliente que paga el servicio y datos de su suscripción.
  */

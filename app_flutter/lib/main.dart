@@ -1,5 +1,23 @@
+/*
+* Nombre de la clase         : main.dart
+* Descripción de la clase    : Punto de entrada principal de la aplicación SBVC_Comidas,
+*                               configura el tema Material 3 y define la pantalla inicial.
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
+import 'core/constants/app_colors.dart';
+import 'features/auth/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,29 +29,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Food Finder',
+      title: 'SBVC Comidas',
       theme: ThemeData(
-        primaryColor: const Color(0xFFDC6601),
+        primaryColor: AppColors.primary,
         colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: MaterialColor(0xFFDC6601, {
-            50: Color(0xFFDC6601).withOpacity(0.1),
-            100: Color(0xFFDC6601).withOpacity(0.2),
-            200: Color(0xFFDC6601).withOpacity(0.3),
-            300: Color(0xFFDC6601).withOpacity(0.4),
-            400: Color(0xFFDC6601).withOpacity(0.5),
-            500: Color(0xFFDC6601),
-            600: Color(0xFFC45A01),
-            700: Color(0xFFAC4E01),
-            800: Color(0xFF944201),
-            900: Color(0xFF7C3601),
-          }),
-          accentColor: const Color(0xFF241178),
-          backgroundColor: Colors.white,
+          primarySwatch: AppColors.createMaterialColor(AppColors.primary),
+          accentColor: AppColors.secondary,
+          backgroundColor: AppColors.background,
         ),
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: AppColors.background,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFDC6601),
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.secondary,
+          foregroundColor: AppColors.textOnSecondary,
           elevation: 0,
         ),
         useMaterial3: true,

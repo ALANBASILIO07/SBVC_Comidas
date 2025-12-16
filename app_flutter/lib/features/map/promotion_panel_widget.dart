@@ -1,4 +1,22 @@
+/*
+* Nombre de la clase         : promotion_panel_widget.dart
+* Descripción de la clase    : Panel expansible que muestra promociones activas de restaurantes,
+*                               con información de ofertas y fechas de validez.
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
 import 'package:flutter/material.dart';
+import '../../core/constants/app_colors.dart';
 
 class PromotionPanel extends StatefulWidget {
   const PromotionPanel({super.key});
@@ -15,11 +33,11 @@ class _PromotionPanelState extends State<PromotionPanel> {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
+            color: AppColors.shadow,
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -28,13 +46,13 @@ class _PromotionPanelState extends State<PromotionPanel> {
       child: ExpansionTile(
         title: const Row(
           children: [
-            Icon(Icons.local_offer, color: Colors.orange),
+            Icon(Icons.local_offer, color: AppColors.primary),
             SizedBox(width: 8),
             Text(
               'Promociones Disponibles',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.orange,
+                color: AppColors.primary,
               ),
             ),
           ],
@@ -50,12 +68,21 @@ class _PromotionPanelState extends State<PromotionPanel> {
 
   Widget _buildPromotionItem(String restaurant, String offer, String validUntil) {
     return ListTile(
-      leading: const Icon(Icons.restaurant_menu, color: Colors.green),
-      title: Text(restaurant),
-      subtitle: Text(offer),
+      leading: const Icon(Icons.restaurant_menu, color: AppColors.success),
+      title: Text(
+        restaurant,
+        style: const TextStyle(color: AppColors.textPrimary),
+      ),
+      subtitle: Text(
+        offer,
+        style: const TextStyle(color: AppColors.textSecondary),
+      ),
       trailing: Text(
         validUntil,
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
+        style: const TextStyle(
+          fontSize: 12,
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }

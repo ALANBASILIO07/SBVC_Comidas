@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : web.php
+* Descripción de la clase    : Archivo de rutas web para la aplicación SBVC_Comidas,
+*                               define todas las rutas accesibles desde el navegador web.
+* Fecha de creación          : 12/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 27/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;

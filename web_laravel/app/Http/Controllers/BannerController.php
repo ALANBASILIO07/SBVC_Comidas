@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : BannerController.php
+* Descripción de la clase    : Controlador para gestionar banners publicitarios de establecimientos,
+*                               incluyendo creación, edición y eliminación con imágenes.
+* Fecha de creación          : 14/11/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 27/11/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
 
 namespace App\Http\Controllers;
 

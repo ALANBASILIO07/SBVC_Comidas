@@ -1,12 +1,30 @@
-import 'package:flutter/foundation.dart'; // ← NUEVO: para detectar plataforma
+/*
+* Nombre de la clase         : map_screen.dart
+* Descripción de la clase    : Pantalla principal con mapa interactivo de Google Maps que muestra
+*                               restaurantes cercanos, promociones y filtros de búsqueda avanzados.
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:sistemadecomidas/widgets/promotion_panel.dart';
-import 'package:sistemadecomidas/widgets/restaurant_card.dart';
-import 'package:sistemadecomidas/widgets/filter_panel.dart';
-import 'package:sistemadecomidas/screens/restaurant_detail_screen.dart';
-import 'package:sistemadecomidas/screens/profile_screen.dart';
-import 'package:sistemadecomidas/screens/login_screen.dart';
+import '../../core/constants/app_colors.dart';
+import 'promotion_panel_widget.dart';
+import 'restaurant_card_widget.dart';
+import 'filter_panel_widget.dart';
+import 'restaurant_detail_screen.dart';
+import '../profile/profile_screen.dart';
+import '../auth/login_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -129,8 +147,7 @@ class _MapScreenState extends State<MapScreen> {
           position: r['position'],
           infoWindow: InfoWindow(
             title: r['name'],
-            snippet:
-            '${r['isOpen'] ? 'Abierto' : 'Cerrado'} • ${r['rating']}⭐',
+            snippet: '${r['isOpen'] ? 'Abierto' : 'Cerrado'} • ${r['rating']}⭐',
             onTap: () => _showRestaurantDetails(context, r['name']),
           ),
           icon: BitmapDescriptor.defaultMarkerWithHue(
@@ -170,42 +187,55 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Food Finder'),
-        backgroundColor: const Color(0xFF241178),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.secondary,
+        foregroundColor: AppColors.textOnSecondary,
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen())),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (_) => const LoginScreen())),
+            onPressed: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+            ),
           ),
         ],
       ),
       body: Stack(
         children: [
-          // =================== MAPA (solo móvil) / PLACEHOLDER (web) ===================
+          // Mapa (solo móvil) / Placeholder (web)
           if (kIsWeb)
             Container(
-              color: const Color(0xFF241178),
+              color: AppColors.secondary,
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.map_outlined,
-                        size: 100, color: Colors.white.withOpacity(0.8)),
+                    Icon(
+                      Icons.map_outlined,
+                      size: 100,
+                      color: AppColors.white.withOpacity(0.8),
+                    ),
                     const SizedBox(height: 24),
                     const Text(
                       "Mapa disponible en la versión móvil",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 20,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       "En web usamos lista + filtros",
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      style: TextStyle(
+                        color: AppColors.white.withOpacity(0.7),
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),
@@ -220,7 +250,7 @@ class _MapScreenState extends State<MapScreen> {
               myLocationButtonEnabled: true,
             ),
 
-          // =================== BARRA DE BÚSQUEDA Y FILTROS ===================
+          // Barra de búsqueda y filtros
           Positioned(
             top: 16,
             left: 16,
@@ -230,18 +260,19 @@ class _MapScreenState extends State<MapScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2)),
+                        color: AppColors.shadow,
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
                     ],
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.search, color: Color(0xFF241178)),
+                      const Icon(Icons.search, color: AppColors.secondary),
                       const SizedBox(width: 8),
                       const Expanded(
                         child: TextField(
@@ -254,9 +285,11 @@ class _MapScreenState extends State<MapScreen> {
                       IconButton(
                         icon: Badge(
                           isLabelVisible: _activeFilters.isNotEmpty,
-                          backgroundColor: const Color(0xFFEE0000),
-                          child: const Icon(Icons.filter_list,
-                              color: Color(0xFF241178)),
+                          backgroundColor: AppColors.error,
+                          child: const Icon(
+                            Icons.filter_list,
+                            color: AppColors.secondary,
+                          ),
                         ),
                         onPressed: () => _showFilterPanel(context),
                       ),
@@ -268,31 +301,39 @@ class _MapScreenState extends State<MapScreen> {
                 if (_activeFilters.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            blurRadius: 5,
-                            offset: const Offset(0, 1)),
+                          color: AppColors.shadowLight,
+                          blurRadius: 5,
+                          offset: const Offset(0, 1),
+                        ),
                       ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.filter_alt,
-                            size: 14, color: Color(0xFF241178)),
+                        const Icon(
+                          Icons.filter_alt,
+                          size: 14,
+                          color: AppColors.secondary,
+                        ),
                         const SizedBox(width: 4),
-                        Text(_getActiveFiltersText(),
-                            style: const TextStyle(fontSize: 12)),
+                        Text(
+                          _getActiveFiltersText(),
+                          style: const TextStyle(fontSize: 12),
+                        ),
                         const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () => setState(() => _activeFilters = {}),
-                          child: const Icon(Icons.close,
-                              size: 14, color: Color(0xFFEE0000)),
+                          child: const Icon(
+                            Icons.close,
+                            size: 14,
+                            color: AppColors.error,
+                          ),
                         ),
                       ],
                     ),
@@ -302,7 +343,7 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
 
-          // =================== PANEL DE PROMOCIONES ===================
+          // Panel de promociones
           Positioned(
             top: _activeFilters.isNotEmpty ? 120 : 80,
             left: 0,
@@ -310,7 +351,7 @@ class _MapScreenState extends State<MapScreen> {
             child: const PromotionPanel(),
           ),
 
-          // =================== LISTA DE RESTAURANTES ===================
+          // Lista de restaurantes
           Positioned(
             bottom: 0,
             left: 0,
@@ -318,13 +359,17 @@ class _MapScreenState extends State<MapScreen> {
             child: Container(
               height: 200,
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
                 boxShadow: [
-                  BoxShadow(color: Colors.grey, blurRadius: 10, offset: Offset(0, -2)),
+                  BoxShadow(
+                    color: AppColors.shadow,
+                    blurRadius: 10,
+                    offset: Offset(0, -2),
+                  ),
                 ],
               ),
               child: Column(
@@ -337,17 +382,21 @@ class _MapScreenState extends State<MapScreen> {
                         Text(
                           '${_filteredRestaurants.length} Restaurantes ${_activeFilters.isNotEmpty ? 'Filtrados' : 'Cercanos'}',
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Color(0xFF272800)),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         if (_activeFilters.isNotEmpty)
                           TextButton(
                             onPressed: () => setState(() => _activeFilters = {}),
-                            child: const Text('Limpiar',
-                                style: TextStyle(
-                                    color: Color(0xFFEE0000),
-                                    fontWeight: FontWeight.bold)),
+                            child: const Text(
+                              'Limpiar',
+                              style: TextStyle(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -355,32 +404,33 @@ class _MapScreenState extends State<MapScreen> {
                   Expanded(
                     child: _filteredRestaurants.isEmpty
                         ? const Center(
-                      child: Text(
-                        'No se encontraron restaurantes\ncon los filtros aplicados',
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                        : ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _filteredRestaurants.length,
-                      itemBuilder: (context, i) {
-                        final r = _filteredRestaurants[i];
-                        return GestureDetector(
-                          onTap: () => _showRestaurantDetails(context, r['name']),
-                          child: Container(
-                            width: 300,
-                            margin: const EdgeInsets.only(left: 16, right: 8),
-                            child: RestaurantCard(
-                              name: r['name'],
-                              status: r['isOpen'] ? 'Abierto' : 'Cerrado',
-                              distance: r['distance'],
-                              rating: r['rating'],
-                              isOpen: r['isOpen'],
+                            child: Text(
+                              'No se encontraron restaurantes\ncon los filtros aplicados',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: AppColors.textSecondary),
                             ),
+                          )
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _filteredRestaurants.length,
+                            itemBuilder: (context, i) {
+                              final r = _filteredRestaurants[i];
+                              return GestureDetector(
+                                onTap: () => _showRestaurantDetails(context, r['name']),
+                                child: Container(
+                                  width: 300,
+                                  margin: const EdgeInsets.only(left: 16, right: 8),
+                                  child: RestaurantCard(
+                                    name: r['name'],
+                                    status: r['isOpen'] ? 'Abierto' : 'Cerrado',
+                                    distance: r['distance'],
+                                    rating: r['rating'],
+                                    isOpen: r['isOpen'],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ],
               ),

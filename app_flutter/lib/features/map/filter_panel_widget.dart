@@ -1,4 +1,22 @@
+/*
+* Nombre de la clase         : filter_panel_widget.dart
+* Descripción de la clase    : Panel de filtros avanzados para búsqueda de restaurantes,
+*                               permite filtrar por calificación, tipo de negocio, rango de precios y estado.
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
 import 'package:flutter/material.dart';
+import '../../core/constants/app_colors.dart';
 
 class FilterPanel extends StatefulWidget {
   final Function(Map<String, dynamic>) onFiltersChanged;
@@ -54,11 +72,11 @@ class _FilterPanelState extends State<FilterPanel> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
+            color: AppColors.shadow,
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -76,11 +94,11 @@ class _FilterPanelState extends State<FilterPanel> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF272800),
+                  color: AppColors.textPrimary,
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: Color(0xFFEE0000)),
+                icon: const Icon(Icons.close, color: AppColors.error),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -118,18 +136,18 @@ class _FilterPanelState extends State<FilterPanel> {
           'Calificación Mínima',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF272800),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            Icon(Icons.star, color: Colors.amber, size: 20),
+            const Icon(Icons.star, color: Colors.amber, size: 20),
             const SizedBox(width: 8),
             Text(
               '${_minRating.toInt()}+ estrellas',
               style: const TextStyle(
-                color: Color(0xFF241178),
+                color: AppColors.secondary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -147,8 +165,8 @@ class _FilterPanelState extends State<FilterPanel> {
               _minRating = value;
             });
           },
-          activeColor: const Color(0xFF241178),
-          inactiveColor: const Color(0xFF241178).withOpacity(0.3),
+          activeColor: AppColors.secondary,
+          inactiveColor: AppColors.inactive,
         ),
       ],
     );
@@ -162,7 +180,7 @@ class _FilterPanelState extends State<FilterPanel> {
           'Tipo de Negocio',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF272800),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -179,10 +197,10 @@ class _FilterPanelState extends State<FilterPanel> {
                   _businessType = selected ? entry.key : 'todos';
                 });
               },
-              selectedColor: const Color(0xFF241178),
-              checkmarkColor: Colors.white,
+              selectedColor: AppColors.secondary,
+              checkmarkColor: AppColors.white,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : const Color(0xFF272800),
+                color: isSelected ? AppColors.white : AppColors.textPrimary,
               ),
             );
           }).toList(),
@@ -199,7 +217,7 @@ class _FilterPanelState extends State<FilterPanel> {
           'Rango de Precios',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF272800),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -216,10 +234,10 @@ class _FilterPanelState extends State<FilterPanel> {
                   _priceRange = selected ? entry.key : 'todos';
                 });
               },
-              selectedColor: const Color(0xFFDC6601),
-              checkmarkColor: Colors.white,
+              selectedColor: AppColors.primary,
+              checkmarkColor: AppColors.white,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : const Color(0xFF272800),
+                color: isSelected ? AppColors.white : AppColors.textPrimary,
               ),
             );
           }).toList(),
@@ -238,13 +256,13 @@ class _FilterPanelState extends State<FilterPanel> {
               _isOpenNow = value;
             });
           },
-          activeColor: const Color(0xFF241178),
+          activeColor: AppColors.secondary,
         ),
         const SizedBox(width: 8),
         const Text(
           'Solo abiertos ahora',
           style: TextStyle(
-            color: Color(0xFF272800),
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -259,8 +277,8 @@ class _FilterPanelState extends State<FilterPanel> {
           child: OutlinedButton(
             onPressed: _resetFilters,
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFEE0000),
-              side: const BorderSide(color: Color(0xFFEE0000)),
+              foregroundColor: AppColors.error,
+              side: const BorderSide(color: AppColors.error),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -276,8 +294,8 @@ class _FilterPanelState extends State<FilterPanel> {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF241178),
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.textOnSecondary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

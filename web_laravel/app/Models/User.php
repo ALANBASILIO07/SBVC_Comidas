@@ -1,4 +1,20 @@
 <?php
+/*
+* Nombre de la clase         : User.php
+* Descripción de la clase    : Modelo principal para la gestión de usuarios del sistema SBVC_Comidas,
+*                               incluyendo autenticación, autorización, relación con clientes y API tokens.
+* Fecha de creación          : 12/11/2024
+* Elaboró                    : Alan Basilio
+* Fecha de liberación        : 27/11/2024
+* Autorizó                   : Maileth Patiño
+* Versión                    : 2.0
+* Fecha de mantenimiento     : 16/12/2024
+* Folio de mantenimiento     : SBVC-001
+* Tipo de mantenimiento      : Agregar soporte para API Sanctum
+* Descripción del mantenimiento : Se agregó el trait HasApiTokens para soportar autenticación API
+* Responsable                : Alan Basilio
+* Revisor                    : Claude Code Assistant
+*/
 
 namespace App\Models;
 
@@ -9,11 +25,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasApiTokens;
 
     /**
      * La tabla asociada al modelo.

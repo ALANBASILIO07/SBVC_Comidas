@@ -1,5 +1,23 @@
+/*
+* Nombre de la clase         : profile_screen.dart
+* Descripción de la clase    : Pantalla de perfil de usuario que muestra información personal,
+*                               plan activo y opciones de configuración del sistema.
+* Fecha de creación          : 16/12/2024
+* Elaboró                    : Alan Osvaldo Basilio Delgado
+* Fecha de liberación        : 16/12/2024
+* Autorizó                   : Maileth Patiño Ensastegui
+* Versión                    : 1.0
+* Fecha de mantenimiento     :
+* Folio de mantenimiento     :
+* Tipo de mantenimiento      :
+* Descripción del mantenimiento :
+* Responsable                :
+* Revisor                    :
+*/
+
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
+import '../../core/constants/app_colors.dart';
+import '../auth/login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'plan_management_screen.dart';
 
@@ -18,8 +36,8 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi Perfil'),
-        backgroundColor: const Color(0xFF241178),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.secondary,
+        foregroundColor: AppColors.textOnSecondary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -29,11 +47,11 @@ class ProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
+                    color: AppColors.shadow,
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -43,11 +61,11 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   const CircleAvatar(
                     radius: 50,
-                    backgroundColor: Color(0xFF241178),
+                    backgroundColor: AppColors.secondary,
                     child: Icon(
                       Icons.person,
                       size: 50,
-                      color: Colors.white,
+                      color: AppColors.white,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -56,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF272800),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -64,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
                     user['email']!,
                     style: const TextStyle(
                       fontSize: 16,
-                      color: Color(0xFF272800),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -72,14 +90,14 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: user['plan'] == 'premium'
-                          ? const Color(0xFFDC6601)  // Naranja para premium
-                          : const Color(0xFF241178), // Azul para básico
+                          ? AppColors.primary
+                          : AppColors.secondary,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       user['plan'] == 'premium' ? 'Plan Premium' : 'Plan Básico',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -97,7 +115,7 @@ class ProfileScreen extends StatelessWidget {
                   _buildProfileOption(
                     Icons.edit,
                     'Editar Perfil',
-                        () {
+                    () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const EditProfileScreen()),
@@ -107,7 +125,7 @@ class ProfileScreen extends StatelessWidget {
                   _buildProfileOption(
                     Icons.credit_card,
                     'Gestión de Plan',
-                        () {
+                    () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const PlanManagementScreen()),
@@ -117,28 +135,28 @@ class ProfileScreen extends StatelessWidget {
                   _buildProfileOption(
                     Icons.settings,
                     'Configuración',
-                        () {
-                      // Mock: configuración
+                    () {
+                      // TODO: Implementar configuración
                     },
                   ),
                   _buildProfileOption(
                     Icons.help,
                     'Ayuda y Soporte',
-                        () {
-                      // Mock: ayuda
+                    () {
+                      // TODO: Implementar ayuda
                     },
                   ),
                   _buildProfileOption(
                     Icons.privacy_tip,
                     'Política de Privacidad',
-                        () {
-                      // Mock: política
+                    () {
+                      // TODO: Implementar política
                     },
                   ),
                   _buildProfileOption(
                     Icons.logout,
                     'Cerrar Sesión',
-                        () {
+                    () {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -155,7 +173,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileOption(IconData icon, String text, VoidCallback onTap, {bool isLogout = false}) {
+  Widget _buildProfileOption(
+    IconData icon,
+    String text,
+    VoidCallback onTap, {
+    bool isLogout = false,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
@@ -164,16 +187,20 @@ class ProfileScreen extends StatelessWidget {
       child: ListTile(
         leading: Icon(
           icon,
-          color: isLogout ? const Color(0xFFEE0000) : const Color(0xFF241178),
+          color: isLogout ? AppColors.error : AppColors.secondary,
         ),
         title: Text(
           text,
           style: TextStyle(
-            color: isLogout ? const Color(0xFFEE0000) : const Color(0xFF272800),
+            color: isLogout ? AppColors.error : AppColors.textPrimary,
             fontWeight: isLogout ? FontWeight.bold : FontWeight.normal,
           ),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFFDC6601)),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: AppColors.primary,
+        ),
         onTap: onTap,
       ),
     );
