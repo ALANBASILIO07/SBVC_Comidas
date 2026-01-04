@@ -126,30 +126,54 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: UBICACIÓN CON MAPA -->
+                <!-- CARD 2: UBICACIÓN CON MAPA LEAFLET (GRATIS) -->
                 <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-orange-500 overflow-hidden mb-6">
-                    <div class="bg-gradient-to-r from-orange-500 fields to-orange-600 px-6 py-4">
+                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
                         <div class="flex items-center gap-3">
                             <flux:icon.map-pin class="size-6 text-white" />
                             <h3 class="text-lg font-bold text-white">Ubicación</h3>
                         </div>
                     </div>
                     <div class="p-6 space-y-6">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded">
+                            <p class="text-sm text-blue-800 dark:text-blue-300">
+                                <strong>Instrucciones:</strong> Haz clic en el mapa para seleccionar la ubicación exacta de tu establecimiento. Puedes mover el marcador arrastrándolo.
+                            </p>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar dirección</label>
                             <div class="flex gap-2">
-                                <input type="text" id="search_address" placeholder="Escribe una dirección en México..."
+                                <input type="text" id="search_address" placeholder="Escribe una dirección o ciudad en México..."
                                     class="flex-1 rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                                <button type="button" id="search_button" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg">
+                                <button type="button" id="search_button" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
                                     <flux:icon.magnifying-glass class="size-5" />
                                 </button>
                             </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Ejemplo: "Chilpancingo, Guerrero" o "Avenida Juárez, CDMX"
+                            </p>
                         </div>
 
-                        <div id="map" class="w-full h-96 rounded-lg border-2 border-gray-300 dark:border-zinc-600"></div>
+                        <div id="map" class="w-full h-96 rounded-lg border-2 border-gray-300 dark:border-zinc-600 z-0"></div>
 
                         <input type="hidden" name="lat" id="lat" value="{{ old('lat') }}" required>
                         <input type="hidden" name="lng" id="lng" value="{{ old('lng') }}" required>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Latitud</label>
+                                <input type="text" id="lat_display" readonly
+                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-900 text-sm"
+                                    placeholder="Selecciona en el mapa">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Longitud</label>
+                                <input type="text" id="lng_display" readonly
+                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-900 text-sm"
+                                    placeholder="Selecciona en el mapa">
+                            </div>
+                        </div>
 
                         <div>
                             <label for="direccion_completa_establecimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -161,10 +185,26 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div><label>Colonia *</label><input type="text" name="colonia" id="colonia" value="{{ old('colonia') }}" required class="w-full rounded-lg"></div>
-                            <div><label>Municipio *</label><input type="text" name="municipio" id="municipio" value="{{ old('municipio') }}" required class="w-full rounded-lg"></div>
-                            <div><label>Estado *</label><input type="text" name="estado" id="estado" value="{{ old('estado') }}" required class="w-full rounded-lg"></div>
-                            <div><label>Código Postal *</label><input type="text" name="codigo_postal" id="codigo_postal" value="{{ old('codigo_postal') }}" pattern="[0-9]{5}" maxlength="5" required class="w-full rounded-lg"></div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Colonia *</label>
+                                <input type="text" name="colonia" id="colonia" value="{{ old('colonia') }}" required
+                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Municipio *</label>
+                                <input type="text" name="municipio" id="municipio" value="{{ old('municipio') }}" required
+                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado *</label>
+                                <input type="text" name="estado" id="estado" value="{{ old('estado') }}" required
+                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Código Postal *</label>
+                                <input type="text" name="codigo_postal" id="codigo_postal" value="{{ old('codigo_postal') }}" pattern="[0-9]{5}" maxlength="5" required
+                                    class="w-full rounded-lg border-gray-300 dark:border-zinc-600 dark:bg-zinc-700 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,37 +221,29 @@
                         <div class="flex flex-col md:flex-row md:items-center justify-between p-3 bg-gray-50 dark:bg-zinc-900 rounded-lg">
                             <span class="text-sm font-medium">Lunes a Viernes *</span>
                             <div class="flex items-center space-x-2">
-                                <input type="time" name="horarios[lunes_viernes][apertura]" required class="w-32 rounded border-gray-300">
+                                <input type="time" name="horarios[lunes_viernes][apertura]" required class="w-32 rounded border-gray-300 dark:border-zinc-600 dark:bg-zinc-700">
                                 <span>a</span>
-                                <input type="time" name="horarios[lunes_viernes][cierre]" required class="w-32 rounded border-gray-300">
+                                <input type="time" name="horarios[lunes_viernes][cierre]" required class="w-32 rounded border-gray-300 dark:border-zinc-600 dark:bg-zinc-700">
                             </div>
                         </div>
                         <div class="flex flex-col md:flex-row md:items-center justify-between p-3 bg-gray-50 dark:bg-zinc-900 rounded-lg">
                             <span class="text-sm font-medium">Sábados</span>
                             <div class="flex items-center space-x-2">
-                                <input type="time" name="horarios[sabados][apertura]" class="w-32 rounded border-gray-300">
+                                <input type="time" name="horarios[sabados][apertura]" class="w-32 rounded border-gray-300 dark:border-zinc-600 dark:bg-zinc-700">
                                 <span>a</span>
-                                <input type="time" name="horarios[sabados][cierre]" class="w-32 rounded border-gray-300">
+                                <input type="time" name="horarios[sabados][cierre]" class="w-32 rounded border-gray-300 dark:border-zinc-600 dark:bg-zinc-700">
                             </div>
                         </div>
                         <div class="flex flex-col md:flex-row md:items-center justify-between p-3 bg-gray-50 dark:bg-zinc-900 rounded-lg">
                             <span class="text-sm font-medium">Domingos</span>
                             <div class="flex items-center space-x-2">
-                                <input type="time" name="horarios[domingos][apertura]" class="w-32 rounded border-gray-300">
+                                <input type="time" name="horarios[domingos][apertura]" class="w-32 rounded border-gray-300 dark:border-zinc-600 dark:bg-zinc-700">
                                 <span>a</span>
-                                <input type="time" name="horarios[domingos][cierre]" class="w-32 rounded border-gray-300">
+                                <input type="time" name="horarios[domingos][cierre]" class="w-32 rounded border-gray-300 dark:border-zinc-600 dark:bg-zinc-700">
                             </div>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" name="cierra_dias_festivos" value="1" {{ old('cierra_dias_festivos') ? 'checked' : '' }}
-                                class="rounded text-orange-600">
-                            <span class="ml-2 text-sm">Cerramos los días festivos</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Métodos de pago y fiscal (los tienes bien) -->
-                <!-- ... (copia tus cards de métodos de pago y fiscal) ... -->
 
                 <!-- BOTONES -->
                 <div class="flex flex-col sm:flex-row justify-between gap-4 pt-6">
@@ -228,86 +260,190 @@
         </div>
     </div>
 
-    @push('scripts')
-        <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places&callback=initMap" async defer></script>
-        <script>
-            let map, marker, geocoder;
+    @push('styles')
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
+        <style>
+            .leaflet-container {
+                z-index: 0;
+            }
+            .marker-pulse {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+                }
+                70% {
+                    box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+                }
+            }
+        </style>
+    @endpush
 
-            function initMap() {
-                const mexico = { lat: 23.6345, lng: -102.5528 };
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: mexico,
-                    zoom: 5,
+    @push('scripts')
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+
+        <script>
+            let map, marker;
+
+            // Inicializar mapa centrado en México
+            document.addEventListener('DOMContentLoaded', function() {
+                // Centro de México (aproximado)
+                const mexicoCenter = [23.6345, -102.5528];
+
+                // Crear mapa
+                map = L.map('map').setView(mexicoCenter, 5);
+
+                // Agregar capa de OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19,
+                }).addTo(map);
+
+                // Evento click en el mapa
+                map.on('click', function(e) {
+                    placeMarker(e.latlng);
+                    reverseGeocode(e.latlng);
                 });
 
-                geocoder = new google.maps.Geocoder();
-                const autocomplete = new google.maps.places.Autocomplete(
-                    document.getElementById('search_address'),
-                    { types: ['geocode'], componentRestrictions: { country: 'mx' } }
-                );
+                // Si hay valores antiguos, mostrar marcador
+                @if(old('lat') && old('lng'))
+                    const oldLat = {{ old('lat') }};
+                    const oldLng = {{ old('lng') }};
+                    const oldLatLng = L.latLng(oldLat, oldLng);
+                    placeMarker(oldLatLng);
+                    map.setView(oldLatLng, 17);
+                @endif
 
-                autocomplete.addListener('place_changed', () => {
-                    const place = autocomplete.getPlace();
-                    if (place.geometry) {
-                        map.setCenter(place.geometry.location);
-                        map.setZoom(17);
-                        placeMarker(place.geometry.location);
-                        fillFromPlace(place);
+                // Búsqueda de dirección
+                document.getElementById('search_button').addEventListener('click', searchAddress);
+                document.getElementById('search_address').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchAddress();
                     }
                 });
-
-                map.addListener('click', e => {
-                    placeMarker(e.latLng);
-                    reverseGeocode(e.latLng);
-                });
-
-                @if(old('lat') && old('lng'))
-                    const pos = { lat: {{ old('lat') }}, lng: {{ old('lng') }} };
-                    map.setCenter(pos);
-                    map.setZoom(17);
-                    placeMarker(new google.maps.LatLng(pos.lat, pos.lng));
-                @endif
-            }
+            });
 
             function placeMarker(latLng) {
-                if (marker) marker.setMap(null);
-                marker = new google.maps.Marker({
-                    position: latLng,
-                    map: map,
-                    draggable: true
-                });
-                document.getElementById('lat').value = latLng.lat();
-                document.getElementById('lng').value = latLng.lng();
+                // Eliminar marcador anterior
+                if (marker) {
+                    map.removeLayer(marker);
+                }
 
-                marker.addListener('dragend', () => {
-                    const pos = marker.getPosition();
-                    document.getElementById('lat').value = pos.lat();
-                    document.getElementById('lng').value = pos.lng();
+                // Crear nuevo marcador naranja
+                const orangeIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `
+                        <div class="marker-pulse" style="
+                            width: 30px;
+                            height: 30px;
+                            background-color: #f97316;
+                            border: 3px solid white;
+                            border-radius: 50%;
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                        "></div>
+                    `,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                marker = L.marker(latLng, {
+                    icon: orangeIcon,
+                    draggable: true
+                }).addTo(map);
+
+                // Actualizar coordenadas
+                updateCoordinates(latLng);
+
+                // Evento drag
+                marker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    updateCoordinates(pos);
                     reverseGeocode(pos);
                 });
+
+                // Centrar mapa
+                map.setView(latLng, 17);
             }
 
-            function reverseGeocode(latLng) {
-                geocoder.geocode({ location: latLng }, (results, status) => {
-                    if (status === 'OK' && results[0]) fillFromPlace(results[0]);
-                });
+            function updateCoordinates(latLng) {
+                const lat = latLng.lat.toFixed(8);
+                const lng = latLng.lng.toFixed(8);
+
+                document.getElementById('lat').value = lat;
+                document.getElementById('lng').value = lng;
+                document.getElementById('lat_display').value = lat;
+                document.getElementById('lng_display').value = lng;
             }
 
-            function fillFromPlace(place) {
-                document.getElementById('direccion_completa_establecimiento').value = place.formatted_address || '';
-                let colonia = '', municipio = '', estado = '', cp = '';
+            async function searchAddress() {
+                const address = document.getElementById('search_address').value;
+                if (!address) return;
 
-                place.address_components.forEach(c => {
-                    if (c.types.includes('sublocality') || c.types.includes('neighborhood')) colonia = c.long_name;
-                    if (c.types.includes('locality')) municipio = c.long_name;
-                    if (c.types.includes('administrative_area_level_1')) estado = c.long_name;
-                    if (c.types.includes('postal_code')) cp = c.long_name;
-                });
+                try {
+                    // Usar Nominatim (OpenStreetMap) para geocodificación
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=mx&limit=1`);
+                    const data = await response.json();
 
-                document.getElementById('colonia').value = colonia;
-                document.getElementById('municipio').value = municipio;
-                document.getElementById('estado').value = estado;
-                document.getElementById('codigo_postal').value = cp;
+                    if (data && data.length > 0) {
+                        const result = data[0];
+                        const latLng = L.latLng(result.lat, result.lon);
+                        placeMarker(latLng);
+
+                        // Llenar campos de dirección
+                        if (result.display_name) {
+                            document.getElementById('direccion_completa_establecimiento').value = result.display_name;
+                        }
+
+                        // Intentar extraer detalles de la dirección
+                        reverseGeocode(latLng);
+                    } else {
+                        alert('No se encontró la dirección. Intenta con otra búsqueda o haz clic en el mapa.');
+                    }
+                } catch (error) {
+                    console.error('Error al buscar dirección:', error);
+                    alert('Error al buscar la dirección. Por favor, intenta de nuevo.');
+                }
+            }
+
+            async function reverseGeocode(latLng) {
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latLng.lat}&lon=${latLng.lng}&zoom=18&addressdetails=1`);
+                    const data = await response.json();
+
+                    if (data && data.address) {
+                        const addr = data.address;
+
+                        // Llenar campos
+                        if (data.display_name) {
+                            document.getElementById('direccion_completa_establecimiento').value = data.display_name;
+                        }
+
+                        if (addr.suburb || addr.neighbourhood || addr.quarter) {
+                            document.getElementById('colonia').value = addr.suburb || addr.neighbourhood || addr.quarter || '';
+                        }
+
+                        if (addr.city || addr.town || addr.municipality) {
+                            document.getElementById('municipio').value = addr.city || addr.town || addr.municipality || '';
+                        }
+
+                        if (addr.state) {
+                            document.getElementById('estado').value = addr.state;
+                        }
+
+                        if (addr.postcode) {
+                            document.getElementById('codigo_postal').value = addr.postcode;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error al obtener dirección:', error);
+                }
             }
 
             // Mostrar campo "Otro"
@@ -323,8 +459,16 @@
                 });
             });
 
-            document.addEventListener('DOMContentLoaded', () => {
-                document.getElementById('tipo_establecimiento').dispatchEvent(new Event('change'));
+            // Validación antes de enviar
+            document.getElementById('form-establecimiento').addEventListener('submit', function(e) {
+                const lat = document.getElementById('lat').value;
+                const lng = document.getElementById('lng').value;
+
+                if (!lat || !lng) {
+                    e.preventDefault();
+                    alert('Por favor, selecciona una ubicación en el mapa haciendo clic sobre él.');
+                    return false;
+                }
             });
         </script>
     @endpush
