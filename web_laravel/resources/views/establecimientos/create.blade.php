@@ -1,13 +1,17 @@
 {{--
     Nombre del archivo        : create.blade.php
-    Descripción               : Vista para creación de establecimientos
+    Descripción               : Vista para creación de establecimientos con mapa interactivo
+    Fecha de creación         : 07/01/2026
+    Elaboró                   : Alan Osvaldo Basilio Delgado
+    Fecha de liberación       : 07/01/2026
+    Autorizó                  : Maileth Patiño Ensastegui
+    Versión                   : 1.5
     Fecha de mantenimiento    : 07/01/2026
-    Folio de mantenimiento    : MANT-PROD
-    Tipo de mantenimiento     : Versión Final Estable
-    Descripción del mantenimiento: 
-        1. Uso de Geocoding API para búsqueda manual (compatible con cuentas nuevas).
-        2. Inyección segura de API Key desde variables de entorno (.env).
-        3. Configuración de mapa optimizada.
+    Folio de mantenimiento    : MANT-SPA-MAPS
+    Tipo de mantenimiento     : Corrección UX / Compatibilidad Livewire SPA
+    Descripción del mantenimiento: Implementación de listeners de navegación (livewire:navigated) para inicialización del mapa sin recarga y configuración segura de credenciales.
+    Responsable               : Alan Osvaldo Basilio Delgado
+    Revisor                   : Maileth Patiño Ensastegui
 --}}
 
 <x-layouts.app :title="__('Nuevo Establecimiento')">
@@ -180,8 +184,9 @@
 
     @push('scripts')
         <script>
+            // Loader oficial de Google Maps
             (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
-                key: "{{ config('services.google_maps.api_key') }}", // Lee la clave del .env de forma segura
+                key: "{{ config('services.google_maps.api_key') }}",
                 v: "weekly",
             });
         </script>
@@ -190,16 +195,17 @@
             (() => {
                 let map, marker, geocoder;
 
-                async function initMap() {
+                async function initMapScoped() {
+                    // Verificar si el contenedor existe para evitar errores
+                    const mapEl = document.getElementById("map");
+                    if (!mapEl) return;
+
                     try {
                         const { Map } = await google.maps.importLibrary("maps");
                         const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
                         const { Geocoder } = await google.maps.importLibrary("geocoding");
 
                         const mexico = { lat: 23.6345, lng: -102.5528 };
-                        const mapEl = document.getElementById("map");
-
-                        if (!mapEl) return;
 
                         map = new Map(mapEl, {
                             center: mexico,
@@ -209,16 +215,13 @@
 
                         geocoder = new Geocoder();
 
-                        // Listener de Click en Mapa
                         map.addListener("click", (e) => {
                             placeMarker(e.latLng);
                             reverseGeocode(e.latLng);
                         });
 
-                        // Configurar Búsqueda MANUAL
                         setupManualSearch();
 
-                        // Recuperar datos previos
                         @if(old('lat') && old('lng'))
                             const pos = { lat: {{ old('lat') }}, lng: {{ old('lng') }} };
                             map.setCenter(pos);
@@ -228,13 +231,15 @@
 
                     } catch (error) {
                         console.error('Error iniciando mapa:', error);
-                        document.getElementById('map').innerHTML = `<div class="p-4 text-red-500 bg-red-100 h-full flex items-center justify-center">Error al cargar el mapa. Verifica tu conexión y configuración.</div>`;
                     }
                 }
 
                 function setupManualSearch() {
                     const input = document.getElementById("manual_search");
                     const btn = document.getElementById("btn_search");
+                    // Prevenir doble bindeo en Livewire
+                    if(input.dataset.bound) return;
+                    input.dataset.bound = true;
 
                     const performSearch = () => {
                         const address = input.value;
@@ -250,7 +255,7 @@
                                 Swal.fire({
                                     icon: 'warning',
                                     title: 'No encontrado',
-                                    text: 'No se encontró la dirección. Intenta ser más específico.',
+                                    text: 'No se encontró la dirección.',
                                     confirmButtonColor: '#ea580c'
                                 });
                             }
@@ -302,7 +307,6 @@
 
                 function fillFromPlace(place) {
                     document.getElementById('direccion_completa_establecimiento').value = place.formatted_address || '';
-                    
                     document.getElementById('colonia').value = '';
                     document.getElementById('municipio').value = '';
                     document.getElementById('estado').value = '';
@@ -333,10 +337,25 @@
                     });
                 }
 
+                // ==========================================
+                // SOLUCIÓN CLAVE: Disparadores de Eventos
+                // ==========================================
+                
+                // 1. Ejecutar en carga inicial (F5)
                 document.addEventListener('DOMContentLoaded', () => {
                     if (tipoSelect) tipoSelect.dispatchEvent(new Event('change'));
-                    initMap();
+                    initMapScoped();
                 });
+
+                // 2. Ejecutar en navegación SPA (Livewire Wire:Navigate)
+                document.addEventListener('livewire:navigated', () => {
+                    // Esperar un micro-momento a que el DOM se actualice
+                    setTimeout(() => {
+                        if (tipoSelect) tipoSelect.dispatchEvent(new Event('change'));
+                        initMapScoped();
+                    }, 50);
+                });
+
             })();
         </script>
     @endpush
