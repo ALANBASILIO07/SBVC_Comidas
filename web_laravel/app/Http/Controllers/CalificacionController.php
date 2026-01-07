@@ -1,20 +1,20 @@
 <?php
-/*
-* Nombre de la clase         : CalificacionController.php
-* Descripción de la clase    : Controlador para gestionar el sistema de calificaciones y reseñas
-*                               de establecimientos con filtros funcionales.
-* Fecha de creación          : 10/12/2024
-* Elaboró                    : Maileth Patiño Ensastegui
-* Fecha de liberación        : 10/12/2024
-* Autorizó                   : Alan Osvaldo Basilio Delgado
-* Versión                    : 1.0
-* Fecha de mantenimiento     :
-* Folio de mantenimiento     :
-* Tipo de mantenimiento      :
-* Descripción del mantenimiento :
-* Responsable                :
-* Revisor                    :
-*/
+
+/**
+ * Nombre del archivo        : CalificacionController.php
+ * Descripción               : Controlador de calificaciones/reseñas del cliente
+ * Fecha de creación         : 06/01/2026
+ * Elaboró                   : Alan Osvaldo Basilio Delgado
+ * Fecha de liberación       : 06/01/2026
+ * Autorizó                  : Maileth Patiño Ensastegui
+ * Version                   : 1.0
+ * Fecha de mantenimiento    : 06/01/2026
+ * Folio de mantenimiento    :
+ * Tipo de mantenimiento     : Seguridad / UX
+ * Descripción del mantenimiento: Implementación de validación de cliente y plan con SweetAlert
+ * Responsable               : Alan Osvaldo Basilio Delgado
+ * Revisor                   : Maileth Patiño Ensastegui
+ */
 
 namespace App\Http\Controllers;
 
@@ -23,6 +23,7 @@ use App\Models\Establecimientos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\SweetAlertHelper;
 
 class CalificacionController extends Controller
 {
@@ -31,27 +32,35 @@ class CalificacionController extends Controller
      */
     public function index(Request $request)
     {
-        // Obtener cliente autenticado
-        $cliente = Auth::user()->cliente;
+        $user = Auth::user();
+        $cliente = $user->cliente;
 
-        // Obtener todos los establecimientos del cliente para el filtro
+        // Validación redundante (el middleware ya protege, pero por robustez)
+        if (!$cliente) {
+            return SweetAlertHelper::registroIncompleto('registro.completar');
+        }
+
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
+        }
+
+        // Obtener establecimientos del cliente
         $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
             ->orderBy('nombre_establecimiento')
             ->get();
 
-        // Query base: solo reseñas de los establecimientos del cliente autenticado
+        // Query base de reseñas
         $query = Resena::with('establecimiento')
-            ->whereHas('establecimiento', function($q) use ($cliente) {
+            ->whereHas('establecimiento', function ($q) use ($cliente) {
                 $q->where('cliente_id', $cliente->id);
             })
             ->activas();
 
-        // Filtro por establecimiento
+        // Filtros
         if ($request->filled('establecimiento')) {
             $query->porEstablecimiento($request->establecimiento);
         }
 
-        // Filtro por puntuación
         if ($request->filled('puntuacion')) {
             $query->porPuntuacion($request->puntuacion);
         }
@@ -74,18 +83,15 @@ class CalificacionController extends Controller
                 $query->masRecientes();
         }
 
-        // Obtener reseñas paginadas
         $resenas = $query->paginate(10)->withQueryString();
 
-        // Calcular estadísticas generales del cliente
+        // Estadísticas y distribución
         $estadisticas = $this->calcularEstadisticas($cliente->id);
-
-        // Calcular distribución de calificaciones
         $distribucion = $this->calcularDistribucion($cliente->id);
 
-        // Obtener reseñas recientes para el widget
+        // Reseñas recientes (widget)
         $resenasRecientes = Resena::with('establecimiento')
-            ->whereHas('establecimiento', function($q) use ($cliente) {
+            ->whereHas('establecimiento', function ($q) use ($cliente) {
                 $q->where('cliente_id', $cliente->id);
             })
             ->activas()
@@ -103,7 +109,65 @@ class CalificacionController extends Controller
     }
 
     /**
-     * Calcular estadísticas generales
+     * Mostrar todas las calificaciones (vista extendida)
+     */
+    public function todas(Request $request)
+    {
+        $user = Auth::user();
+        $cliente = $user->cliente;
+
+        // Validación redundante
+        if (!$cliente) {
+            return SweetAlertHelper::registroIncompleto('registro.completar');
+        }
+
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
+        }
+
+        // Query base
+        $query = Resena::with('establecimiento')
+            ->whereHas('establecimiento', function ($q) use ($cliente) {
+                $q->where('cliente_id', $cliente->id);
+            })
+            ->activas();
+
+        // Filtros
+        if ($request->filled('establecimiento')) {
+            $query->porEstablecimiento($request->establecimiento);
+        }
+
+        if ($request->filled('puntuacion')) {
+            $query->porPuntuacion($request->puntuacion);
+        }
+
+        // Ordenamiento
+        switch ($request->input('orden', 'recientes')) {
+            case 'recientes':
+                $query->masRecientes();
+                break;
+            case 'antiguas':
+                $query->masAntiguas();
+                break;
+            case 'mejor':
+                $query->mejorCalificadas();
+                break;
+            case 'peor':
+                $query->peorCalificadas();
+                break;
+        }
+
+        $resenas = $query->paginate(20)->withQueryString();
+
+        $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
+            ->orderBy('nombre_establecimiento')
+            ->get();
+
+        return view('calificaciones.todas', compact('resenas', 'establecimientos'));
+    }
+
+    /**
+     * Calcular estadísticas generales de calificaciones
      */
     private function calcularEstadisticas($clienteId)
     {
@@ -126,7 +190,7 @@ class CalificacionController extends Controller
     }
 
     /**
-     * Calcular distribución de calificaciones (1-5 estrellas)
+     * Calcular distribución de calificaciones por estrellas
      */
     private function calcularDistribucion($clienteId)
     {
@@ -157,54 +221,5 @@ class CalificacionController extends Controller
         }
 
         return $resultado;
-    }
-
-    /**
-     * Mostrar todas las reseñas (página completa)
-     */
-    public function todas(Request $request)
-    {
-        $cliente = Auth::user()->cliente;
-
-        // Query base
-        $query = Resena::with('establecimiento')
-            ->whereHas('establecimiento', function($q) use ($cliente) {
-                $q->where('cliente_id', $cliente->id);
-            })
-            ->activas();
-
-        // Filtro por establecimiento
-        if ($request->filled('establecimiento')) {
-            $query->porEstablecimiento($request->establecimiento);
-        }
-
-        // Filtro por puntuación
-        if ($request->filled('puntuacion')) {
-            $query->porPuntuacion($request->puntuacion);
-        }
-
-        // Ordenamiento
-        switch ($request->input('orden', 'recientes')) {
-            case 'recientes':
-                $query->masRecientes();
-                break;
-            case 'antiguas':
-                $query->masAntiguas();
-                break;
-            case 'mejor':
-                $query->mejorCalificadas();
-                break;
-            case 'peor':
-                $query->peorCalificadas();
-                break;
-        }
-
-        $resenas = $query->paginate(20)->withQueryString();
-
-        $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
-            ->orderBy('nombre_establecimiento')
-            ->get();
-
-        return view('calificaciones.todas', compact('resenas', 'establecimientos'));
     }
 }

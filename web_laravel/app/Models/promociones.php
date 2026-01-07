@@ -1,20 +1,4 @@
 <?php
-/*
-* Nombre de la clase         : Promociones.php
-* Descripción de la clase    : Modelo Eloquent para gestionar promociones y descuentos de establecimientos,
-*                               con validación de vigencia y estado activo.
-* Fecha de creación          : 22/11/2024
-* Elaboró                    : Alan Osvaldo Basilio Delgado
-* Fecha de liberación        : 27/11/2024
-* Autorizó                   : Maileth Patiño Ensastegui
-* Versión                    : 1.0
-* Fecha de mantenimiento     :
-* Folio de mantenimiento     :
-* Tipo de mantenimiento      :
-* Descripción del mantenimiento :
-* Responsable                :
-* Revisor                    :
-*/
 
 namespace App\Models;
 
@@ -24,7 +8,7 @@ use Carbon\Carbon;
 
 /**
  * Modelo Promocion
- *
+ * 
  * Representa una promoción o descuento ofrecido por un establecimiento.
  * Incluye validación de vigencia y estado activo.
  */

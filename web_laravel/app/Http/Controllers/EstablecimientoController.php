@@ -1,20 +1,20 @@
 <?php
-/*
-* Nombre de la clase         : EstablecimientoController.php
-* Descripción de la clase    : Controlador para gestionar el CRUD de establecimientos de comida,
-*                               incluyendo filtros, categorización y validaciones.
-* Fecha de creación          : 23/11/2024
-* Elaboró                    : Alan Osvaldo Basilio Delgado
-* Fecha de liberación        : 26/11/2024
-* Autorizó                   : Maileth Patiño Ensastegui
-* Versión                    : 1.2
-* Fecha de mantenimiento     : 10/12/2024
-* Folio de mantenimiento     : SBVC-002
-* Tipo de mantenimiento      : Agregar filtros funcionales en vista
-* Descripción del mantenimiento : Se agregaron filtros por categoría y tipo de establecimiento
-* Responsable                : Maileth Patiño Ensastegui
-* Revisor                    : Alan Osvaldo Basilio Delgado
-*/
+
+/**
+ * Nombre del archivo        : EstablecimientoController.php
+ * Descripción               : Controlador de establecimientos del cliente
+ * Fecha de creación         : 06/01/2026
+ * Elaboró                   : Alan Osvaldo Basilio Delgado
+ * Fecha de liberación       : 06/01/2026
+ * Autorizó                  : Maileth Patiño Ensastegui
+ * Version                   : 1.0
+ * Fecha de mantenimiento    : 06/01/2026
+ * Folio de mantenimiento    :
+ * Tipo de mantenimiento     : Seguridad / UX
+ * Descripción del mantenimiento: Implementación de validación de cliente y plan con SweetAlert
+ * Responsable               : Alan Osvaldo Basilio Delgado
+ * Revisor                   : Maileth Patiño Ensastegui
+ */
 
 namespace App\Http\Controllers;
 
@@ -23,51 +23,31 @@ use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\SweetAlertHelper;
 
 class EstablecimientoController extends Controller
 {
     /**
      * Muestra la lista de establecimientos
      */
-    public function index(Request $request)
+    public function index()
     {
-        $cliente = Auth::user()->cliente;
+        $user = Auth::user();
+        $cliente = $user->cliente;
 
         if (!$cliente) {
-            return redirect()->route('registro.completar')
-                ->with('swal', [
-                    'icon' => 'warning',
-                    'title' => 'Registro incompleto',
-                    'text' => 'Primero debes completar tu registro de cliente.',
-                ]);
+            return SweetAlertHelper::registroIncompleto('registro.completar');
         }
 
-        // Query base
-        $query = Establecimientos::where('cliente_id', $cliente->id);
-
-        // Filtro por categoría
-        if ($request->filled('categoria')) {
-            $query->where('categoria_id', $request->categoria);
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
         }
 
-        // Filtro por tipo de establecimiento
-        if ($request->filled('tipo')) {
-            $query->where('tipo_establecimiento', $request->tipo);
-        }
+        $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
+            ->orderByDesc('created_at')
+            ->get();
 
-        // Ordenamiento
-        $query->orderByDesc('created_at');
-
-        $establecimientos = $query->get();
-
-        // Obtener categorías para el filtro
-        $categorias = Categoria::where('activo', true)
-            ->orderBy('tipo_establecimiento')
-            ->orderBy('nombre')
-            ->get()
-            ->groupBy('tipo_establecimiento');
-
-        return view('establecimientos.index', compact('establecimientos', 'categorias'));
+        return view('establecimientos.index', compact('establecimientos'));
     }
 
     /**
@@ -75,15 +55,15 @@ class EstablecimientoController extends Controller
      */
     public function create()
     {
-        $cliente = Auth::user()->cliente;
+        $user = Auth::user();
+        $cliente = $user->cliente;
 
         if (!$cliente) {
-            return redirect()->route('registro.completar')
-                ->with('swal', [
-                    'icon' => 'warning',
-                    'title' => 'Registro incompleto',
-                    'text' => 'Primero debes completar tu registro de cliente.',
-                ]);
+            return SweetAlertHelper::registroIncompleto('registro.completar');
+        }
+
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
         }
 
         // Verificar límite según el plan
@@ -101,8 +81,11 @@ class EstablecimientoController extends Controller
             return redirect()->route('establecimientos.index')
                 ->with('swal', [
                     'icon' => 'warning',
-                    'title' => 'Limite alcanzado',
-                    'text' => "Has alcanzado el limite de establecimientos para tu plan {$cliente->plan}. Actualiza tu plan para agregar mas.",
+                    'title' => 'Límite alcanzado',
+                    'text' => "Has alcanzado el límite de establecimientos para tu plan {$cliente->plan}. Actualiza tu plan para agregar más.",
+                    'confirmButtonText' => 'Entendido',
+                    'confirmButtonColor' => '#F7941D',
+                    'draggable' => true,
                 ]);
         }
 
@@ -116,15 +99,15 @@ class EstablecimientoController extends Controller
      */
     public function store(Request $request)
     {
-        $cliente = Auth::user()->cliente;
+        $user = Auth::user();
+        $cliente = $user->cliente;
 
         if (!$cliente) {
-            return redirect()->route('registro.completar')
-                ->with('swal', [
-                    'icon' => 'warning',
-                    'title' => 'Registro incompleto',
-                    'text' => 'Primero debes completar tu registro de cliente.',
-                ]);
+            return SweetAlertHelper::registroIncompleto('registro.completar');
+        }
+
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
         }
 
         Log::info('INTENTO DE CREAR ESTABLECIMIENTO', [
@@ -157,23 +140,23 @@ class EstablecimientoController extends Controller
                 'nombre_establecimiento.required' => 'El nombre del establecimiento es obligatorio',
                 'nombre_establecimiento.min' => 'El nombre debe tener al menos 3 caracteres',
                 'tipo_establecimiento.required' => 'Debes seleccionar un tipo de establecimiento',
-                'lat.required' => 'Debes seleccionar la ubicacion en el mapa',
-                'lng.required' => 'Debes seleccionar la ubicacion en el mapa',
-                'direccion_completa_establecimiento.required' => 'La direccion es obligatoria',
-                'telefono_establecimiento.required' => 'El telefono es obligatorio',
-                'telefono_establecimiento.regex' => 'El telefono solo puede contener numeros',
+                'lat.required' => 'Debes seleccionar la ubicación en el mapa',
+                'lng.required' => 'Debes seleccionar la ubicación en el mapa',
+                'direccion_completa_establecimiento.required' => 'La dirección es obligatoria',
+                'telefono_establecimiento.required' => 'El teléfono es obligatorio',
+                'telefono_establecimiento.regex' => 'El teléfono solo puede contener números',
                 'correo_establecimiento.required' => 'El correo es obligatorio',
-                'correo_establecimiento.email' => 'Debes ingresar un correo valido',
-                'codigo_postal.size' => 'El codigo postal debe tener 5 digitos',
-                'codigo_postal.regex' => 'El codigo postal solo puede contener numeros',
+                'correo_establecimiento.email' => 'Debes ingresar un correo válido',
+                'codigo_postal.size' => 'El código postal debe tener 5 dígitos',
+                'codigo_postal.regex' => 'El código postal solo puede contener números',
                 'rfc_establecimiento.size' => 'El RFC debe tener exactamente 13 caracteres',
-                'rfc_establecimiento.regex' => 'El formato del RFC no es valido',
+                'rfc_establecimiento.regex' => 'El formato del RFC no es válido',
             ]);
 
-            Log::info('Validacion exitosa', ['validated' => $validated]);
+            Log::info('Validación exitosa', ['validated' => $validated]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Error de validacion', [
+            Log::error('Error de validación', [
                 'errores' => $e->errors()
             ]);
             throw $e;
@@ -212,7 +195,7 @@ class EstablecimientoController extends Controller
             'total_resenas' => 0,
         ];
 
-        Log::info('Datos preparados para insercion', $datosEstablecimiento);
+        Log::info('Datos preparados para inserción', $datosEstablecimiento);
 
         try {
             $establecimiento = Establecimientos::create($datosEstablecimiento);
@@ -228,7 +211,9 @@ class EstablecimientoController extends Controller
                     'icon' => 'success',
                     'title' => 'Establecimiento creado',
                     'text' => "'{$establecimiento->nombre_establecimiento}' ha sido registrado exitosamente.",
-                    'showConfirmButton' => true,
+                    'confirmButtonText' => 'Continuar',
+                    'confirmButtonColor' => '#F7941D',
+                    'draggable' => true,
                     'timer' => 3000
                 ]);
 
@@ -247,7 +232,9 @@ class EstablecimientoController extends Controller
                     'icon' => 'error',
                     'title' => 'Error al guardar',
                     'text' => 'Detalles: ' . $e->getMessage(),
-                    'showConfirmButton' => true
+                    'confirmButtonText' => 'Entendido',
+                    'confirmButtonColor' => '#F7941D',
+                    'draggable' => true,
                 ]);
         }
     }
@@ -257,15 +244,15 @@ class EstablecimientoController extends Controller
      */
     public function show($id)
     {
-        $cliente = Auth::user()->cliente;
+        $user = Auth::user();
+        $cliente = $user->cliente;
 
         if (!$cliente) {
-            return redirect()->route('registro.completar')
-                ->with('swal', [
-                    'icon' => 'warning',
-                    'title' => 'Registro incompleto',
-                    'text' => 'Primero debes completar tu registro de cliente.',
-                ]);
+            return SweetAlertHelper::registroIncompleto('registro.completar');
+        }
+
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
         }
 
         $establecimiento = Establecimientos::where('cliente_id', $cliente->id)
@@ -276,19 +263,19 @@ class EstablecimientoController extends Controller
     }
 
     /**
-     * Muestra el formulario de edicion
+     * Muestra el formulario de edición
      */
     public function edit($id)
     {
-        $cliente = Auth::user()->cliente;
+        $user = Auth::user();
+        $cliente = $user->cliente;
 
         if (!$cliente) {
-            return redirect()->route('registro.completar')
-                ->with('swal', [
-                    'icon' => 'warning',
-                    'title' => 'Registro incompleto',
-                    'text' => 'Primero debes completar tu registro de cliente.',
-                ]);
+            return SweetAlertHelper::registroIncompleto('registro.completar');
+        }
+
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
         }
 
         $establecimiento = Establecimientos::where('cliente_id', $cliente->id)
@@ -305,15 +292,15 @@ class EstablecimientoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $cliente = Auth::user()->cliente;
+        $user = Auth::user();
+        $cliente = $user->cliente;
 
         if (!$cliente) {
-            return redirect()->route('registro.completar')
-                ->with('swal', [
-                    'icon' => 'warning',
-                    'title' => 'Registro incompleto',
-                    'text' => 'Primero debes completar tu registro de cliente.',
-                ]);
+            return SweetAlertHelper::registroIncompleto('registro.completar');
+        }
+
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
         }
 
         $establecimiento = Establecimientos::where('cliente_id', $cliente->id)
@@ -384,7 +371,9 @@ class EstablecimientoController extends Controller
                     'icon' => 'success',
                     'title' => 'Establecimiento actualizado',
                     'text' => 'Los cambios se han guardado exitosamente.',
-                    'showConfirmButton' => true,
+                    'confirmButtonText' => 'Continuar',
+                    'confirmButtonColor' => '#F7941D',
+                    'draggable' => true,
                     'timer' => 3000
                 ]);
 
@@ -402,7 +391,9 @@ class EstablecimientoController extends Controller
                     'icon' => 'error',
                     'title' => 'Error al actualizar',
                     'text' => 'Hubo un error al actualizar el establecimiento. Por favor intenta de nuevo.',
-                    'showConfirmButton' => true
+                    'confirmButtonText' => 'Entendido',
+                    'confirmButtonColor' => '#F7941D',
+                    'draggable' => true,
                 ]);
         }
     }
@@ -412,15 +403,15 @@ class EstablecimientoController extends Controller
      */
     public function destroy($id)
     {
-        $cliente = Auth::user()->cliente;
+        $user = Auth::user();
+        $cliente = $user->cliente;
 
         if (!$cliente) {
-            return redirect()->route('registro.completar')
-                ->with('swal', [
-                    'icon' => 'warning',
-                    'title' => 'Registro incompleto',
-                    'text' => 'Primero debes completar tu registro de cliente.',
-                ]);
+            return SweetAlertHelper::registroIncompleto('registro.completar');
+        }
+
+        if (empty($cliente->plan) || $cliente->plan === 'sin_plan') {
+            return SweetAlertHelper::planRequerido('subscripcion.index');
         }
 
         $establecimiento = Establecimientos::where('cliente_id', $cliente->id)
@@ -442,7 +433,9 @@ class EstablecimientoController extends Controller
                     'icon' => 'success',
                     'title' => 'Establecimiento eliminado',
                     'text' => "'{$nombreEstablecimiento}' ha sido eliminado exitosamente.",
-                    'showConfirmButton' => true,
+                    'confirmButtonText' => 'Continuar',
+                    'confirmButtonColor' => '#F7941D',
+                    'draggable' => true,
                     'timer' => 3000
                 ]);
 
@@ -459,7 +452,9 @@ class EstablecimientoController extends Controller
                     'icon' => 'error',
                     'title' => 'Error al eliminar',
                     'text' => 'Hubo un error al eliminar el establecimiento. Por favor intenta de nuevo.',
-                    'showConfirmButton' => true
+                    'confirmButtonText' => 'Entendido',
+                    'confirmButtonColor' => '#F7941D',
+                    'draggable' => true,
                 ]);
         }
     }

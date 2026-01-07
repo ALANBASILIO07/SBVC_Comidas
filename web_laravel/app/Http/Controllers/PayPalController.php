@@ -1,20 +1,4 @@
 <?php
-/*
-* Nombre de la clase         : PayPalController.php
-* Descripción de la clase    : Controlador para gestionar la integración con PayPal,
-*                               incluyendo pagos, suscripciones y modos demo/sandbox/live.
-* Fecha de creación          : 27/11/2024
-* Elaboró                    : Alan Osvaldo Basilio Delgado
-* Fecha de liberación        : 28/11/2024
-* Autorizó                   : Maileth Patiño Ensastegui
-* Versión                    : 1.1
-* Fecha de mantenimiento     : 28/11/2024
-* Folio de mantenimiento     : SBVC-003
-* Tipo de mantenimiento      : Actualización de planes
-* Descripción del mantenimiento : Se actualizaron los planes de suscripción
-* Responsable                : Maileth Patiño Ensastegui
-* Revisor                    : Alan Osvaldo Basilio Delgado
-*/
 
 namespace App\Http\Controllers;
 

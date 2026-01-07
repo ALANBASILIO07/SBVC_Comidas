@@ -12,10 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Middleware aliases - SIN cliente.completo
-        // $middleware->alias([
-        //     'cliente.completo' => \App\Http\Middleware\EnsureClienteCompleto::class,
-        // ]);
+        // Registrar alias del middleware de plan activo
+        $middleware->alias([
+            'plan.activo' => \App\Http\Middleware\RequireActivePlan::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

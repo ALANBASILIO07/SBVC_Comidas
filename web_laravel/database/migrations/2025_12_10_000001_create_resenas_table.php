@@ -1,19 +1,4 @@
 <?php
-/*
-* Nombre de la clase         : 2025_12_10_000001_create_resenas_table.php
-* Descripción de la clase    : Migración para crear la tabla de reseñas y calificaciones de establecimientos.
-* Fecha de creación          : 10/12/2024
-* Elaboró                    : Maileth Patiño Ensastegui
-* Fecha de liberación        : 10/12/2024
-* Autorizó                   : Alan Osvaldo Basilio Delgado
-* Versión                    : 1.0
-* Fecha de mantenimiento     :
-* Folio de mantenimiento     :
-* Tipo de mantenimiento      :
-* Descripción del mantenimiento :
-* Responsable                :
-* Revisor                    :
-*/
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

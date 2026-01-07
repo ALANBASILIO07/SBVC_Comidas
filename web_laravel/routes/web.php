@@ -1,20 +1,15 @@
 <?php
-/*
-* Nombre de la clase         : web.php
-* Descripción de la clase    : Archivo de rutas web para la aplicación SBVC_Comidas,
-*                               define todas las rutas accesibles desde el navegador web.
-* Fecha de creación          : 12/11/2024
-* Elaboró                    : Alan Osvaldo Basilio Delgado
-* Fecha de liberación        : 27/11/2024
-* Autorizó                   : Maileth Patiño Ensastegui
-* Versión                    : 1.0
-* Fecha de mantenimiento     :
-* Folio de mantenimiento     :
-* Tipo de mantenimiento      :
-* Descripción del mantenimiento :
-* Responsable                :
-* Revisor                    :
-*/
+
+/**
+ * Nombre del archivo        : web.php
+ * Descripción               : Rutas web de la aplicación SBVC Comidas
+ * Fecha de mantenimiento    : 06/01/2026
+ * Folio de mantenimiento    :
+ * Tipo de mantenimiento     : Seguridad / Control de acceso
+ * Descripción del mantenimiento: Aplicación de middleware plan.activo a rutas protegidas
+ * Responsable               : Alan Osvaldo Basilio Delgado
+ * Revisor                   : Maileth Patiño Ensastegui
+ */
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -24,19 +19,22 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EstablecimientoController;
 use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\PromocionController;
+use App\Http\Controllers\CalificacionController;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes - SIN middleware cliente.completo
+| Ruta principal
 |--------------------------------------------------------------------------
 */
-
-// Ruta principal
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// Rutas para completar registro de cliente
+/*
+|--------------------------------------------------------------------------
+| Rutas para completar registro de cliente
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth'])->group(function () {
     Route::get('completar-registro', function () {
         return view('clientes.complete_profile');
@@ -46,19 +44,78 @@ Route::middleware(['auth'])->group(function () {
         ->name('clientes.store');
 });
 
-// Dashboard principal
+/*
+|--------------------------------------------------------------------------
+| Dashboard principal (sin plan requerido)
+|--------------------------------------------------------------------------
+*/
 Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// Rutas protegidas solo con autenticación y verificación
+/*
+|--------------------------------------------------------------------------
+| Suscripción (sin plan requerido para que puedan contratar)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::prefix('subscripcion')->name('subscripcion.')->group(function () {
+        Route::get('/', function () {
+            $cliente = auth()->user()->cliente ?? null;
+            $plan_actual = $cliente ? $cliente->plan : 'basico';
+
+            $planes = [
+                'basico' => [
+                    'nombre' => 'Plan Básico',
+                    'precio' => 0,
+                    'caracteristicas' => [
+                        '1 Establecimiento',
+                        '5 Promociones al mes',
+                        'Soporte por email'
+                    ]
+                ],
+                'estandar' => [
+                    'nombre' => 'Plan Estándar',
+                    'precio' => 299,
+                    'caracteristicas' => [
+                        '1 Establecimiento',
+                        'Promociones ilimitadas',
+                        'Estadísticas básicas',
+                        'Soporte prioritario'
+                    ]
+                ],
+                'premium' => [
+                    'nombre' => 'Plan Premium',
+                    'precio' => 599,
+                    'caracteristicas' => [
+                        'Establecimientos ilimitados',
+                        'Promociones ilimitadas',
+                        'Estadísticas avanzadas',
+                        'Soporte 24/7',
+                        'API Access'
+                    ]
+                ]
+            ];
+
+            return view('subscripcion.index', compact('cliente', 'plan_actual', 'planes'));
+        })->name('index');
+    });
+
+    // PayPal (necesario para procesar pagos)
+    Route::prefix('paypal')->name('paypal.')->group(function () {
+        Route::post('/create-order', [PayPalController::class, 'create'])->name('create');
+        Route::post('/orders/{orderId}/capture', [PayPalController::class, 'capture'])->name('capture');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Rutas protegidas (requieren plan activo: basico o premium)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified', 'plan.activo'])->group(function () {
     
-    /*
-    |--------------------------------------------------------------------------
-    | Establecimientos
-    |--------------------------------------------------------------------------
-    */
+    // Establecimientos
     Route::prefix('establecimientos')->name('establecimientos.')->group(function () {
         Route::get('/', [EstablecimientoController::class, 'index'])->name('index');
         Route::get('/create', [EstablecimientoController::class, 'create'])->name('create');
@@ -69,25 +126,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [EstablecimientoController::class, 'destroy'])->name('destroy');
     });
     
-    /*
-    |--------------------------------------------------------------------------
-    | Promociones
-    |--------------------------------------------------------------------------
-    */
+    // Promociones
     Route::resource('promociones', PromocionController::class);
     
-    /*
-    |--------------------------------------------------------------------------
-    | Banners
-    |--------------------------------------------------------------------------
-    */
+    // Banners
     Route::resource('banners', BannerController::class);
     
-    /*
-    |--------------------------------------------------------------------------
-    | Notificaciones
-    |--------------------------------------------------------------------------
-    */
+    // Calificaciones
+    Route::prefix('calificaciones')->name('calificaciones.')->group(function () {
+        Route::get('/', [CalificacionController::class, 'index'])->name('index');
+        Route::get('/todas', [CalificacionController::class, 'todas'])->name('todas');
+    });
+    
+    // Notificaciones
     Route::prefix('notificaciones')->name('notificaciones.')->group(function () {
         Route::get('/', function () {
             $notificaciones = collect([
@@ -139,78 +190,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('edit');
     });
     
-    /*
-    |--------------------------------------------------------------------------
-    | Calificaciones
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('calificaciones')->name('calificaciones.')->group(function () {
-        Route::get('/', [App\Http\Controllers\CalificacionController::class, 'index'])->name('index');
-        Route::get('/todas', [App\Http\Controllers\CalificacionController::class, 'todas'])->name('todas');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Subscripción
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('subscripcion')->name('subscripcion.')->group(function () {
-        Route::get('/', function () {
-            $cliente = auth()->user()->cliente ?? null;
-            $plan_actual = $cliente ? $cliente->plan : 'basico';
-
-            $planes = [
-                'basico' => [
-                    'nombre' => 'Plan Básico',
-                    'precio' => 0,
-                    'caracteristicas' => [
-                        '1 Establecimiento',
-                        '5 Promociones al mes',
-                        'Soporte por email'
-                    ]
-                ],
-                'estandar' => [
-                    'nombre' => 'Plan Estándar',
-                    'precio' => 299,
-                    'caracteristicas' => [
-                        '1 Establecimiento',
-                        'Promociones ilimitadas',
-                        'Estadísticas básicas',
-                        'Soporte prioritario'
-                    ]
-                ],
-                'premium' => [
-                    'nombre' => 'Plan Premium',
-                    'precio' => 599,
-                    'caracteristicas' => [
-                        'Establecimientos ilimitados',
-                        'Promociones ilimitadas',
-                        'Estadísticas avanzadas',
-                        'Soporte 24/7',
-                        'API Access'
-                    ]
-                ]
-            ];
-
-            return view('subscripcion.index', compact('cliente', 'plan_actual', 'planes'));
-        })->name('index');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | PayPal - Pagos
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('paypal')->name('paypal.')->group(function () {
-        Route::post('/create-order', [PayPalController::class, 'create'])->name('create');
-        Route::post('/orders/{orderId}/capture', [PayPalController::class, 'capture'])->name('capture');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Clientes
-    |--------------------------------------------------------------------------
-    */
+    // Clientes
     Route::prefix('clientes')->name('clientes.')->group(function () {
         Route::get('/', function () {
             $clientes = \App\Models\Cliente::with('user')->orderByDesc('created_at')->get();

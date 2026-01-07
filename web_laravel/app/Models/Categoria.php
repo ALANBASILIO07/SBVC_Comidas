@@ -1,20 +1,4 @@
 <?php
-/*
-* Nombre de la clase         : Categoria.php
-* Descripción de la clase    : Modelo Eloquent para gestionar categorías de establecimientos,
-*                               organizados por tipo (formal/informal).
-* Fecha de creación          : 23/11/2024
-* Elaboró                    : Alan Osvaldo Basilio Delgado
-* Fecha de liberación        : 26/11/2024
-* Autorizó                   : Maileth Patiño Ensastegui
-* Versión                    : 1.0
-* Fecha de mantenimiento     :
-* Folio de mantenimiento     :
-* Tipo de mantenimiento      :
-* Descripción del mantenimiento :
-* Responsable                :
-* Revisor                    :
-*/
 
 namespace App\Models;
 
@@ -24,7 +8,7 @@ use Illuminate\Support\Str;
 
 /**
  * Modelo Categoria
- *
+ * 
  * Representa una categoría de establecimiento de comida.
  * Ejemplos: Restaurante, Cafetería, Comida Rápida, Panadería, etc.
  */
