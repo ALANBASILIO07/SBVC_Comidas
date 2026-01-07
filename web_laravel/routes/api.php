@@ -15,19 +15,23 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     
-    // Establecimientos
-    Route::apiResource('establecimientos', App\Http\Controllers\Api\EstablecimientoController::class);
-    
-    // Promociones
-    Route::apiResource('promociones', App\Http\Controllers\Api\PromocionController::class);
-    
-    // Banners
-    Route::apiResource('banners', App\Http\Controllers\Api\BannerController::class);
-    
-    // Categorías (solo lectura)
-    Route::get('categorias', [App\Http\Controllers\Api\CategoriaController::class, 'index']);
-    
-    // Calificaciones
-    Route::get('calificaciones', [App\Http\Controllers\Api\CalificacionController::class, 'index']);
-    Route::post('calificaciones', [App\Http\Controllers\Api\CalificacionController::class, 'store']);
+    // IMPORTANTE: Agregamos el name('api.') para evitar colisión con rutas web
+    Route::name('api.')->group(function () {
+        
+        // Establecimientos (Nombre ruta: api.establecimientos.index)
+        Route::apiResource('establecimientos', App\Http\Controllers\Api\EstablecimientoController::class);
+        
+        // Promociones (Nombre ruta: api.promociones.index)
+        Route::apiResource('promociones', App\Http\Controllers\Api\PromocionController::class);
+        
+        // Banners (Nombre ruta: api.banners.index)
+        Route::apiResource('banners', App\Http\Controllers\Api\BannerController::class);
+        
+        // Categorías (solo lectura)
+        Route::get('categorias', [App\Http\Controllers\Api\CategoriaController::class, 'index'])->name('categorias.index');
+        
+        // Calificaciones
+        Route::get('calificaciones', [App\Http\Controllers\Api\CalificacionController::class, 'index'])->name('calificaciones.index');
+        Route::post('calificaciones', [App\Http\Controllers\Api\CalificacionController::class, 'store'])->name('calificaciones.store');
+    });
 });
