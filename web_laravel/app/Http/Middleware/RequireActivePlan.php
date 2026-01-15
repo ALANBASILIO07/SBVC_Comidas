@@ -3,17 +3,17 @@
  * Nombre del archivo        : RequireActivePlan.php
  * Ruta                      : app/Http/Middleware/RequireActivePlan.php
  * Descripción               : Middleware para validar que el cliente tenga un plan activo.
- *                             Responde en español y devuelve JSON para peticiones AJAX (útil para SweetAlert),
- *                             o redirecciona con una sesión flash (`swal`) para mostrar SweetAlert en frontend.
+ * Responde en español y devuelve JSON para peticiones AJAX (útil para SweetAlert),
+ * o redirecciona con una sesión flash (`swal`) para mostrar SweetAlert en frontend.
  * Fecha de creación         : 06/01/2026
  * Elaboró                   : Alan Osvaldo Basilio Delgado
  * Fecha de liberación       : 06/01/2026
  * Autorizó                  : Maileth Patiño Ensastegui
- * Versión                   : 1.2
- * Fecha de mantenimiento    : 18/01/2026
- * Tipo de mantenimiento     : Ampliación/Robustecimiento
- * Descripción del mantenimiento: Mejora en manejo de AJAX, aplicación de downgrades programados,
- *                                prevención de bucles, logging y mensajes en español.
+ * Versión                   : 1.3
+ * Fecha de mantenimiento    : 21/01/2026
+ * Tipo de mantenimiento     : Corrección Bug (Laravel 12 Compatibility)
+ * Descripción del mantenimiento: Se reemplaza la función helper obsoleta 'str_is()' por 'Str::is()'
+ * para compatibilidad con Laravel 12.
  * Responsable               : Alan Osvaldo Basilio Delgado
  * Revisor                   : Maileth Patiño Ensastegui
  */
@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Helpers\SweetAlertHelper;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str; // <--- IMPORTANTE: Importar la clase Str
 use Carbon\Carbon;
 
 class RequireActivePlan
@@ -61,13 +62,13 @@ class RequireActivePlan
         $path = $request->path();
 
         foreach ($this->exemptRoutes() as $exempt) {
-            // Comparar por nombre de ruta
-            if ($name && str_is($exempt, $name)) {
+            // Comparar por nombre de ruta usando Str::is
+            if ($name && Str::is($exempt, $name)) {
                 return true;
             }
 
-            // Comparar por prefijo en path (por ejemplo 'api/*' o 'paypal/*')
-            if (str_is($exempt, $path) || str_is($exempt . '/*', $path) || str_is($exempt, $path)) {
+            // Comparar por prefijo en path usando Str::is
+            if (Str::is($exempt, $path) || Str::is($exempt . '/*', $path) || Str::is($exempt, $path)) {
                 return true;
             }
         }
@@ -85,7 +86,7 @@ class RequireActivePlan
      *
      * - Para peticiones AJAX devuelve JSON con la estructura necesaria para SweetAlert.
      * - Para peticiones normales intenta usar SweetAlertHelper::planRequerido(...) si está disponible,
-     *   o realiza un redirect()->route(...) con flash en session('swal').
+     * o realiza un redirect()->route(...) con flash en session('swal').
      *
      * Evita bucles respetando las rutas exentas configuradas en `exemptRoutes()`.
      *
