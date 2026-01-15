@@ -1,12 +1,16 @@
 <?php
-
 /**
  * Nombre del archivo        : web.php
- * Descripción               : Rutas web de la aplicación SBVC Comidas
- * Fecha de mantenimiento    : 06/01/2026
+ * Descripción               : Rutas web de la aplicación SBVC Comidas (archivo de rutas principal).
+ * Fecha de creación         : 06/01/2026
+ * Elaboró                   : Alan Osvaldo Basilio Delgado
+ * Fecha de liberación       : 06/01/2026
+ * Autorizó                  : Maileth Patiño Ensastegui
+ * Versión                   : 1.3
+ * Fecha de mantenimiento    : 07/01/2026
  * Folio de mantenimiento    :
- * Tipo de mantenimiento     : Seguridad / Control de acceso
- * Descripción del mantenimiento: Aplicación de middleware plan.activo a rutas protegidas
+ * Tipo de mantenimiento     : UX / Compatibilidad Livewire
+ * Descripción del mantenimiento: Guard SPA para rutas protegidas y compatibilidad Swal con wire:navigate
  * Responsable               : Alan Osvaldo Basilio Delgado
  * Revisor                   : Maileth Patiño Ensastegui
  */
@@ -106,6 +110,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/create-order', [PayPalController::class, 'create'])->name('create');
         Route::post('/orders/{orderId}/capture', [PayPalController::class, 'capture'])->name('capture');
     });
+
+    // Ruta para actualizar plan (rápida, usada por AJAX desde la vista)
+    Route::post('clientes/change-plan', [ClienteController::class, 'changePlan'])
+        ->name('clientes.changePlan');
 });
 
 /*

@@ -1,0 +1,106 @@
+/**
+ * Nombre del archivo        : _sbvc-colors.css
+ * Descripción               : Variables CSS con paleta corporativa SBVC para uso global en la aplicación.
+ *                            Centraliza tokens de color para uso en CSS y compatibilidad con Tailwind.
+ * Fecha de creación         : 14/01/2026
+ * Elaboró                   : Alan Osvaldo Basilio Delgado
+ * Fecha de liberación       : 14/01/2026
+ * Autorizó                  : Maileth Patiño Ensastegui
+ * Versión                   : 1.2
+ * Fecha de mantenimiento    : 18/01/2026
+ * Folio de mantenimiento    :
+ * Tipo de mantenimiento     : Diseño / Tokens de Color / Corrección Dark Mode
+ * Descripción del mantenimiento: Se agregan tokens semánticos y variantes claras/osc en root y html.dark
+ * Responsable               : Alan Osvaldo Basilio Delgado
+ * Revisor                   : Maileth Patiño Ensastegui
+ */
+
+/* PROLOGUE: Variables CSS con paleta corporativa SBVC para uso global en la app. */
+/* Archivo: resources/css/_sbvc-colors.css */
+
+/* ===========================
+   Light mode (valores por defecto)
+   =========================== */
+:root {
+  /* Marca / primarios */
+  --sbvc-primary-50:  #FFF6ED;
+  --sbvc-primary-100: #FFE6C9;
+  --sbvc-primary-300: #FFB97A;
+  --sbvc-primary-500: #DE6601; /* valor principal */
+  --sbvc-primary-600: #C05501;
+  --sbvc-primary-700: #9E4401;
+
+  --sbvc-success-500: #42A958;
+  --sbvc-info-500:    #241178;
+  --sbvc-danger-500:  #EE0000;
+
+  /* Tokens semánticos (light) */
+  --sbvc-bg:          #FFFFFF; /* page background */
+  --sbvc-surface:     #FBFDFF; /* surface / panels */
+  --sbvc-card-bg:     #F8FAFC; /* cards */
+  --sbvc-text:        #0F1724; /* primary text (dark gray / near black) */
+  --sbvc-text-weak:   #4B5563; /* secondary text */
+  --sbvc-muted:       #6B7280; /* muted */
+  --sbvc-border:      #E6E9EE; /* borders */
+  --sbvc-input-bg:    #FFFFFF; /* inputs background */
+  --sbvc-shadow:      rgba(2,6,23,0.06);
+
+  /* Accesibilidad */
+  --sbvc-contrast-on-primary: #FFFFFF; /* texto sobre primary en light */
+  --sbvc-primary-hover: #E65A00;
+
+  /* Neutros por compatibilidad */
+  --sbvc-white: #FFFFFF;
+  --sbvc-black: #000000;
+}
+
+/* ===========================
+   Dark mode (override)
+   =========================== */
+html.dark {
+  /* Marca / primarios en dark (ligeramente más claros para contraste) */
+  --sbvc-primary-50:  #2A1200;
+  --sbvc-primary-100: #3C1700;
+  --sbvc-primary-300: #8B3C14;
+  --sbvc-primary-500: #FF8533; /* naranja vibrante en dark */
+  --sbvc-primary-600: #DE6F2B;
+  --sbvc-primary-700: #B35821;
+
+  --sbvc-success-500: #52C968;
+  --sbvc-info-500:    #3D2BB8;
+  --sbvc-danger-500:  #FF3333;
+
+  /* Tokens semánticos (dark) */
+  --sbvc-bg:          #0A0A0B; /* page background muy oscuro */
+  --sbvc-surface:     #0F1720; /* surface / panels oscuro */
+  --sbvc-card-bg:     #121212; /* cards */
+  --sbvc-text:        #F8FAFC; /* texto primario claro */
+  --sbvc-text-weak:   #A3B4C8; /* secundario claro */
+  --sbvc-muted:       #94A3B8;
+  --sbvc-border:      #1F2937; /* borde oscuro */
+  --sbvc-input-bg:    #0B1220; /* inputs fondo oscuro */
+  --sbvc-shadow:      rgba(2,6,23,0.6);
+
+  --sbvc-contrast-on-primary: #000000; /* texto sobre primary en dark (si primary muy claro) */
+  --sbvc-primary-hover: #FF7A2A;
+}
+
+/* ===========================
+   Utilidades rápidas (por si se requiere sin Tailwind)
+   =========================== */
+.bg-sbvc-primary { background-color: var(--sbvc-primary-500) !important; }
+.text-sbvc-primary { color: var(--sbvc-primary-500) !important; }
+.bg-sbvc-success { background-color: var(--sbvc-success-500) !important; }
+.text-sbvc-success { color: var(--sbvc-success-500) !important; }
+.bg-sbvc-info { background-color: var(--sbvc-info-500) !important; }
+.text-sbvc-info { color: var(--sbvc-info-500) !important; }
+.bg-sbvc-danger { background-color: var(--sbvc-danger-500) !important; }
+.text-sbvc-danger { color: var(--sbvc-danger-500) !important; }
+
+.bg-sbvc-white { background-color: var(--sbvc-white) !important; }
+.text-sbvc-white { color: var(--sbvc-white) !important; }
+.bg-sbvc-black { background-color: var(--sbvc-black) !important; }
+.text-sbvc-black { color: var(--sbvc-black) !important; }
+
+/* Swatch helper (documentación) */
+.swatch { width:150px; height:100px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--sbvc-white); }

@@ -1,7 +1,22 @@
+{{--
+    Nombre del archivo        : complete_profile.blade.php
+    Descripción               : Vista para completar registro del cliente y permitir la selección/actualización de plan desde la misma pantalla.
+    Fecha de creación         : 06/01/2026
+    Elaboró                   : Alan Osvaldo Basilio Delgado
+    Fecha de liberación       : 06/01/2026
+    Autorizó                  : Maileth Patiño Ensastegui
+    Versión                   : 1.3
+    Fecha de mantenimiento    : 07/01/2026
+    Folio de mantenimiento    :
+    Tipo de mantenimiento     : UX / Compatibilidad Livewire
+    Descripción del mantenimiento: Guard SPA para rutas protegidas y compatibilidad Swal con wire:navigate
+    Responsable               : Alan Osvaldo Basilio Delgado
+    Revisor                   : Maileth Patiño Ensastegui
+--}}
+
 <x-layouts.app :title="__('Completar Registro')">
     <div class="py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-4xl mx-auto">
-            
             {{-- HEADER --}}
             <div class="mb-8">
                 <div class="flex items-center gap-3 mb-2">
@@ -18,10 +33,8 @@
             {{-- FORMULARIO --}}
             <form action="{{ route('clientes.store') }}" method="POST" class="space-y-6">
             @csrf
-                
-                {{-- ============================================ --}}
+
                 {{-- CARD 1: INFORMACIÓN PERSONAL --}}
-                {{-- ============================================ --}}
                 <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-orange-500 overflow-hidden">
                     <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
                         <div class="flex items-center gap-3">
@@ -88,9 +101,7 @@
                     </div>
                 </div>
 
-                {{-- ============================================ --}}
                 {{-- CARD 2: INFORMACIÓN FISCAL (OPCIONAL) --}}
-                {{-- ============================================ --}}
                 <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border-2 border-gray-300 dark:border-zinc-700 overflow-hidden">
                     <div class="bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-4">
                         <div class="flex items-center gap-3">
@@ -154,9 +165,7 @@
                     </div>
                 </div>
 
-                {{-- ============================================ --}}
-                {{-- INFORMACIÓN DE PLAN (SOLO LECTURA) --}}
-                {{-- ============================================ --}}
+                {{-- NUEVA SECCIÓN: SELECCIÓN / ACTUALIZACIÓN DE PLAN --}}
                 <div class="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-xl border-2 border-orange-300 dark:border-orange-700 p-6">
                     <div class="flex items-start gap-4">
                         <flux:icon.sparkles class="size-8 text-orange-600 flex-shrink-0" />
@@ -165,29 +174,65 @@
                                 Puedes actualizar tu plan
                             </h4>
                             <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                                Tu cuenta aún no tiene un plan. Puedes actualizar tu plan desde la sección de subcripción.
+                                Selecciona un plan aquí. Puedes:
+                                <ul class="list-disc list-inside">
+                                    <li>Seleccionarlo ahora y se guardará junto con tu registro.</li>
+                                    <li>O, si ya completaste tu registro, usar "Actualizar plan" para cambiarlo de inmediato (sin pago en modo demo).</li>
+                                </ul>
                             </p>
-                            <div class="flex flex-wrap gap-2">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                    <flux:icon.check class="size-4 mr-1" />
-                                    Gestión básica de menús
-                                </span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                    <flux:icon.check class="size-4 mr-1" />
-                                    Hasta 50 platillos
-                                </span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                    <flux:icon.check class="size-4 mr-1" />
-                                    1 establecimiento
-                                </span>
+
+                            <input type="hidden" name="plan" id="plan_input" value="{{ old('plan') }}">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                {{-- Básico --}}
+                                <label class="plan-card p-4 rounded-lg border cursor-pointer" data-plan="basico" for="plan_basico">
+                                    <input type="radio" name="plan_radio" id="plan_basico" value="basico" class="hidden" 
+                                        @if(old('plan') === 'basico') checked @endif>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h5 class="font-bold text-lg">Plan Básico</h5>
+                                            <p class="text-sm text-gray-600">$299 / mes — 1 establecimiento, promociones ilimitadas</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-2xl font-bold text-orange-500">$299</span>
+                                            <div class="text-xs text-gray-500">/mes</div>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                {{-- Premium --}}
+                                <label class="plan-card p-4 rounded-lg border cursor-pointer" data-plan="premium" for="plan_premium">
+                                    <input type="radio" name="plan_radio" id="plan_premium" value="premium" class="hidden"
+                                        @if(old('plan') === 'premium') checked @endif>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h5 class="font-bold text-lg">Plan Premium</h5>
+                                            <p class="text-sm text-gray-600">$599 / mes — establecimientos ilimitados, API access</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-2xl font-bold text-orange-600">$599</span>
+                                            <div class="text-xs text-gray-500">/mes</div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button type="button" id="update-plan-btn" class="px-4 py-2 bg-orange-600 text-white rounded-lg shadow hover:bg-orange-700">
+                                    Actualizar plan (rápido)
+                                </button>
+
+                                <button type="button" id="clear-plan-btn" class="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-50">
+                                    Quitar selección
+                                </button>
+
+                                <p class="text-xs text-gray-500 ml-3 self-center">Si quieres guardar la selección junto con el registro, haz clic en "Guardar y Continuar".</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- ============================================ --}}
                 {{-- BOTONES DE ACCIÓN --}}
-                {{-- ============================================ --}}
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
                     <a 
                         href="{{ route('dashboard') }}" 
@@ -212,10 +257,8 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Validación del formulario
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Inicializando validación del formulario...');
-
+            // Variables principales
             const form = document.querySelector('form[action*="clientes.store"]');
             const submitBtn = document.getElementById('submit-btn');
             const btnText = document.getElementById('btn-text');
@@ -223,6 +266,108 @@
             const telefonoInput = document.getElementById('telefono');
             const rfcInput = document.getElementById('rfc_titular');
 
+            // Plan UI
+            const planCards = document.querySelectorAll('.plan-card');
+            const planInputHidden = document.getElementById('plan_input');
+            const updatePlanBtn = document.getElementById('update-plan-btn');
+            const clearPlanBtn = document.getElementById('clear-plan-btn');
+            const csrfToken = '{{ csrf_token() }}';
+
+            // Manejo selección visual de plan
+            function clearPlanSelectionVisual() {
+                planCards.forEach(c => {
+                    c.classList.remove('border-orange-500', 'bg-orange-50', 'ring-2');
+                    const radio = c.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = false;
+                });
+            }
+
+            planCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const plan = card.getAttribute('data-plan');
+                    clearPlanSelectionVisual();
+                    card.classList.add('border-orange-500', 'bg-orange-50', 'ring-2');
+                    const radio = card.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = true;
+                    planInputHidden.value = plan;
+                });
+            });
+
+            clearPlanBtn.addEventListener('click', function() {
+                clearPlanSelectionVisual();
+                planInputHidden.value = '';
+            });
+
+            // Actualizar plan rápido (AJAX) — para usuarios que ya tienen cliente creado
+            updatePlanBtn.addEventListener('click', function() {
+                const selectedPlan = planInputHidden.value;
+                if (!selectedPlan) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Ningún plan seleccionado',
+                        text: 'Por favor selecciona un plan antes de actualizar.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    return;
+                }
+
+                // Mostrar confirmación
+                Swal.fire({
+                    title: '¿Actualizar plan?',
+                    html: `Se cambiará tu plan a <strong>${selectedPlan.toUpperCase()}</strong>.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, actualizar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#F7941D'
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        // Enviar petición AJAX
+                        Swal.fire({
+                            title: 'Actualizando plan...',
+                            text: 'Por favor espera',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => Swal.showLoading()
+                        });
+
+                        fetch("{{ route('clientes.changePlan') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            body: JSON.stringify({ plan: selectedPlan })
+                        })
+                        .then(async resp => {
+                            const json = await resp.json().catch(() => ({}));
+                            if (!resp.ok) throw json;
+                            return json;
+                        })
+                        .then(data => {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Plan actualizado!',
+                                text: `Tu plan ha sido cambiado a ${selectedPlan.toUpperCase()}`,
+                                confirmButtonColor: '#F7941D'
+                            }).then(() => location.reload());
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            const msg = err?.message || 'Error al actualizar el plan';
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: msg,
+                                confirmButtonColor: '#ef4444'
+                            });
+                        });
+                    }
+                });
+            });
+
+            // --- Validación de formulario (tal como ya tenías) ---
             if (!form) {
                 console.error('No se encontró el formulario');
                 return;
@@ -232,8 +377,6 @@
                 console.error('No se encontraron los campos requeridos');
                 return;
             }
-
-            console.log('Formulario encontrado, configurando validaciones...');
 
             // Validación en tiempo real del nombre (solo letras y espacios)
             nombreInput.addEventListener('input', function(e) {
@@ -264,16 +407,18 @@
                 });
             }
 
-            // Manejo del envío del formulario
+            // Al enviar el formulario, enviamos también el plan seleccionado (si existe)
             form.addEventListener('submit', function(e) {
-                console.log('Formulario enviado, validando...');
+                const selectedPlanFromRadio = document.querySelector('input[name="plan_radio"]:checked');
+                if (selectedPlanFromRadio) {
+                    planInputHidden.value = selectedPlanFromRadio.value;
+                }
 
                 const nombre = nombreInput.value.trim();
                 const telefono = telefonoInput.value.trim();
 
                 if (!nombre || nombre.length < 3) {
                     e.preventDefault();
-                    console.log('Error: Nombre inválido');
                     Swal.fire({
                         icon: "error",
                         title: "Campo incompleto",
@@ -287,7 +432,6 @@
 
                 if (!telefono || telefono.length < 10) {
                     e.preventDefault();
-                    console.log('Error: Teléfono inválido');
                     Swal.fire({
                         icon: "error",
                         title: "Campo incompleto",
@@ -302,7 +446,6 @@
                 const rfc = rfcInput ? rfcInput.value.trim() : '';
                 if (rfc && rfc.length > 0 && rfc.length !== 13) {
                     e.preventDefault();
-                    console.log('Error: RFC inválido');
                     Swal.fire({
                         icon: "error",
                         title: "RFC inválido",
@@ -314,13 +457,10 @@
                     return false;
                 }
 
-                console.log('Validación exitosa, enviando formulario...');
-
-                // Deshabilitar botón y mostrar loading
+                // Mostrar loader y permitir envío
                 submitBtn.disabled = true;
                 btnText.textContent = 'Guardando...';
 
-                // Mostrar loader con SweetAlert2
                 Swal.fire({
                     title: 'Guardando información...',
                     html: 'Por favor espera mientras procesamos tus datos',
@@ -332,11 +472,9 @@
                     }
                 });
 
-                // Permitir que el formulario se envíe
                 return true;
             });
 
-            console.log('✅ Validación de formulario configurada correctamente');
         });
     </script>
     @endpush

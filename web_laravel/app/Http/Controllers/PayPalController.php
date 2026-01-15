@@ -1,4 +1,21 @@
 <?php
+/**
+ * Nombre del archivo        : PayPalController.php
+ * Descripción               : Controlador para manejar pagos con PayPal.
+ *                             Gestiona la creación y captura de órdenes de pago
+ *                             para actualización de planes de clientes.
+ * Fecha de creación         : 06/01/2026
+ * Elaboró                   : Alan Osvaldo Basilio Delgado
+ * Fecha de liberación       : 06/01/2026
+ * Autorizó                  : Maileth Patiño Ensastegui
+ * Versión                   : 1.4
+ * Fecha de mantenimiento    : 12/01/2026
+ * Folio de mantenimiento    :
+ * Tipo de mantenimiento     : UX / Corrección estado suscripción
+ * Descripción del mantenimiento: Actualización de suscripcion_activa y fechas al capturar pago.
+ * Responsable               : Alan Osvaldo Basilio Delgado
+ * Revisor                   : Maileth Patiño Ensastegui
+ */
 
 namespace App\Http\Controllers;
 
@@ -10,24 +27,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Controlador para manejar pagos con PayPal
- *
- * Gestiona la creación y captura de órdenes de pago
- * para actualización de planes de clientes
- */
 class PayPalController extends Controller
 {
     public function __construct(private PayPalService $paypal)
     {
     }
 
-    /**
-     * Crea una orden de pago en PayPal
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function create(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -47,19 +52,20 @@ class PayPalController extends Controller
             ], 422);
         }
 
-        // Precios de los planes
         $prices = [
-            'basico' => 299.00,    // $299 MXN
-            'premium' => 599.00    // $599 MXN
+            'basico' => 299.00,
+            'premium' => 599.00
         ];
 
         $planName = $data['plan'];
         $amount = $prices[$planName];
 
-        // MODO DEMO: Simular creación de orden
         if (config('paypal.mode') === 'demo') {
             DB::transaction(function () use ($cliente, $planName) {
                 $cliente->plan = $planName;
+                $cliente->suscripcion_activa = true;
+                $cliente->fecha_inicio_suscripcion = now();
+                $cliente->fecha_fin_suscripcion = now()->addMonth();
                 $cliente->save();
             });
 
@@ -99,16 +105,8 @@ class PayPalController extends Controller
         ]);
     }
 
-    /**
-     * Captura el pago de una orden aprobada
-     *
-     * @param Request $request
-     * @param string $orderId
-     * @return JsonResponse
-     */
     public function capture(Request $request, string $orderId): JsonResponse
     {
-        // Obtener información de la orden
         $orderInfo = $this->paypal->getOrder($orderId);
 
         if (($orderInfo['status'] ?? 500) !== 200) {
@@ -125,13 +123,12 @@ class PayPalController extends Controller
         }
 
         $orderStatus = $orderInfo['body']['status'] ?? null;
-        $orderBody = $orderInfo['body'];
 
         if ($orderStatus !== 'APPROVED') {
             Log::warning('Order not in APPROVED state', [
                 'orderId' => $orderId,
                 'status' => $orderStatus,
-                'order' => $orderBody
+                'order' => $orderInfo['body']
             ]);
 
             $message = match ($orderStatus) {
@@ -149,7 +146,6 @@ class PayPalController extends Controller
             ], 422);
         }
 
-        // Capturar el pago
         $capture = $this->paypal->captureOrder($orderId);
 
         if (($capture['status'] ?? 500) !== 201) {
@@ -188,7 +184,6 @@ class PayPalController extends Controller
             ], 422);
         }
 
-        // Extraer información de la referencia
         $reference = data_get($captureBody, 'purchase_units.0.reference_id', '');
 
         if (!preg_match('/^plan-(\w+)-cliente-(\d+)-(\d+)$/', $reference, $matches)) {
@@ -220,10 +215,12 @@ class PayPalController extends Controller
             ], 403);
         }
 
-        // Actualizar el plan del cliente
         try {
             DB::transaction(function () use ($cliente, $planName) {
                 $cliente->plan = $planName;
+                $cliente->suscripcion_activa = true;
+                $cliente->fecha_inicio_suscripcion = now();
+                $cliente->fecha_fin_suscripcion = now()->addMonth();
                 $cliente->save();
             });
 

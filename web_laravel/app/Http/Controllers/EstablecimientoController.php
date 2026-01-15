@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Nombre del archivo        : EstablecimientoController.php
  * Descripción               : Controlador de establecimientos del cliente
@@ -7,11 +6,13 @@
  * Elaboró                   : Alan Osvaldo Basilio Delgado
  * Fecha de liberación       : 06/01/2026
  * Autorizó                  : Maileth Patiño Ensastegui
- * Version                   : 1.0
- * Fecha de mantenimiento    : 06/01/2026
- * Folio de mantenimiento    :
- * Tipo de mantenimiento     : Seguridad / UX
- * Descripción del mantenimiento: Implementación de validación de cliente y plan con SweetAlert
+ * Versión                   : 1.2
+ * Fecha de mantenimiento    : 20/01/2026
+ * Tipo de mantenimiento     : Seguridad / UX / Validación
+ * Descripción del mantenimiento: Ajustes en validación de tipos (coincidentes con seeder),
+ *                                verificación de correspondencia categoría->tipo,
+ *                                y coherencia en la señalización de SweetAlert vía sesión.
+ *                                Uso consistente de alertas con botón negro y alertas de éxito sin botón.
  * Responsable               : Alan Osvaldo Basilio Delgado
  * Revisor                   : Maileth Patiño Ensastegui
  */
@@ -23,13 +24,9 @@ use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Helpers\SweetAlertHelper;
 
 class EstablecimientoController extends Controller
 {
-    /**
-     * Muestra la lista de establecimientos
-     */
     public function index()
     {
         $user = Auth::user();
@@ -50,9 +47,6 @@ class EstablecimientoController extends Controller
         return view('establecimientos.index', compact('establecimientos'));
     }
 
-    /**
-     * Muestra el formulario de creación
-     */
     public function create()
     {
         $user = Auth::user();
@@ -84,7 +78,7 @@ class EstablecimientoController extends Controller
                     'title' => 'Límite alcanzado',
                     'text' => "Has alcanzado el límite de establecimientos para tu plan {$cliente->plan}. Actualiza tu plan para agregar más.",
                     'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#F7941D',
+                    'confirmButtonColor' => '#000000',
                     'draggable' => true,
                 ]);
         }
@@ -94,9 +88,6 @@ class EstablecimientoController extends Controller
         return view('establecimientos.create', compact('categorias'));
     }
 
-    /**
-     * Guarda el nuevo establecimiento
-     */
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -118,7 +109,7 @@ class EstablecimientoController extends Controller
         try {
             $validated = $request->validate([
                 'nombre_establecimiento' => 'required|string|min:3|max:255',
-                'tipo_establecimiento' => 'required|in:Restaurante,Cafeteria,Food Truck,Panaderia,Bar,Otro',
+                'tipo_establecimiento' => 'required|in:Restaurante,Cafetería,Food Truck,Panadería,Bar,Otro',
                 'tipo_establecimiento_otro' => 'nullable|string|max:100',
                 'lat' => 'required|numeric|between:-90,90',
                 'lng' => 'required|numeric|between:-180,180',
@@ -136,21 +127,6 @@ class EstablecimientoController extends Controller
                 'tipos_pago_establecimiento' => 'nullable|array',
                 'categoria_id' => 'nullable|exists:categorias,id',
                 'horarios' => 'nullable|array',
-            ], [
-                'nombre_establecimiento.required' => 'El nombre del establecimiento es obligatorio',
-                'nombre_establecimiento.min' => 'El nombre debe tener al menos 3 caracteres',
-                'tipo_establecimiento.required' => 'Debes seleccionar un tipo de establecimiento',
-                'lat.required' => 'Debes seleccionar la ubicación en el mapa',
-                'lng.required' => 'Debes seleccionar la ubicación en el mapa',
-                'direccion_completa_establecimiento.required' => 'La dirección es obligatoria',
-                'telefono_establecimiento.required' => 'El teléfono es obligatorio',
-                'telefono_establecimiento.regex' => 'El teléfono solo puede contener números',
-                'correo_establecimiento.required' => 'El correo es obligatorio',
-                'correo_establecimiento.email' => 'Debes ingresar un correo válido',
-                'codigo_postal.size' => 'El código postal debe tener 5 dígitos',
-                'codigo_postal.regex' => 'El código postal solo puede contener números',
-                'rfc_establecimiento.size' => 'El RFC debe tener exactamente 13 caracteres',
-                'rfc_establecimiento.regex' => 'El formato del RFC no es válido',
             ]);
 
             Log::info('Validación exitosa', ['validated' => $validated]);
@@ -165,6 +141,29 @@ class EstablecimientoController extends Controller
         $tipoFinal = $validated['tipo_establecimiento'];
         if ($tipoFinal === 'Otro' && !empty($validated['tipo_establecimiento_otro'])) {
             $tipoFinal = $validated['tipo_establecimiento_otro'];
+        }
+
+        if (!empty($validated['categoria_id'])) {
+            $categoria = Categoria::find($validated['categoria_id']);
+            if (!$categoria) {
+                return redirect()->back()->withInput()->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Categoría inválida',
+                    'text' => 'La categoría seleccionada no existe.',
+                    'confirmButtonText' => 'Entendido',
+                    'confirmButtonColor' => '#000000',
+                ]);
+            }
+
+            if ($validated['tipo_establecimiento'] !== 'Otro' && $categoria->tipo_establecimiento !== $validated['tipo_establecimiento']) {
+                return redirect()->back()->withInput()->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Categoría no permitida',
+                    'text' => 'La categoría seleccionada no corresponde con el tipo de establecimiento elegido.',
+                    'confirmButtonText' => 'Entendido',
+                    'confirmButtonColor' => '#000000',
+                ]);
+            }
         }
 
         $datosEstablecimiento = [
@@ -199,23 +198,29 @@ class EstablecimientoController extends Controller
 
         try {
             $establecimiento = Establecimientos::create($datosEstablecimiento);
-            
+
             Log::info('ESTABLECIMIENTO CREADO EXITOSAMENTE', [
                 'id' => $establecimiento->id,
                 'nombre' => $establecimiento->nombre_establecimiento
             ]);
 
-            return redirect()
-                ->route('establecimientos.index')
-                ->with('swal', [
-                    'icon' => 'success',
-                    'title' => 'Establecimiento creado',
-                    'text' => "'{$establecimiento->nombre_establecimiento}' ha sido registrado exitosamente.",
-                    'confirmButtonText' => 'Continuar',
-                    'confirmButtonColor' => '#F7941D',
-                    'draggable' => true,
-                    'timer' => 3000
-                ]);
+            // ---------------------------
+            // RESPUESTA FINAL: REDIRECCIÓN AL INDEX CON SWEETALERT EN SESIÓN
+            // ---------------------------
+            $cfg = [
+                'position' => 'top-end',
+                'icon' => 'success',
+                // Mantengo el título solicitado originalmente
+                'title' => 'Establecimiento creado',
+                'text' => "{$establecimiento->nombre_establecimiento} ha sido registrado exitosamente.",
+                'showConfirmButton' => false,
+                'timer' => 1500,
+                'confirmButtonColor' => '#000000'
+            ];
+
+            Log::info('Preparando redirect()->route(\'establecimientos.index\') con swal', $cfg);
+
+            return redirect()->route('establecimientos.index')->with('swal', $cfg);
 
         } catch (\Exception $e) {
             Log::error('ERROR AL CREAR ESTABLECIMIENTO', [
@@ -233,15 +238,11 @@ class EstablecimientoController extends Controller
                     'title' => 'Error al guardar',
                     'text' => 'Detalles: ' . $e->getMessage(),
                     'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#F7941D',
-                    'draggable' => true,
+                    'confirmButtonColor' => '#000000',
                 ]);
         }
     }
 
-    /**
-     * Muestra el detalle de un establecimiento
-     */
     public function show($id)
     {
         $user = Auth::user();
@@ -262,9 +263,6 @@ class EstablecimientoController extends Controller
         return view('establecimientos.show', compact('establecimiento'));
     }
 
-    /**
-     * Muestra el formulario de edición
-     */
     public function edit($id)
     {
         $user = Auth::user();
@@ -287,9 +285,6 @@ class EstablecimientoController extends Controller
         return view('establecimientos.edit', compact('establecimiento', 'categorias'));
     }
 
-    /**
-     * Actualiza un establecimiento
-     */
     public function update(Request $request, $id)
     {
         $user = Auth::user();
@@ -315,7 +310,7 @@ class EstablecimientoController extends Controller
         try {
             $validated = $request->validate([
                 'nombre_establecimiento' => 'required|string|min:3|max:255',
-                'tipo_establecimiento' => 'required|in:Restaurante,Cafeteria,Food Truck,Panaderia,Bar,Otro',
+                'tipo_establecimiento' => 'required|in:Restaurante,Cafetería,Food Truck,Panadería,Bar,Otro',
                 'tipo_establecimiento_otro' => 'nullable|string|max:100',
                 'lat' => 'required|numeric|between:-90,90',
                 'lng' => 'required|numeric|between:-180,180',
@@ -338,6 +333,20 @@ class EstablecimientoController extends Controller
             $tipoFinal = $validated['tipo_establecimiento'];
             if ($tipoFinal === 'Otro' && !empty($validated['tipo_establecimiento_otro'])) {
                 $tipoFinal = $validated['tipo_establecimiento_otro'];
+            }
+
+            // Verificar correspondencia categoría->tipo como en store()
+            if (!empty($validated['categoria_id'])) {
+                $categoria = Categoria::find($validated['categoria_id']);
+                if ($validated['tipo_establecimiento'] !== 'Otro' && $categoria && $categoria->tipo_establecimiento !== $validated['tipo_establecimiento']) {
+                    return redirect()->back()->withInput()->with('swal', [
+                        'icon' => 'error',
+                        'title' => 'Categoría no permitida',
+                        'text' => 'La categoría seleccionada no corresponde con el tipo de establecimiento elegido.',
+                        'confirmButtonText' => 'Entendido',
+                        'confirmButtonColor' => '#000000',
+                    ]);
+                }
             }
 
             $establecimiento->update([
@@ -368,13 +377,13 @@ class EstablecimientoController extends Controller
             return redirect()
                 ->route('establecimientos.index')
                 ->with('swal', [
+                    'position' => 'top-end',
                     'icon' => 'success',
                     'title' => 'Establecimiento actualizado',
                     'text' => 'Los cambios se han guardado exitosamente.',
-                    'confirmButtonText' => 'Continuar',
-                    'confirmButtonColor' => '#F7941D',
-                    'draggable' => true,
-                    'timer' => 3000
+                    'showConfirmButton' => false,
+                    'timer' => 1500,
+                    'confirmButtonColor' => '#000000'
                 ]);
 
         } catch (\Exception $e) {
@@ -392,15 +401,11 @@ class EstablecimientoController extends Controller
                     'title' => 'Error al actualizar',
                     'text' => 'Hubo un error al actualizar el establecimiento. Por favor intenta de nuevo.',
                     'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#F7941D',
-                    'draggable' => true,
+                    'confirmButtonColor' => '#000000',
                 ]);
         }
     }
 
-    /**
-     * Elimina un establecimiento
-     */
     public function destroy($id)
     {
         $user = Auth::user();
@@ -430,13 +435,13 @@ class EstablecimientoController extends Controller
             return redirect()
                 ->route('establecimientos.index')
                 ->with('swal', [
+                    'position' => 'top-end',
                     'icon' => 'success',
                     'title' => 'Establecimiento eliminado',
                     'text' => "'{$nombreEstablecimiento}' ha sido eliminado exitosamente.",
-                    'confirmButtonText' => 'Continuar',
-                    'confirmButtonColor' => '#F7941D',
-                    'draggable' => true,
-                    'timer' => 3000
+                    'showConfirmButton' => false,
+                    'timer' => 1500,
+                    'confirmButtonColor' => '#000000'
                 ]);
 
         } catch (\Exception $e) {
@@ -453,8 +458,7 @@ class EstablecimientoController extends Controller
                     'title' => 'Error al eliminar',
                     'text' => 'Hubo un error al eliminar el establecimiento. Por favor intenta de nuevo.',
                     'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#F7941D',
-                    'draggable' => true,
+                    'confirmButtonColor' => '#000000',
                 ]);
         }
     }

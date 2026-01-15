@@ -1,18 +1,20 @@
-{{--
+<?php
+/*
     Nombre del archivo        : app.blade.php
     Descripción               : Layout principal de la aplicación
     Fecha de creación         : 06/01/2026
     Elaboró                   : Alan Osvaldo Basilio Delgado
     Fecha de liberación       : 06/01/2026
     Autorizó                  : Maileth Patiño Ensastegui
-    Versión                   : 1.3
+    Versión                   : 1.4
     Fecha de mantenimiento    : 07/01/2026
     Folio de mantenimiento    :
     Tipo de mantenimiento     : UX / Compatibilidad Livewire
     Descripción del mantenimiento: Guard SPA para rutas protegidas y compatibilidad Swal con wire:navigate
     Responsable               : Alan Osvaldo Basilio Delgado
     Revisor                   : Maileth Patiño Ensastegui
---}}
+*/
+?>
 
 @props(['title' => config('app.name', 'SBVC - Comidas')])
 
@@ -70,7 +72,8 @@
     >
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-        <div class="flex items-center gap-3 px-4 py-4 border-b border-zinc-200 dark:border-zinc-700">
+        {{-- header del sidebar: línea (border-b) eliminada según petición --}}
+        <div class="flex items-center gap-3 px-4 py-4">
             <div class="flex-shrink-0">
                 <x-app-logo-icon class="size-9" />
             </div>
@@ -83,7 +86,8 @@
         </div>
 
         <flux:navlist variant="outline" class="p-4">
-            <flux:navlist.group :heading="__('Plataforma')">
+            {{-- Cambiado "Plataforma" por "Menú" --}}
+            <flux:navlist.group :heading="__('Menú')">
 
                 <flux:navlist.item icon="home"
                     :href="route('dashboard')"
@@ -142,7 +146,7 @@
 
         <flux:spacer />
 
-        <div class="border-t border-zinc-200 dark:border-zinc-700 p-4">
+        <div class="p-4">
             <flux:dropdown position="top" align="start">
                 <flux:profile
                     :name="auth()->user()->name"
@@ -159,6 +163,7 @@
                         </div>
                     </flux:menu.radio.group>
 
+                    {{-- Mantengo separators internos del menú; no se tocó la separación de items --}}
                     <flux:menu.separator />
 
                     <flux:menu.item :href="route('profile.edit')" icon="user" wire:navigate>

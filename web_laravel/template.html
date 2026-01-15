@@ -1,0 +1,230 @@
+<!-- PROLOGUE: Plantilla actualizada con colores corporativos según documento (verde #19D200, naranja #FF6600, azul #06337C, rojo #EE0000, negro #000000, blanco #FFFFFF). -->
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Guía de Estilos y Colores - SBVC</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  /* Variables de color (modo claro por defecto) */
+  :root{
+    --color-white: #FFFFFF;
+    --color-black: #000000;
+
+    --primary: #FF6600;   /* Naranja */
+    --success: #19D200;   /* Verde */
+    --info: #06337C;      /* Azul */
+    --danger: #EE0000;    /* Rojo */
+
+    --purple-1: #241178;
+    --purple-2: #1A0D5A;
+    --olive: #272800;
+
+    /* Neutros */
+    --bg: #FFFFFF;
+    --card-bg: #F8FAFC; /* bg-zinc-50 like */
+    --text: #0F172A; /* zinc-900 */
+    --muted: #475569; /* zinc-700 */
+  }
+
+  /* Dark mode overrides */
+  html.dark {
+    --bg: #0B0B0C;       /* overall page bg */
+    --card-bg: #0F1724;  /* slightly lighter container in dark */
+    --text: #E6EEF8;     /* near white text */
+    --muted: #A3B4C8;    /* muted in dark */
+    /* Slightly alter primary to be more vivid on dark */
+    --primary: #FF7A1A;
+  }
+
+  /* Apply root variables to page basic look (so Tailwind classes still work) */
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  /* Custom utility-like classes for components */
+  .btn-primary {
+    background: var(--primary);
+    color: var(--color-white);
+  }
+  .btn-primary:hover { filter: brightness(.95); }
+
+  .btn-success { background: var(--success); color: var(--color-white); }
+  .btn-danger  { background: var(--danger);  color: var(--color-white); }
+  .btn-black   { background: var(--color-black); color: var(--color-white); }
+
+  .badge-ok {
+    background: linear-gradient(180deg, rgba(25,210,0,0.12), rgba(25,210,0,0.06));
+    color: #064e00;
+  }
+  .badge-warning {
+    background: linear-gradient(180deg, rgba(255,102,0,0.10), rgba(255,102,0,0.04));
+    color: #5a2c00;
+  }
+
+  /* Small swatch boxes */
+  .swatch { width:150px; height:100px; border-radius:8px; box-shadow: 0 6px 18px rgba(2,6,23,0.06); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; }
+  .swatch.light-text { color: var(--text); font-weight:600; }
+
+  /* Dark/light friendly link/label colors */
+  .label-accent { color: var(--text); }
+  .link-accent { color: var(--primary); text-decoration: underline; }
+  html.dark .link-accent { color: var(--primary); }
+
+  /* Small responsive tweaks */
+  @media (max-width:640px){
+    .swatch { width:120px; height:80px; font-size:12px; }
+  }
+</style>
+
+<script>
+  // Toggle dark mode and persist choice
+  function toggleDark() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    if(isDark) {
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('sbvc-theme','dark');
+      document.getElementById('modeBtn').textContent = 'Cambiar a modo claro';
+    } else {
+      document.documentElement.classList.add('light');
+      localStorage.setItem('sbvc-theme','light');
+      document.getElementById('modeBtn').textContent = 'Cambiar a modo oscuro';
+    }
+  }
+
+  // On load, restore preference
+  document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('sbvc-theme');
+    if(saved === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      const btn = document.getElementById('modeBtn');
+      if(btn) btn.textContent = 'Cambiar a modo claro';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      const btn = document.getElementById('modeBtn');
+      if(btn) btn.textContent = 'Cambiar a modo oscuro';
+    }
+  });
+</script>
+</head>
+<body class="p-8 font-sans">
+
+  <h1 class="text-3xl font-bold mb-6">Guía de Estilos y Colores - SBVC</h1>
+
+  <button id="modeBtn" onclick="toggleDark()" class="mb-8 px-4 py-2 rounded inline-flex items-center gap-2 btn-primary hover:shadow-lg transition">
+    Cambiar modo claro/oscuro
+  </button>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold mb-4">Botones (colores corporativos)</h2>
+    <div class="flex flex-wrap gap-4">
+      <button class="px-5 py-2 rounded-md btn-primary font-medium shadow-sm transition">
+        Botón Primario (Nuevo, Guardar)
+      </button>
+
+      <button class="px-5 py-2 rounded-md btn-success font-medium shadow-md transition">
+        Botón Positivo (Editar, Confirmar)
+      </button>
+
+      <button class="px-5 py-2 rounded-md btn-danger font-medium shadow-md transition">
+        Botón Destructivo (Eliminar, Cancelar)
+      </button>
+
+      <button class="px-5 py-2 rounded-md btn-black font-medium shadow-md transition">
+        Botón Negro (Primer paso)
+      </button>
+    </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold mb-4">Badges de Estado</h2>
+    <div class="flex flex-wrap gap-6 items-center">
+      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium badge-ok">
+        Verificado / Activo
+      </span>
+      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium badge-warning">
+        Sin verificar / Vencido
+      </span>
+    </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold mb-4">Textos y Fondos Neutros</h2>
+    <div class="space-y-2">
+      <p class="font-semibold">Texto principal claro / oscuro</p>
+      <p class="text-sm" style="color:var(--muted)">Texto secundario / informativo</p>
+      <div class="p-4 rounded" style="background:var(--card-bg)">Fondo claro / oscuro para contenedores</div>
+    </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold mb-4">Paleta Corporativa (swatches)</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="space-y-2">
+        <div class="swatch light-text" style="background:var(--color-white); border:1px solid #e6e6e6; color: #000">#FFFFFF</div>
+        <div class="text-sm text-center mt-1">Blanco (#FFFFFF)</div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="swatch" style="background:var(--color-black)">#000000</div>
+        <div class="text-sm text-center mt-1">Negro (#000000)</div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="swatch" style="background:var(--purple-1)">#241178</div>
+        <div class="text-sm text-center mt-1">Púrpura (#241178)</div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="swatch" style="background:var(--purple-2)">#1A0D5A</div>
+        <div class="text-sm text-center mt-1">Púrpura oscuro (#1A0D5A)</div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="swatch" style="background:var(--olive)">#272800</div>
+        <div class="text-sm text-center mt-1">Oliva (#272800)</div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="swatch" style="background:var(--success)">#19D200</div>
+        <div class="text-sm text-center mt-1">Verde (RGB 25,210,0 → #19D200)</div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="swatch" style="background:var(--primary)">#FF6600</div>
+        <div class="text-sm text-center mt-1">Naranja (RGB 255,102,0 → #FF6600) - Primario</div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="swatch" style="background:var(--danger)">#EE0000</div>
+        <div class="text-sm text-center mt-1">Rojo (RGB 238,0,0 → #EE0000)</div>
+      </div>
+
+      <div class="space-y-2">
+        <div class="swatch" style="background:var(--info)">#06337C</div>
+        <div class="text-sm text-center mt-1">Azul (RGB 6,51,124 → #06337C)</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Ejemplo Limpio: Tipo sin colores ni sombras</h2>
+    <p class="font-medium">Formal</p>
+    <p class="font-medium">Informal</p>
+    <p class="font-medium">N/E</p>
+  </section>
+
+  <footer class="mt-12 text-sm" style="color:var(--muted)">
+    <p>Guía generada con la paleta especificada. Ajusta variables en :root (estilos en &lt;style&gt;) si necesitas pequeñas variaciones.</p>
+  </footer>
+
+</body>
+</html>

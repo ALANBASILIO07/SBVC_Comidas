@@ -1,24 +1,36 @@
 /**
  * Nombre del archivo        : app.js
- * Descripción               : JavaScript principal de la aplicación
+ * Descripción               : JavaScript principal de la aplicación.
+ *                            Punto de entrada principal que:
+ *                              - Inicializa utilidades globales (SweetAlert2, Toasts).
+ *                              - Implementa guardias de navegación protegida (wire:navigate).
+ *                              - Carga información de autenticación inyectada por Blade.
+ *                              - Inicializa validaciones de formulario (establecimiento).
  * Fecha de creación         : 06/01/2026
  * Elaboró                   : Alan Osvaldo Basilio Delgado
  * Fecha de liberación       : 06/01/2026
  * Autorizó                  : Maileth Patiño Ensastegui
- * Versión                  : 1.3
- * Fecha de mantenimiento    : 07/01/2026
+ * Versión                   : 1.4
+ * Fecha de mantenimiento    : 18/01/2026
  * Folio de mantenimiento    :
- * Tipo de mantenimiento     : UX / Compatibilidad Livewire
- * Descripción del mantenimiento: Guard para evitar loading infinito con wire:navigate en rutas protegidas + logs
+ * Tipo de mantenimiento     : UX / Compatibilidad Livewire + Modularización validación establecimiento
+ * Descripción del mantenimiento: Guard para evitar loading infinito con wire:navigate en rutas protegidas + logs,
+ *                                y modularización validación formulario establecimiento.
  * Responsable               : Alan Osvaldo Basilio Delgado
  * Revisor                   : Maileth Patiño Ensastegui
  */
+
+/* PROLOGUE: Entrada JS principal - importa bootstrap, SweetAlert2 y módulos app. */
+/* NOTA: No eliminar los métodos ni la lógica existente; se ha mantenido todo funcional. */
 
 // ===== IMPORTAR SWEETALERT2 =====
 import Swal from 'sweetalert2';
 
 // Hacer SweetAlert2 disponible globalmente
 window.Swal = Swal;
+
+// Importar validación y toggle de establecimiento
+import initEstablecimientoForm from './establecimiento.js';
 
 // ===============================
 // [SBVC][FIX] Guard anti-loading wire:navigate + logs (mejorado)
@@ -287,6 +299,12 @@ document.addEventListener('DOMContentLoaded', () => {
     sbvcLog('EVENT DOMContentLoaded');
     loadSbvcAuth();
     runSwalFromDom();
+    // Inicializar validación establecimiento
+    try {
+        initEstablecimientoForm();
+    } catch (err) {
+        sbvcWarn('initEstablecimientoForm falló durante DOMContentLoaded', err);
+    }
 });
 
 // ===============================

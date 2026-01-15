@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Nombre del archivo        : RequireActivePlan.php
  * Descripción               : Middleware para validar plan activo del cliente
@@ -7,11 +6,11 @@
  * Elaboró                   : Alan Osvaldo Basilio Delgado
  * Fecha de liberación       : 06/01/2026
  * Autorizó                  : Maileth Patiño Ensastegui
- * Version                   : 1.0
- * Fecha de mantenimiento    : 06/01/2026
+ * Version                   : 1.1
+ * Fecha de mantenimiento    : 12/01/2026
  * Folio de mantenimiento    :
  * Tipo de mantenimiento     : Seguridad / Control de acceso
- * Descripción del mantenimiento: Creación de middleware para validar planes
+ * Descripción del mantenimiento: Validar que la suscripción esté realmente activa (suscripcion_activa).
  * Responsable               : Alan Osvaldo Basilio Delgado
  * Revisor                   : Maileth Patiño Ensastegui
  */
@@ -41,10 +40,25 @@ class RequireActivePlan
 
         $cliente = $user->cliente;
 
-        // Verificar si tiene un plan activo (basico, estandar o premium)
-        $planesValidos = ['basico', 'estandar', 'premium'];
-        
-        if (empty($cliente->plan) || !in_array($cliente->plan, $planesValidos)) {
+        // Si la fecha de fin existe y ya pasó, marcar como inactiva
+        if ($cliente->fecha_fin_suscripcion && $cliente->fecha_fin_suscripcion->isPast()) {
+            // Actualizamos de forma segura
+            try {
+                $cliente->suscripcion_activa = false;
+                $cliente->save();
+            } catch (\Throwable $e) {
+                // Log opcional (no detener el flujo por el log)
+                \Log::warning('RequireActivePlan: error al actualizar suscripcion_activa', [
+                    'cliente_id' => $cliente->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            return SweetAlertHelper::planRequerido('subscripcion.index');
+        }
+
+        // Validar que exista un plan y que la suscripción esté activa
+        if (empty($cliente->plan) || !$cliente->suscripcion_activa) {
             return SweetAlertHelper::planRequerido('subscripcion.index');
         }
 

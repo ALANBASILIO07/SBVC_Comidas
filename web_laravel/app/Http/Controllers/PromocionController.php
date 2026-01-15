@@ -1,4 +1,17 @@
 <?php
+/*
+ * Nombre del archivo        : PromocionController.php
+ * Ruta                      : app/Http/Controllers/PromocionController.php
+ * Descripción               : Controlador para la gestión de promociones.
+ *                            - Valida existencia de establecimientos antes de crear.
+ *                            - Todas las notificaciones se emiten mediante SweetAlert (sesión 'swal').
+ *                            - Manejo básico de imágenes en disco público.
+ * Autor                     : Alan Osvaldo Basilio Delgado
+ * Fecha de creación         : 2026-01-14
+ * Versión                   : 1.6
+ * Responsable               : Alan Osvaldo Basilio Delgado
+ * Notas                     : Evitar mensajes de sesión en texto plano; usar siempre 'swal'.
+ */
 
 namespace App\Http\Controllers;
 
@@ -7,6 +20,7 @@ use App\Models\Establecimientos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class PromocionController extends Controller
 {
@@ -19,10 +33,15 @@ class PromocionController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => __('Atención'),
+                    'text' => __('Primero debes completar tu registro de cliente.'),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
-        $promociones = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
+        $promociones = Promociones::whereHas('establecimiento', function ($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->with('establecimiento')
           ->orderByDesc('created_at')
@@ -40,7 +59,12 @@ class PromocionController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => __('Atención'),
+                    'text' => __('Primero debes completar tu registro de cliente.'),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
         $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
@@ -48,8 +72,14 @@ class PromocionController extends Controller
             ->get();
 
         if ($establecimientos->isEmpty()) {
+            // Redirigimos a crear establecimiento y mostramos SweetAlert informativa
             return redirect()->route('establecimientos.create')
-                ->with('info', 'Primero debes crear un establecimiento para poder agregar promociones.');
+                ->with('swal', [
+                    'icon' => 'info',
+                    'title' => __('Necesitas un establecimiento'),
+                    'text' => __('Primero debes crear un establecimiento para poder agregar promociones.'),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
         return view('promociones.create', compact('establecimientos'));
@@ -64,7 +94,12 @@ class PromocionController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => __('Atención'),
+                    'text' => __('Primero debes completar tu registro de cliente.'),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
         $validated = $request->validate([
@@ -76,18 +111,18 @@ class PromocionController extends Controller
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'activo' => 'boolean'
         ], [
-            'establecimientos_id.required' => 'Debes seleccionar un establecimiento',
-            'establecimientos_id.exists' => 'El establecimiento seleccionado no es válido',
-            'titulo.required' => 'El título es obligatorio',
-            'titulo.min' => 'El título debe tener al menos 3 caracteres',
-            'descripcion.required' => 'La descripción es obligatoria',
-            'descripcion.min' => 'La descripción debe tener al menos 10 caracteres',
-            'fecha_inicio.required' => 'La fecha de inicio es obligatoria',
-            'fecha_inicio.after_or_equal' => 'La fecha de inicio no puede ser anterior a hoy',
-            'fecha_final.required' => 'La fecha final es obligatoria',
-            'fecha_final.after' => 'La fecha final debe ser posterior a la fecha de inicio',
-            'imagen.image' => 'El archivo debe ser una imagen',
-            'imagen.max' => 'La imagen no debe pesar más de 2MB',
+            'establecimientos_id.required' => __('Debes seleccionar un establecimiento'),
+            'establecimientos_id.exists' => __('El establecimiento seleccionado no es válido'),
+            'titulo.required' => __('El título es obligatorio'),
+            'titulo.min' => __('El título debe tener al menos 3 caracteres'),
+            'descripcion.required' => __('La descripción es obligatoria'),
+            'descripcion.min' => __('La descripción debe tener al menos 10 caracteres'),
+            'fecha_inicio.required' => __('La fecha de inicio es obligatoria'),
+            'fecha_inicio.after_or_equal' => __('La fecha de inicio no puede ser anterior a hoy'),
+            'fecha_final.required' => __('La fecha final es obligatoria'),
+            'fecha_final.after' => __('La fecha final debe ser posterior a la fecha de inicio'),
+            'imagen.image' => __('El archivo debe ser una imagen'),
+            'imagen.max' => __('La imagen no debe pesar más de 2MB'),
         ]);
 
         // Verificar que el establecimiento pertenece al cliente
@@ -97,11 +132,17 @@ class PromocionController extends Controller
 
         if (!$establecimiento) {
             return redirect()->back()
-                ->with('error', 'No tienes permisos para crear promociones en este establecimiento.');
+                ->withInput()
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => __('Permisos insuficientes'),
+                    'text' => __('No tienes permisos para crear promociones en este establecimiento.'),
+                    'confirmButtonColor' => '#ef4444'
+                ]);
         }
 
         // Verificar límites según el plan
-        $promocionesActivas = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
+        $promocionesActivas = Promociones::whereHas('establecimiento', function ($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->where('activo', true)
           ->whereDate('fecha_final', '>=', now())
@@ -109,27 +150,32 @@ class PromocionController extends Controller
 
         $limitesPorPlan = [
             'basico' => 5,
-            'estandar' => 999, // Sin límite
-            'premium' => 999, // Sin límite
+            'estandar' => 999, // Sin límite práctico
+            'premium' => 999,
         ];
 
         $limite = $limitesPorPlan[$cliente->plan] ?? 5;
 
         if ($promocionesActivas >= $limite && $cliente->plan === 'basico') {
             return redirect()->route('promociones.index')
-                ->with('warning', "Has alcanzado el límite de promociones activas para tu plan {$cliente->plan}.");
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => __('Límite alcanzado'),
+                    'text' => __("Has alcanzado el límite de promociones activas para tu plan {$cliente->plan}."),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
         try {
             $data = $validated;
-            
+
             // Manejar la imagen si se sube
             if ($request->hasFile('imagen')) {
                 $path = $request->file('imagen')->store('promociones', 'public');
                 $data['imagen'] = $path;
             }
 
-            // Asegurar que activo tenga un valor
+            // Asegurar que activo tenga un valor booleano
             $data['activo'] = $request->has('activo');
 
             $promocion = Promociones::create($data);
@@ -137,25 +183,20 @@ class PromocionController extends Controller
             return redirect()->route('promociones.index')
                 ->with('swal', [
                     'icon' => 'success',
-                    'title' => '¡Éxito!',
-                    'text' => '¡Promoción creada exitosamente!',
-                    'confirmButtonText' => 'Aceptar',
-                    'confirmButtonColor' => '#42A958',
-                    'draggable' => true
+                    'title' => __('¡Éxito!'),
+                    'text' => __('Promoción creada exitosamente.'),
+                    'confirmButtonColor' => '#42A958'
                 ]);
-
         } catch (\Exception $e) {
-            \Log::error('Error al crear promoción: ' . $e->getMessage());
+            Log::error('Error al crear promoción: ' . $e->getMessage());
 
             return redirect()->back()
                 ->withInput()
                 ->with('swal', [
                     'icon' => 'error',
-                    'title' => '¡Error!',
-                    'text' => 'Hubo un error al crear la promoción: ' . $e->getMessage(),
-                    'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#ef4444',
-                    'draggable' => true
+                    'title' => __('¡Error!'),
+                    'text' => __('Hubo un error al crear la promoción. Por favor intenta de nuevo.'),
+                    'confirmButtonColor' => '#ef4444'
                 ]);
         }
     }
@@ -169,10 +210,15 @@ class PromocionController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => __('Atención'),
+                    'text' => __('Primero debes completar tu registro de cliente.'),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
-        $promocion = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
+        $promocion = Promociones::whereHas('establecimiento', function ($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->with('establecimiento')
           ->findOrFail($id);
@@ -189,10 +235,15 @@ class PromocionController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => __('Atención'),
+                    'text' => __('Primero debes completar tu registro de cliente.'),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
-        $promocion = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
+        $promocion = Promociones::whereHas('establecimiento', function ($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->findOrFail($id);
 
@@ -212,10 +263,15 @@ class PromocionController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => __('Atención'),
+                    'text' => __('Primero debes completar tu registro de cliente.'),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
-        $promocion = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
+        $promocion = Promociones::whereHas('establecimiento', function ($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->findOrFail($id);
 
@@ -231,32 +287,40 @@ class PromocionController extends Controller
 
         try {
             $data = $validated;
-            
+
             // Manejar la imagen si se sube una nueva
             if ($request->hasFile('imagen')) {
                 // Eliminar imagen anterior si existe
                 if ($promocion->imagen) {
                     Storage::disk('public')->delete($promocion->imagen);
                 }
-                
+
                 $path = $request->file('imagen')->store('promociones', 'public');
                 $data['imagen'] = $path;
             }
 
-            // Asegurar que activo tenga un valor
             $data['activo'] = $request->has('activo');
 
             $promocion->update($data);
 
             return redirect()->route('promociones.index')
-                ->with('success', '¡Promoción actualizada exitosamente!');
-
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => __('¡Listo!'),
+                    'text' => __('Promoción actualizada exitosamente.'),
+                    'confirmButtonColor' => '#42A958'
+                ]);
         } catch (\Exception $e) {
-            \Log::error('Error al actualizar promoción: ' . $e->getMessage());
-            
+            Log::error('Error al actualizar promoción: ' . $e->getMessage());
+
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Hubo un error al actualizar la promoción. Por favor intenta de nuevo.');
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => __('¡Error!'),
+                    'text' => __('Hubo un error al actualizar la promoción. Por favor intenta de nuevo.'),
+                    'confirmButtonColor' => '#ef4444'
+                ]);
         }
     }
 
@@ -269,10 +333,15 @@ class PromocionController extends Controller
 
         if (!$cliente) {
             return redirect()->route('registro.completar')
-                ->with('warning', 'Primero debes completar tu registro de cliente.');
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => __('Atención'),
+                    'text' => __('Primero debes completar tu registro de cliente.'),
+                    'confirmButtonColor' => '#F7941D'
+                ]);
         }
 
-        $promocion = Promociones::whereHas('establecimiento', function($query) use ($cliente) {
+        $promocion = Promociones::whereHas('establecimiento', function ($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->findOrFail($id);
 
@@ -285,13 +354,22 @@ class PromocionController extends Controller
             $promocion->delete();
 
             return redirect()->route('promociones.index')
-                ->with('success', 'Promoción eliminada exitosamente.');
-
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => __('¡Eliminado!'),
+                    'text' => __('Promoción eliminada exitosamente.'),
+                    'confirmButtonColor' => '#42A958'
+                ]);
         } catch (\Exception $e) {
-            \Log::error('Error al eliminar promoción: ' . $e->getMessage());
-            
+            Log::error('Error al eliminar promoción: ' . $e->getMessage());
+
             return redirect()->back()
-                ->with('error', 'Hubo un error al eliminar la promoción. Por favor intenta de nuevo.');
+                ->with('swal', [
+                    'icon' => 'error',
+                    'title' => __('¡Error!'),
+                    'text' => __('Hubo un error al eliminar la promoción. Por favor intenta de nuevo.'),
+                    'confirmButtonColor' => '#ef4444'
+                ]);
         }
     }
 }
