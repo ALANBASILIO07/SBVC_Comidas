@@ -1,4 +1,18 @@
 <?php
+/*
+ * Nombre del archivo           : recovery-codes.blade.php
+ * Descripción de la vista      : Componente Livewire/Volt para visualizar y regenerar códigos de recuperación 2FA.
+ * Fecha de creación            : 06/01/2026
+ * Elaboró                      : Alan Osvaldo Basilio Delgado
+ * Fecha de liberación          : 06/01/2026
+ * Autorizó                     : Maileth Patiño Ensastegui
+ * Versión                      : 1.1
+ * Fecha de mantenimiento       : 15/01/2026
+ * Tipo de mantenimiento        : Adaptación de Interfaz / UX
+ * Descripción del mantenimiento: Implementación de SweetAlert2 para confirmación de regeneración y traducción al español.
+ * Responsable                  : Alan Osvaldo Basilio Delgado
+ * Revisor                      : Maileth Patiño Ensastegui
+ */
 
 use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
 use Livewire\Attributes\Locked;
@@ -24,6 +38,9 @@ new class extends Component {
         $generateNewRecoveryCodes(auth()->user());
 
         $this->loadRecoveryCodes();
+
+        // Despachar evento para mostrar SweetAlert de éxito
+        $this->dispatch('recovery-codes-regenerated');
     }
 
     /**
@@ -37,8 +54,7 @@ new class extends Component {
             try {
                 $this->recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
             } catch (Exception) {
-                $this->addError('recoveryCodes', 'Failed to load recovery codes');
-
+                $this->addError('recoveryCodes', 'Error al cargar los códigos de recuperación.');
                 $this->recoveryCodes = [];
             }
         }
@@ -50,18 +66,22 @@ new class extends Component {
     wire:cloak
     x-data="{ showRecoveryCodes: false }"
 >
+    {{-- Encabezado --}}
     <div class="px-6 space-y-2">
         <div class="flex items-center gap-2">
             <flux:icon.lock-closed variant="outline" class="size-4"/>
-            <flux:heading size="lg" level="3">{{ __('2FA Recovery Codes') }}</flux:heading>
+            <flux:heading size="lg" level="3">{{ __('Códigos de recuperación 2FA') }}</flux:heading>
         </div>
         <flux:text variant="subtle">
-            {{ __('Recovery codes let you regain access if you lose your 2FA device. Store them in a secure password manager.') }}
+            {{ __('Los códigos de recuperación te permiten recuperar el acceso a tu cuenta si pierdes tu dispositivo de autenticación. Guárdalos en un gestor de contraseñas seguro.') }}
         </flux:text>
     </div>
 
+    {{-- Acciones --}}
     <div class="px-6">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            
+            {{-- Botón Mostrar --}}
             <flux:button
                 x-show="!showRecoveryCodes"
                 icon="eye"
@@ -71,9 +91,10 @@ new class extends Component {
                 aria-expanded="false"
                 aria-controls="recovery-codes-section"
             >
-                {{ __('View Recovery Codes') }}
+                {{ __('Ver códigos') }}
             </flux:button>
 
+            {{-- Botón Ocultar --}}
             <flux:button
                 x-show="showRecoveryCodes"
                 icon="eye-slash"
@@ -83,21 +104,23 @@ new class extends Component {
                 aria-expanded="true"
                 aria-controls="recovery-codes-section"
             >
-                {{ __('Hide Recovery Codes') }}
+                {{ __('Ocultar códigos') }}
             </flux:button>
 
+            {{-- Botón Regenerar (Con confirmación JS) --}}
             @if (filled($recoveryCodes))
                 <flux:button
                     x-show="showRecoveryCodes"
                     icon="arrow-path"
                     variant="filled"
-                    wire:click="regenerateRecoveryCodes"
+                    onclick="confirmRegeneration()" 
                 >
-                    {{ __('Regenerate Codes') }}
+                    {{ __('Regenerar códigos') }}
                 </flux:button>
             @endif
         </div>
 
+        {{-- Lista de Códigos --}}
         <div
             x-show="showRecoveryCodes"
             x-transition
@@ -106,15 +129,16 @@ new class extends Component {
             x-bind:aria-hidden="!showRecoveryCodes"
         >
             <div class="mt-3 space-y-3">
+                {{-- Manejo de errores de carga --}}
                 @error('recoveryCodes')
-                    <flux:callout variant="danger" icon="x-circle" heading="{{$message}}"/>
+                    <flux:callout variant="danger" icon="x-circle" heading="{{ $message }}"/>
                 @enderror
 
                 @if (filled($recoveryCodes))
                     <div
                         class="grid gap-1 p-4 font-mono text-sm rounded-lg bg-zinc-100 dark:bg-white/5"
                         role="list"
-                        aria-label="Recovery codes"
+                        aria-label="Códigos de recuperación"
                     >
                         @foreach($recoveryCodes as $code)
                             <div
@@ -127,10 +151,47 @@ new class extends Component {
                         @endforeach
                     </div>
                     <flux:text variant="subtle" class="text-xs">
-                        {{ __('Each recovery code can be used once to access your account and will be removed after use. If you need more, click Regenerate Codes above.') }}
+                        {{ __('Cada código de recuperación puede utilizarse una sola vez. Si necesitas más, haz clic en "Regenerar códigos".') }}
                     </flux:text>
                 @endif
             </div>
         </div>
     </div>
+
+    {{-- SCRIPTS PARA SWEETALERT --}}
+    @script
+    <script>
+        // Función global para confirmar la regeneración
+        window.confirmRegeneration = () => {
+            Swal.fire({
+                title: '{{ __("¿Estás seguro?") }}',
+                text: '{{ __("Los códigos de recuperación anteriores dejarán de funcionar inmediatamente. Asegúrate de guardar los nuevos.") }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#000000', // Estilo negro
+                cancelButtonColor: '#d33',
+                confirmButtonText: '{{ __("Sí, regenerar") }}',
+                cancelButtonText: '{{ __("Cancelar") }}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Llamar al método Livewire
+                    $wire.regenerateRecoveryCodes();
+                }
+            });
+        };
+
+        // Escuchar evento de éxito tras regenerar
+        Livewire.on('recovery-codes-regenerated', () => {
+            Swal.fire({
+                icon: 'success',
+                title: '{{ __("¡Regenerados!") }}',
+                text: '{{ __("Se han generado nuevos códigos de recuperación exitosamente.") }}',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#000000',
+                timer: 3000
+            });
+        });
+    </script>
+    @endscript
 </div>

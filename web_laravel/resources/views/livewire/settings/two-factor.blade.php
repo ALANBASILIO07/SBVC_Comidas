@@ -1,3 +1,20 @@
+{{--
+* Nombre del archivo           : two-factor.blade.php
+* Ruta                         : resources/views/livewire/settings/two-factor.blade.php
+* Descripción de la vista      : Componente Livewire/Volt para la gestión de la autenticación de dos factores (2FA).
+* Incluye activación (QR), confirmación (OTP) y desactivación.
+* Fecha de creación            : 06/01/2026
+* Elaboró                      : Alan Osvaldo Basilio Delgado
+* Fecha de liberación          : 06/01/2026
+* Autorizó                     : Maileth Patiño Ensastegui
+* Versión                      : 1.1
+* Fecha de mantenimiento       : 15/01/2026
+* Tipo de mantenimiento        : Adaptación de Interfaz / UX / Traducción
+* Descripción del mantenimiento: Implementación de notificaciones con SweetAlert2 y traducción completa al español.
+* Responsable                  : Alan Osvaldo Basilio Delgado
+* Revisor                      : Maileth Patiño Ensastegui
+--}}
+
 <?php
 
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
@@ -72,8 +89,7 @@ new class extends Component {
             $this->qrCodeSvg = $user?->twoFactorQrCodeSvg();
             $this->manualSetupKey = decrypt($user->two_factor_secret);
         } catch (Exception) {
-            $this->addError('setupData', 'Failed to fetch setup data.');
-
+            $this->addError('setupData', __('No se pudieron cargar los datos de configuración.'));
             $this->reset('qrCodeSvg', 'manualSetupKey');
         }
     }
@@ -85,9 +101,7 @@ new class extends Component {
     {
         if ($this->requiresConfirmation) {
             $this->showVerificationStep = true;
-
             $this->resetErrorBag();
-
             return;
         }
 
@@ -99,13 +113,21 @@ new class extends Component {
      */
     public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirmTwoFactorAuthentication): void
     {
-        $this->validate();
+        try {
+            $this->validate();
+            $confirmTwoFactorAuthentication(auth()->user(), $this->code);
+            
+            $this->closeModal();
+            $this->twoFactorEnabled = true;
 
-        $confirmTwoFactorAuthentication(auth()->user(), $this->code);
+            // Despachar evento de éxito
+            $this->dispatch('2fa-confirmed');
 
-        $this->closeModal();
-
-        $this->twoFactorEnabled = true;
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Mostrar error visualmente
+            $this->addError('code', __('El código de autenticación proporcionado no es válido.'));
+            $this->dispatch('2fa-error', message: __('El código es incorrecto. Intenta nuevamente.'));
+        }
     }
 
     /**
@@ -114,7 +136,6 @@ new class extends Component {
     public function resetVerification(): void
     {
         $this->reset('code', 'showVerificationStep');
-
         $this->resetErrorBag();
     }
 
@@ -124,8 +145,9 @@ new class extends Component {
     public function disable(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
     {
         $disableTwoFactorAuthentication(auth()->user());
-
         $this->twoFactorEnabled = false;
+        
+        $this->dispatch('2fa-disabled');
     }
 
     /**
@@ -149,30 +171,30 @@ new class extends Component {
     }
 
     /**
-     * Get the current modal configuration state.
+     * Get the current modal configuration state (Translated).
      */
     public function getModalConfigProperty(): array
     {
         if ($this->twoFactorEnabled) {
             return [
-                'title' => __('Two-Factor Authentication Enabled'),
-                'description' => __('Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.'),
-                'buttonText' => __('Close'),
+                'title' => __('Autenticación de 2 Factores Habilitada'),
+                'description' => __('La autenticación de dos factores está habilitada. Escanea el código QR o ingresa la clave de configuración en tu aplicación de autenticación.'),
+                'buttonText' => __('Cerrar'),
             ];
         }
 
         if ($this->showVerificationStep) {
             return [
-                'title' => __('Verify Authentication Code'),
-                'description' => __('Enter the 6-digit code from your authenticator app.'),
-                'buttonText' => __('Continue'),
+                'title' => __('Verificar Código de Autenticación'),
+                'description' => __('Ingresa el código de 6 dígitos de tu aplicación de autenticación.'),
+                'buttonText' => __('Continuar'),
             ];
         }
 
         return [
-            'title' => __('Enable Two-Factor Authentication'),
-            'description' => __('To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app.'),
-            'buttonText' => __('Continue'),
+            'title' => __('Habilitar Autenticación de 2 Factores'),
+            'description' => __('Para finalizar la activación, escanea el código QR o ingresa la clave de configuración en tu aplicación de autenticación.'),
+            'buttonText' => __('Continuar'),
         ];
     }
 } ?>
@@ -181,41 +203,42 @@ new class extends Component {
     @include('partials.settings-heading')
 
     <x-settings.layout
-        :heading="__('Two Factor Authentication')"
-        :subheading="__('Manage your two-factor authentication settings')"
+        :heading="__('Autenticación de dos factores')"
+        :subheading="__('Gestiona la configuración de seguridad adicional de tu cuenta')"
     >
         <div class="flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>
             @if ($twoFactorEnabled)
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
-                        <flux:badge color="green">{{ __('Enabled') }}</flux:badge>
+                        <flux:badge color="green">{{ __('Habilitado') }}</flux:badge>
                     </div>
 
                     <flux:text>
-                        {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
+                        {{ __('Con la autenticación de dos factores habilitada, se te pedirá un PIN seguro y aleatorio durante el inicio de sesión, el cual puedes obtener de la aplicación TOTP en tu teléfono.') }}
                     </flux:text>
 
                     <livewire:settings.two-factor.recovery-codes :$requiresConfirmation/>
 
                     <div class="flex justify-start">
+                        {{-- Botón Desactivar con confirmación JS --}}
                         <flux:button
                             variant="danger"
                             icon="shield-exclamation"
                             icon:variant="outline"
-                            wire:click="disable"
+                            onclick="confirmDisable2FA()"
                         >
-                            {{ __('Disable 2FA') }}
+                            {{ __('Desactivar 2FA') }}
                         </flux:button>
                     </div>
                 </div>
             @else
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
-                        <flux:badge color="red">{{ __('Disabled') }}</flux:badge>
+                        <flux:badge color="red">{{ __('Deshabilitado') }}</flux:badge>
                     </div>
 
                     <flux:text variant="subtle">
-                        {{ __('When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.') }}
+                        {{ __('Cuando habilitas la autenticación de dos factores, se te pedirá un PIN seguro durante el inicio de sesión. Este PIN se puede obtener desde una aplicación compatible con TOTP (como Google Authenticator) en tu teléfono.') }}
                     </flux:text>
 
                     <flux:button
@@ -224,7 +247,7 @@ new class extends Component {
                         icon:variant="outline"
                         wire:click="enable"
                     >
-                        {{ __('Enable 2FA') }}
+                        {{ __('Activar 2FA') }}
                     </flux:button>
                 </div>
             @endif
@@ -239,20 +262,16 @@ new class extends Component {
     >
         <div class="space-y-6">
             <div class="flex flex-col items-center space-y-4">
+                {{-- Contenedor QR --}}
                 <div class="p-0.5 w-auto rounded-full border border-stone-100 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm">
                     <div class="p-2.5 rounded-full border border-stone-200 dark:border-stone-600 overflow-hidden bg-stone-100 dark:bg-stone-200 relative">
+                        {{-- Fondo Decorativo --}}
                         <div class="flex items-stretch absolute inset-0 w-full h-full divide-x [&>div]:flex-1 divide-stone-200 dark:divide-stone-300 justify-around opacity-50">
-                            @for ($i = 1; $i <= 5; $i++)
-                                <div></div>
-                            @endfor
+                            @for ($i = 1; $i <= 5; $i++) <div></div> @endfor
                         </div>
-
                         <div class="flex flex-col items-stretch absolute w-full h-full divide-y [&>div]:flex-1 inset-0 divide-stone-200 dark:divide-stone-300 justify-around opacity-50">
-                            @for ($i = 1; $i <= 5; $i++)
-                                <div></div>
-                            @endfor
+                            @for ($i = 1; $i <= 5; $i++) <div></div> @endfor
                         </div>
-
                         <flux:icon.qr-code class="relative z-20 dark:text-accent-foreground"/>
                     </div>
                 </div>
@@ -285,7 +304,7 @@ new class extends Component {
                             class="flex-1"
                             wire:click="resetVerification"
                         >
-                            {{ __('Back') }}
+                            {{ __('Atrás') }}
                         </flux:button>
 
                         <flux:button
@@ -294,7 +313,7 @@ new class extends Component {
                             wire:click="confirmTwoFactor"
                             x-bind:disabled="$wire.code.length < 6"
                         >
-                            {{ __('Confirm') }}
+                            {{ __('Confirmar') }}
                         </flux:button>
                     </div>
                 </div>
@@ -334,7 +353,7 @@ new class extends Component {
                     <div class="relative flex items-center justify-center w-full">
                         <div class="absolute inset-0 w-full h-px top-1/2 bg-stone-200 dark:bg-stone-600"></div>
                         <span class="relative px-2 text-sm bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400">
-                            {{ __('or, enter the code manually') }}
+                            {{ __('o, ingresa el código manualmente') }}
                         </span>
                     </div>
 
@@ -346,9 +365,21 @@ new class extends Component {
                                 try {
                                     await navigator.clipboard.writeText('{{ $manualSetupKey }}');
                                     this.copied = true;
+                                    
+                                    // Feedback visual
+                                    const Toast = Swal.mixin({
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 1500,
+                                        background: '#333',
+                                        color: '#fff'
+                                    });
+                                    Toast.fire({ icon: 'success', title: 'Copiado' });
+
                                     setTimeout(() => this.copied = false, 1500);
                                 } catch (e) {
-                                    console.warn('Could not copy to clipboard');
+                                    console.warn('No se pudo copiar al portapapeles');
                                 }
                             }
                         }"
@@ -368,7 +399,8 @@ new class extends Component {
 
                                 <button
                                     @click="copy()"
-                                    class="px-3 transition-colors border-l cursor-pointer border-stone-200 dark:border-stone-600"
+                                    class="px-3 transition-colors border-l cursor-pointer border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700"
+                                    title="{{ __('Copiar al portapapeles') }}"
                                 >
                                     <flux:icon.document-duplicate x-show="!copied" variant="outline"></flux:icon>
                                     <flux:icon.check
@@ -384,4 +416,62 @@ new class extends Component {
             @endif
         </div>
     </flux:modal>
+
+    {{-- SCRIPTS PARA SWEETALERT --}}
+    @script
+    <script>
+        // Confirmación para Desactivar
+        window.confirmDisable2FA = () => {
+            Swal.fire({
+                title: '{{ __("¿Desactivar 2FA?") }}',
+                text: '{{ __("Tu cuenta será menos segura si desactivas la autenticación de dos factores.") }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33', // Rojo para acción de riesgo
+                cancelButtonColor: '#000000', // Negro para cancelar
+                confirmButtonText: '{{ __("Sí, desactivar") }}',
+                cancelButtonText: '{{ __("Cancelar") }}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $wire.disable();
+                }
+            });
+        };
+
+        // Escuchar éxito al desactivar
+        Livewire.on('2fa-disabled', () => {
+            Swal.fire({
+                icon: 'success',
+                title: '{{ __("Desactivado") }}',
+                text: '{{ __("La autenticación de dos factores ha sido desactivada.") }}',
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#000000',
+                timer: 2000
+            });
+        });
+
+        // Escuchar éxito al confirmar/activar
+        Livewire.on('2fa-confirmed', () => {
+            Swal.fire({
+                icon: 'success',
+                title: '{{ __("¡Habilitado!") }}',
+                text: '{{ __("La autenticación de dos factores se ha configurado correctamente.") }}',
+                confirmButtonText: 'Excelente',
+                confirmButtonColor: '#16a34a' // Verde
+            });
+        });
+
+        // Escuchar errores de validación del código
+        Livewire.on('2fa-error', ({ message }) => {
+            Swal.fire({
+                icon: 'error',
+                title: '{{ __("Error") }}',
+                text: message,
+                confirmButtonText: 'Reintentar',
+                confirmButtonColor: '#000000'
+            });
+        });
+    </script>
+    @endscript
 </section>
