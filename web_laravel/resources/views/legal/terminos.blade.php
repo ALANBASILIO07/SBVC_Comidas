@@ -3,14 +3,15 @@
 * Descripción de la vista      : Página de Términos y Condiciones del servicio SBVC Comidas
 * Fecha de creación            : 24/11/2025
 * Elaboró                      : Alan Osvaldo Basilio Delgado
-* Fecha de liberación          : 24/11/2025
-* Versión                      : 1.0
-* Fecha de mantenimiento       : 
-* Folio de mantenimiento       :
-* Tipo de mantenimiento        :
-* Descripción del mantenimiento:
-* Responsable                  :
-* Revisor                      :
+* Fecha de liberación          : 06/01/2026
+* Autorizó                     : Maileth Patiño Ensastegui
+* Versión                      : 1.1
+* Fecha de mantenimiento       : 16/01/2026
+* Folio de mantenimiento       : DOC-002
+* Tipo de mantenimiento        : Actualización de Contenido Legal
+* Descripción del mantenimiento: Inclusión de detalles sobre planes de suscripción, pagos y uso de la plataforma.
+* Responsable                  : Alan Osvaldo Basilio Delgado
+* Revisor                      : Maileth Patiño Ensastegui
 --}}
 
 <!DOCTYPE html>
@@ -38,7 +39,7 @@
 
                 <div>
                     <h1 class="text-2xl font-bold">
-                        Términos y Condiciones
+                        Términos y Condiciones de Uso
                     </h1>
                     <p class="text-sm text-black/60 dark:text-white/60">
                         Última actualización: {{ now()->format('d/m/Y') }}
@@ -54,88 +55,104 @@
         {{-- Sección 1 --}}
         <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
             <h2 class="text-xl font-semibold">
-                1. Aceptación de los Términos
+                1. Acuerdo General
             </h2>
             <p class="text-sm leading-relaxed text-black/80 dark:text-white/80">
-                Al acceder y utilizar la plataforma <strong>SBVC Comidas</strong>, usted acepta estar sujeto a estos Términos y Condiciones.
-                Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestros servicios.
+                Bienvenido a <strong>SBVC Comidas</strong>. Al acceder, navegar y utilizar nuestra plataforma web y servicios asociados, usted acepta incondicionalmente estar sujeto a los presentes Términos y Condiciones. Estos términos constituyen un acuerdo legalmente vinculante entre usted (el "Usuario" o "Cliente") y SBVC Comidas. Si no está de acuerdo con alguna de estas condiciones, le rogamos abstenerse de utilizar nuestros servicios.
             </p>
         </section>
 
         {{-- Sección 2 --}}
         <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
             <h2 class="text-xl font-semibold">
-                2. Uso del Servicio
+                2. Descripción del Servicio
             </h2>
             <p class="text-sm leading-relaxed text-black/80 dark:text-white/80">
-                Nuestra plataforma está diseñada para ayudar a los establecimientos de comida a gestionar sus operaciones,
-                promociones y relaciones con clientes. El usuario se compromete a utilizar el servicio de manera responsable
-                y conforme a las leyes aplicables.
+                SBVC Comidas ofrece una plataforma digital SaaS (Software as a Service) diseñada para la gestión administrativa y promocional de establecimientos de comida. Nuestros servicios permiten a los usuarios registrar establecimientos, crear y publicar promociones, gestionar banners publicitarios, recibir calificaciones de clientes y acceder a herramientas de administración según el plan contratado.
             </p>
         </section>
 
         {{-- Sección 3 --}}
         <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
             <h2 class="text-xl font-semibold">
-                3. Registro de Cuenta
+                3. Planes de Suscripción y Tarifas
             </h2>
             <p class="text-sm leading-relaxed text-black/80 dark:text-white/80">
-                Para utilizar ciertos servicios, deberá crear una cuenta. Es su responsabilidad mantener la confidencialidad
-                de su contraseña y cuenta. Usted es responsable de todas las actividades que ocurran bajo su cuenta.
+                El acceso a ciertas funcionalidades de la plataforma está determinado por el nivel de suscripción contratado. Los planes disponibles son:
+            </p>
+            <ul class="list-disc pl-6 text-sm text-black/80 dark:text-white/80 space-y-2 mt-2">
+                <li><strong>Plan Básico (Gratuito):</strong> Permite registrar 1 establecimiento y publicar hasta 5 promociones activas mensuales. Incluye soporte estándar por correo electrónico.</li>
+                <li><strong>Plan Estándar:</strong> Con costo mensual. Permite registrar 1 establecimiento, publicar promociones ilimitadas, acceder a estadísticas básicas y recibir soporte prioritario.</li>
+                <li><strong>Plan Premium:</strong> Con costo mensual. Permite registrar establecimientos ilimitados, promociones ilimitadas, gestión avanzada de banners, estadísticas detalladas y soporte técnico 24/7.</li>
+            </ul>
+            <p class="text-sm leading-relaxed text-black/80 dark:text-white/80 mt-2">
+                Nos reservamos el derecho de modificar las tarifas y características de los planes, notificando a los usuarios con antelación razonable.
             </p>
         </section>
 
         {{-- Sección 4 --}}
         <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
             <h2 class="text-xl font-semibold">
-                4. Contenido del Usuario
+                4. Pagos y Facturación
             </h2>
             <p class="text-sm leading-relaxed text-black/80 dark:text-white/80">
-                Usted es responsable del contenido que publique en la plataforma. No debe publicar contenido que sea
-                ilegal, ofensivo, fraudulento o que infrinja los derechos de terceros.
+                Los pagos de las suscripciones (Planes Estándar y Premium) se procesan de forma segura a través de <strong>PayPal</strong>. Al contratar un plan de pago, usted autoriza a SBVC Comidas a realizar el cobro correspondiente. Las suscripciones se renuevan automáticamente salvo que se cancelen antes de la fecha de corte.
+            </p>
+            <p class="text-sm leading-relaxed text-black/80 dark:text-white/80 mt-2">
+                <strong>Política de Reembolsos:</strong> No se ofrecen reembolsos por periodos parciales de servicio no utilizados, salvo en casos excepcionales determinados a discreción de SBVC Comidas o por fallas técnicas imputables a la plataforma.
             </p>
         </section>
 
         {{-- Sección 5 --}}
         <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
             <h2 class="text-xl font-semibold">
-                5. Propiedad Intelectual
+                5. Cuenta de Usuario y Seguridad
             </h2>
             <p class="text-sm leading-relaxed text-black/80 dark:text-white/80">
-                Todo el contenido, características y funcionalidades de la plataforma son propiedad exclusiva de
-                <strong>SBVC Comidas</strong> y están protegidos por las leyes de propiedad intelectual aplicables.
+                Para utilizar el servicio, deberá completar el registro proporcionando información veraz y actualizada. Usted es el único responsable de mantener la confidencialidad de sus credenciales de acceso. SBVC Comidas ofrece autenticación de dos factores (2FA) para mayor seguridad, y recomendamos encarecidamente su activación. Usted acepta notificarnos inmediatamente cualquier uso no autorizado de su cuenta.
             </p>
         </section>
 
         {{-- Sección 6 --}}
         <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
             <h2 class="text-xl font-semibold">
-                6. Limitación de Responsabilidad
+                6. Uso Aceptable y Contenido del Usuario
             </h2>
             <p class="text-sm leading-relaxed text-black/80 dark:text-white/80">
-                <strong>SBVC Comidas</strong> no será responsable de daños indirectos, incidentales, especiales o consecuentes
-                que resulten del uso o la imposibilidad de usar el servicio.
+                Usted conserva los derechos de propiedad sobre el contenido que publica (imágenes de comida, logotipos, descripciones), pero otorga a SBVC Comidas una licencia para alojar, mostrar y distribuir dicho contenido en la plataforma.
+            </p>
+            <p class="text-sm leading-relaxed text-black/80 dark:text-white/80 mt-2">
+                Está estrictamente prohibido subir contenido ilegal, ofensivo, fraudulento, o que infrinja derechos de autor. Nos reservamos el derecho de suspender o eliminar cuentas que violen estas políticas sin previo aviso.
             </p>
         </section>
 
         {{-- Sección 7 --}}
         <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
             <h2 class="text-xl font-semibold">
-                7. Modificaciones
+                7. Disponibilidad del Servicio
             </h2>
             <p class="text-sm leading-relaxed text-black/80 dark:text-white/80">
-                Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones
-                entrarán en vigor inmediatamente después de su publicación en la plataforma.
+                Nos esforzamos por garantizar una disponibilidad continua del servicio. Sin embargo, SBVC Comidas no garantiza que la plataforma esté libre de interrupciones, errores o virus. Podemos suspender el acceso temporalmente por mantenimiento o actualizaciones.
             </p>
         </section>
 
-        {{-- Sección 8: Contacto --}}
+        {{-- Sección 8 --}}
         <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
             <h2 class="text-xl font-semibold">
-                8. Contacto
+                8. Modificaciones a los Términos
+            </h2>
+            <p class="text-sm leading-relaxed text-black/80 dark:text-white/80">
+                SBVC Comidas se reserva el derecho de modificar estos Términos y Condiciones en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en el sitio. El uso continuado del servicio tras dichas modificaciones constituirá su aceptación de los nuevos términos.
+            </p>
+        </section>
+
+        {{-- Sección 9: Contacto --}}
+        <section class="space-y-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-5">
+            <h2 class="text-xl font-semibold">
+                9. Contacto y Soporte
             </h2>
             <p class="text-sm text-black/80 dark:text-white/80">
-                Si tiene preguntas sobre estos Términos y Condiciones, puede contactarnos a través de:
+                Si tiene preguntas sobre estos Términos y Condiciones o requiere soporte técnico, puede contactarnos a través de:
                 <a href="mailto:soporte@sbvccomidas.com"
                     class="text-black dark:text-white hover:underline underline-offset-4 decoration-custom-orange decoration-2 transition-all">
                     soporte@sbvccomidas.com
@@ -150,7 +167,7 @@
             </flux:text>
 
             <flux:text class="text-xs text-black/60 dark:text-white/60">
-                El logotipo y nombre "SAT" pertenecen a la SHCP; se incluyen con fines ilustrativos.
+                Al utilizar este servicio, usted acepta regirse por estos Términos y Condiciones.
             </flux:text>
         </div>
 
