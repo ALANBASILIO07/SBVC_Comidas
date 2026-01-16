@@ -64,9 +64,9 @@ class EstablecimientoController extends Controller
         $establecimientosCount = Establecimientos::where('cliente_id', $cliente->id)->count();
         
         $limitesPorPlan = [
-            'basico' => 1,
+            'basico' => 2,
             'estandar' => 1,
-            'premium' => 999,
+            'premium' => 6,
         ];
 
         $limite = $limitesPorPlan[$cliente->plan] ?? 1;
