@@ -2,19 +2,18 @@
 /**
  * Nombre del archivo        : Cliente.php
  * Ruta                      : app/Models/Cliente.php
- * Descripción               : Modelo para la gestión completa de clientes y suscripciones,
- *                             incluyendo lógica de validación, transición de planes,
- *                             control de acceso y conservación de datos.
+ * Descripción               : Modelo Eloquent para la gestión de Clientes.
+ * Representa al titular de la cuenta y su suscripción.
  * Fecha de creación         : 06/01/2026
  * Elaboró                   : Alan Osvaldo Basilio Delgado
- * Versión                   : 2.0
- * Fecha de mantenimiento    : 15/01/2026
- * Tipo de mantenimiento     : Refactorización y ampliación de funcionalidades
- * Descripción del mantenimiento: Se integran métodos para manejo completo de planes,
- *                                validación de suscripción, transición entre planes,
- *                                conservación de datos y reglas de negocio.
+ * Versión                   : 1.5
+ * Fecha de mantenimiento    : 21/01/2026
+ * Tipo de mantenimiento     : Estructural / Base de Datos
+ * Descripción del mantenimiento: 
+ * - Se agrega la relación 'establecimientos' (HasMany) para corregir la navegación
+ * en los controladores (User -> Cliente -> Establecimientos).
+ * - Se añade 'plan_proximo_vencimiento' al fillable para permitir downgrades programados.
  * Responsable               : Alan Osvaldo Basilio Delgado
- * Revisor                   : Maileth Patiño Ensastegui
  */
 
 namespace App\Models;
@@ -22,28 +21,37 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Cliente extends Model
 {
     use SoftDeletes;
 
+    /**
+     * La tabla asociada al modelo.
+     */
     protected $table = 'clientes';
 
+    /**
+     * Los atributos que son asignables en masa.
+     */
     protected $fillable = [
         'user_id',
         'nombre_titular',
         'email_contacto',
         'telefono',
         'plan',
+        'plan_proximo_vencimiento', // <--- AGREGADO: Necesario para la lógica de downgrade en el Controller
         'fecha_inicio_suscripcion',
         'fecha_fin_suscripcion',
         'suscripcion_activa',
         'rfc_titular',
         'razon_social_titular',
-        'plan_proximo_vencimiento', // Plan al que se cambiará tras vencimiento (downgrade programado)
     ];
 
+    /**
+     * Los atributos que deben ser casteados a tipos nativos.
+     */
     protected $casts = [
         'fecha_inicio_suscripcion' => 'datetime',
         'fecha_fin_suscripcion' => 'datetime',
@@ -51,8 +59,12 @@ class Cliente extends Model
         'deleted_at' => 'datetime',
     ];
 
+    /* =========================================================================
+     * RELACIONES
+     * ========================================================================= */
+
     /**
-     * Relación con el usuario propietario de la cuenta.
+     * Relación con el usuario propietario de la cuenta (User -> Cliente).
      */
     public function user(): BelongsTo
     {
@@ -60,7 +72,20 @@ class Cliente extends Model
     }
 
     /**
-     * Scope para filtrar solo clientes con suscripción activa.
+     * Relación con los establecimientos del cliente (Cliente -> Establecimientos).
+     * CORRECCIÓN IMPORTANTE: Permite acceder a $cliente->establecimientos
+     */
+    public function establecimientos(): HasMany
+    {
+        return $this->hasMany(Establecimientos::class, 'cliente_id');
+    }
+
+    /* =========================================================================
+     * SCOPES (Filtros de consulta)
+     * ========================================================================= */
+
+    /**
+     * Filtra solo clientes con suscripción activa.
      */
     public function scopeActivos($query)
     {
@@ -68,7 +93,7 @@ class Cliente extends Model
     }
 
     /**
-     * Scope para filtrar por plan.
+     * Filtra por tipo de plan.
      */
     public function scopePorPlan($query, string $plan)
     {
@@ -76,7 +101,7 @@ class Cliente extends Model
     }
 
     /**
-     * Scope para suscripciones próximas a vencer (dentro de X días).
+     * Filtra suscripciones próximas a vencer (dentro de X días).
      */
     public function scopeProximasVencer($query, int $dias = 7)
     {
@@ -89,7 +114,7 @@ class Cliente extends Model
     }
 
     /**
-     * Scope para suscripciones vencidas.
+     * Filtra suscripciones que ya han vencido.
      */
     public function scopeVencidas($query)
     {
@@ -97,12 +122,24 @@ class Cliente extends Model
                     ->where('fecha_fin_suscripcion', '<', now());
     }
 
+    /* =========================================================================
+     * MÉTODOS DE AYUDA (Helpers)
+     * ========================================================================= */
+
     /**
      * Verifica si el cliente tiene plan premium.
      */
     public function esPremium(): bool
     {
-        return strtolower($this->plan) === 'premium';
+        return $this->plan === 'premium';
+    }
+
+    /**
+     * Verifica si el cliente tiene plan estándar.
+     */
+    public function esEstandar(): bool
+    {
+        return $this->plan === 'estandar';
     }
 
     /**
@@ -110,19 +147,11 @@ class Cliente extends Model
      */
     public function esBasico(): bool
     {
-        return strtolower($this->plan) === 'basico';
+        return $this->plan === 'basico';
     }
 
     /**
-     * Verifica si el cliente tiene plan estándar (si aplica).
-     */
-    public function esEstandar(): bool
-    {
-        return strtolower($this->plan) === 'estandar';
-    }
-
-    /**
-     * Verifica si la suscripción está activa y vigente.
+     * Verifica si la suscripción está activa y la fecha no ha expirado.
      */
     public function suscripcionVigente(): bool
     {
@@ -130,8 +159,9 @@ class Cliente extends Model
             return false;
         }
 
+        // Si es null, asumimos vitalicia o indefinida
         if ($this->fecha_fin_suscripcion === null) {
-            return true; // Suscripción sin fecha de fin
+            return true;
         }
 
         return $this->fecha_fin_suscripcion->isFuture();
@@ -139,7 +169,7 @@ class Cliente extends Model
 
     /**
      * Obtiene los días restantes de la suscripción.
-     * Retorna null si no hay fecha de fin.
+     * Retorna null si es indefinida.
      */
     public function diasRestantes(): ?int
     {
@@ -151,7 +181,7 @@ class Cliente extends Model
     }
 
     /**
-     * Verifica si tiene datos fiscales completos.
+     * Verifica si tiene datos fiscales completos para facturación.
      */
     public function tieneDatosFiscales(): bool
     {
@@ -159,147 +189,20 @@ class Cliente extends Model
     }
 
     /**
-     * Verifica si el cliente tiene acceso completo a la plataforma.
-     * Acceso completo si la suscripción está vigente.
+     * Aplica el downgrade si existe uno programado y la fecha de suscripción venció.
+     * (Método auxiliar llamado por Middleware/Controller)
      */
-    public function tieneAccesoCompleto(): bool
+    public function aplicarDowngradeSiCorresponde(): void
     {
-        return $this->suscripcionVigente();
-    }
-
-    /**
-     * Verifica si el cliente tiene acceso limitado (datos conservados pero sin plan activo).
-     * Se conserva acceso por 1 mes tras vencimiento.
-     */
-    public function tieneAccesoLimitado(): bool
-    {
-        if ($this->suscripcionVigente()) {
-            return true;
-        }
-
-        if ($this->fecha_fin_suscripcion === null) {
-            return false;
-        }
-
-        $mesDesdeVencimiento = now()->diffInMonths($this->fecha_fin_suscripcion, false);
-
-        return $mesDesdeVencimiento >= 0 && $mesDesdeVencimiento < 1;
-    }
-
-    /**
-     * Verifica si la cuenta debe ser eliminada (2 meses o más sin plan activo).
-     */
-    public function debeSerEliminado(): bool
-    {
-        if ($this->suscripcionVigente()) {
-            return false;
-        }
-
-        if ($this->fecha_fin_suscripcion === null) {
-            return false;
-        }
-
-        $mesesDesdeVencimiento = now()->diffInMonths($this->fecha_fin_suscripcion, false);
-
-        return $mesesDesdeVencimiento >= 2;
-    }
-
-    /**
-     * Verifica si el cliente tiene un downgrade programado.
-     * Retorna el nombre del plan al que se cambiará o null.
-     */
-    public function tieneDowngradeProgramado(): ?string
-    {
-        return $this->plan_proximo_vencimiento ? strtolower($this->plan_proximo_vencimiento) : null;
-    }
-
-    /**
-     * Aplica el downgrade programado si la fecha de vencimiento ya pasó.
-     * Retorna true si se aplicó el cambio, false si no.
-     */
-    public function aplicarDowngradeSiCorresponde(): bool
-    {
-        if (!$this->tieneDowngradeProgramado()) {
-            return false;
-        }
-
-        if ($this->fecha_fin_suscripcion && $this->fecha_fin_suscripcion->isPast()) {
+        if ($this->plan_proximo_vencimiento && 
+            $this->fecha_fin_suscripcion && 
+            $this->fecha_fin_suscripcion->isPast()) {
+            
             $this->plan = $this->plan_proximo_vencimiento;
             $this->plan_proximo_vencimiento = null;
-            $this->fecha_inicio_suscripcion = now();
-            $this->fecha_fin_suscripcion = now()->addMonth();
-            $this->suscripcion_activa = true;
+            // Aquí se podría renovar la fecha o desactivar suscripción según lógica de negocio
+            // Por defecto, mantenemos suscripción activa pero con plan degradado
             $this->save();
-
-            return true;
         }
-
-        return false;
-    }
-
-    /**
-     * Retorna el límite de establecimientos según el plan.
-     */
-    public function limiteEstablecimientos(): int
-    {
-        if ($this->esPremium()) {
-            return 6;
-        } elseif ($this->esBasico()) {
-            return 2;
-        }
-        return 0;
-    }
-
-    /**
-     * Retorna el límite de promociones según el plan.
-     */
-    public function limitePromociones(): int
-    {
-        if ($this->esPremium()) {
-            return 30;
-        } elseif ($this->esBasico()) {
-            return 10;
-        }
-        return 0;
-    }
-
-    /**
-     * Retorna el límite de banners según el plan.
-     */
-    public function limiteBanners(): int
-    {
-        if ($this->esPremium()) {
-            return 10;
-        } elseif ($this->esBasico()) {
-            return 3;
-        }
-        return 0;
-    }
-
-    /**
-     * Verifica si el cliente ha excedido el límite de establecimientos.
-     * Recibe la cantidad actual de establecimientos activos.
-     */
-    public function excedeLimiteEstablecimientos(int $cantidadActual): bool
-    {
-        return $cantidadActual > $this->limiteEstablecimientos();
-    }
-
-    /**
-     * Verifica si el cliente ha excedido el límite de promociones.
-     * Recibe la cantidad actual de promociones activas.
-     */
-    public function excedeLimitePromociones(int $cantidadActual): bool
-    {
-        return $cantidadActual > $this->limitePromociones();
-    }
-
-    /**
-     * Verifica si el cliente ha excedido el límite de banners.
-     * Recibe la cantidad actual de banners activos.
-     */
-    public function excedeLimiteBanners(int $cantidadActual): bool
-    {
-        return $cantidadActual > $this->limiteBanners();
     }
 }

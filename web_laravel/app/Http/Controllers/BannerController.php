@@ -1,18 +1,17 @@
 <?php
-/*
+/**
  * Nombre del archivo        : BannerController.php
  * Ruta                      : app/Http/Controllers/BannerController.php
  * Descripción               : Controlador para gestionar Banners.
- *                            - Incluye validación de límites por plan (establecimientos, promociones, banners).
- *                            - Responde con JSON (403) cuando la petición es AJAX y se ha alcanzado un límite,
- *                              permitiendo a la vista mostrar SweetAlert sin redirigir.
- *                            - Mantiene compatibilidad con peticiones no-AJAX devolviendo sesiones 'swal'.
- * Autor                     : Generado/Actualizado por asistente
- * Fecha de modificación     : 2026-01-15
- * Versión                   : 1.0
+ * - Valida existencia de perfil de cliente.
+ * - Relación correcta Cliente -> Establecimientos.
+ * - Manejo de límites de plan.
+ * Fecha de creación         : 2026-01-14
+ * Versión                   : 2.1 (Fix Namespace & Logic)
+ * Responsable               : Alan Osvaldo Basilio Delgado
  */
- 
-namespace App\Http\Controllers;
+
+namespace App\Http\Controllers; // <--- Namespace Correcto
 
 use App\Models\Banner;
 use App\Models\Establecimientos;
@@ -28,16 +27,27 @@ class BannerController extends Controller
      */
     public function index()
     {
-        $cliente = Auth::user();
+        $cliente = Auth::user()->cliente;
 
-        // Obtener todos los banners de los establecimientos del cliente
+        // Validación de seguridad: Si no ha completado registro
+        if (!$cliente) {
+            return redirect()->route('registro.completar')
+                ->with('swal', [
+                    'icon' => 'warning',
+                    'title' => 'Atención',
+                    'text' => 'Primero debes completar tu registro de cliente.',
+                    'confirmButtonColor' => '#F7941D'
+                ]);
+        }
+
+        // Obtener banners vinculados a los establecimientos de ESTE cliente
         $banners = Banner::whereHas('establecimiento', function ($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->with('establecimiento')
             ->orderByDesc('created_at')
             ->get();
 
-        // Obtener establecimientos del cliente para validar existencia y mostrar botón
+        // Obtener establecimientos para validar si existen (usando cliente_id)
         $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
             ->orderBy('nombre_establecimiento')
             ->get();
@@ -47,27 +57,27 @@ class BannerController extends Controller
 
     /**
      * Muestra el formulario para crear un nuevo banner.
-     *
-     * NOTA: Si se alcanza el límite de banners para el plan del cliente, y la petición
-     * es AJAX/JSON, devolvemos un 403 con información para que la vista muestre SweetAlert
-     * sin redirigir. Si la petición no es AJAX, redirigimos con sesión 'swal' (compatibilidad).
      */
     public function create(Request $request)
     {
-        $cliente = Auth::user();
+        $cliente = Auth::user()->cliente;
 
-        // Obtener los establecimientos del cliente autenticado
+        if (!$cliente) {
+            return redirect()->route('registro.completar');
+        }
+
+        // Obtener establecimientos del cliente
         $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
             ->orderBy('nombre_establecimiento')
             ->get();
 
-        // Verificar que el cliente tenga establecimientos -> en este caso SÍ redirigimos a crear establecimiento
+        // 1. Validar si tiene establecimientos
         if ($establecimientos->isEmpty()) {
-            // Si es AJAX, devolver JSON con instrucción de redirección
             $payload = [
-                'icon' => 'warning',
-                'title' => 'Sin establecimientos',
-                'text' => 'Primero debes crear un establecimiento antes de agregar banners',
+                'icon' => 'info',
+                'title' => 'Necesitas un establecimiento',
+                'text' => 'Primero debes crear un establecimiento para poder agregar banners.',
+                'confirmButtonColor' => '#F7941D'
             ];
 
             if ($request->expectsJson() || $request->ajax()) {
@@ -77,15 +87,10 @@ class BannerController extends Controller
                 ], 403);
             }
 
-            return redirect()->route('establecimientos.create')
-                ->with('swal', array_merge($payload, [
-                    'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#f59e0b',
-                    'draggable' => true
-                ]));
+            return redirect()->route('establecimientos.create')->with('swal', $payload);
         }
 
-        // Validar límite de banners según plan
+        // 2. Validar límite de banners según plan
         $plan = strtolower($cliente->plan ?? 'sin_plan');
         $limits = $this->planLimits($plan);
         $limiteBanners = $limits['banners'] ?? 0;
@@ -95,30 +100,18 @@ class BannerController extends Controller
         })->count();
 
         if ($limiteBanners > 0 && $bannersCount >= $limiteBanners) {
-            // Límite alcanzado: devolver JSON para que la vista maneje SweetAlert sin redirigir
             $mensaje = 'Has alcanzado el límite de banners para tu plan actual.';
-            $data = [
-                'limite_alcanzado' => true,
-                'recurso' => 'banners',
-                'plan' => $plan,
-                'limite' => $limiteBanners,
-                'cantidad_actual' => $bannersCount,
-                'mensaje' => $mensaje,
-            ];
-
+            
             if ($request->expectsJson() || $request->ajax()) {
-                return response()->json($data, 403);
+                return response()->json(['error' => $mensaje], 403);
             }
 
-            // Para peticiones normales, volvemos a la lista con sesión swal (queda recargando la vista)
             return redirect()->route('banners.index')
                 ->with('swal', [
                     'icon' => 'warning',
                     'title' => 'Límite alcanzado',
                     'text' => $mensaje,
-                    'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#f59e0b',
-                    'draggable' => true
+                    'confirmButtonColor' => '#f59e0b'
                 ]);
         }
 
@@ -127,163 +120,63 @@ class BannerController extends Controller
 
     /**
      * Almacena un nuevo banner en la base de datos.
-     * Valida límites antes de crear.
      */
     public function store(Request $request)
     {
         try {
-            $cliente = Auth::user();
+            $cliente = Auth::user()->cliente;
 
             // Validar datos
             $validated = $request->validate([
                 'establecimiento_id' => 'required|exists:establecimientos,id',
                 'titulo_banner' => 'required|string|min:3|max:255',
                 'descripcion_banner' => 'nullable|string|max:500',
-                'imagen_banner' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB
+                'imagen_banner' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
                 'url_destino' => 'nullable|url|max:500',
                 'fecha_inicio' => 'required|date|after_or_equal:today',
                 'fecha_fin' => 'required|date|after:fecha_inicio',
                 'activo' => 'boolean'
-            ], [
-                'establecimiento_id.required' => 'Debes seleccionar un establecimiento',
-                'establecimiento_id.exists' => 'El establecimiento seleccionado no existe',
-                'titulo_banner.required' => 'El título es obligatorio',
-                'titulo_banner.min' => 'El título debe tener al menos 3 caracteres',
-                'descripcion_banner.max' => 'La descripción no puede exceder 500 caracteres',
-                'imagen_banner.required' => 'La imagen es obligatoria',
-                'imagen_banner.image' => 'El archivo debe ser una imagen',
-                'imagen_banner.max' => 'La imagen no puede pesar más de 5MB',
-                'fecha_inicio.required' => 'La fecha de inicio es obligatoria',
-                'fecha_inicio.after_or_equal' => 'La fecha de inicio no puede ser anterior a hoy',
-                'fecha_fin.required' => 'La fecha de finalización es obligatoria',
-                'fecha_fin.after' => 'La fecha de finalización debe ser posterior a la fecha de inicio',
-                'url_destino.url' => 'Debes ingresar una URL válida'
             ]);
 
-            // Verificar que el establecimiento pertenezca al cliente
+            // Verificar propiedad del establecimiento
             $establecimiento = Establecimientos::findOrFail($validated['establecimiento_id']);
             if ($establecimiento->cliente_id !== $cliente->id) {
-                $payload = [
+                return redirect()->back()->with('swal', [
                     'icon' => 'error',
-                    'title' => '¡Error!',
-                    'text' => 'No tienes permisos para crear banners en este establecimiento',
-                ];
-
-                if ($request->expectsJson() || $request->ajax()) {
-                    return response()->json($payload, 403);
-                }
-
-                return redirect()->back()
-                    ->with('swal', array_merge($payload, [
-                        'confirmButtonText' => 'Entendido',
-                        'confirmButtonColor' => '#ef4444',
-                        'draggable' => true
-                    ]));
-            }
-
-            // Verificar límite de banners antes de crear
-            $plan = strtolower($cliente->plan ?? 'sin_plan');
-            $limits = $this->planLimits($plan);
-            $limiteBanners = $limits['banners'] ?? 0;
-
-            $bannersCount = Banner::whereHas('establecimiento', function ($q) use ($cliente) {
-                $q->where('cliente_id', $cliente->id);
-            })->count();
-
-            if ($limiteBanners > 0 && $bannersCount >= $limiteBanners) {
-                $mensaje = 'Has alcanzado el límite de banners para tu plan actual.';
-                $payload = [
-                    'limite_alcanzado' => true,
-                    'mensaje' => $mensaje,
-                    'plan' => $plan,
-                    'limite' => $limiteBanners,
-                    'cantidad_actual' => $bannersCount,
-                ];
-
-                if ($request->expectsJson() || $request->ajax()) {
-                    return response()->json($payload, 403);
-                }
-
-                return redirect()->route('banners.index')
-                    ->with('swal', [
-                        'icon' => 'warning',
-                        'title' => 'Límite alcanzado',
-                        'text' => $mensaje,
-                        'confirmButtonText' => 'Entendido',
-                        'confirmButtonColor' => '#f59e0b',
-                        'draggable' => true
-                    ]);
+                    'title' => 'Error de permiso',
+                    'text' => 'El establecimiento seleccionado no te pertenece.',
+                    'confirmButtonColor' => '#ef4444'
+                ]);
             }
 
             $data = $validated;
 
-            // Procesar imagen
             if ($request->hasFile('imagen_banner')) {
                 $path = $request->file('imagen_banner')->store('banners', 'public');
                 $data['imagen_banner'] = $path;
             }
 
-            // Asegurar que activo tenga un valor
             $data['activo'] = $request->has('activo');
 
             Banner::create($data);
 
-            $successPayload = [
-                'icon' => 'success',
-                'title' => '¡Éxito!',
-                'text' => '¡Banner creado exitosamente!',
-            ];
-
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json($successPayload, 201);
-            }
-
             return redirect()->route('banners.index')
-                ->with('swal', array_merge($successPayload, [
-                    'confirmButtonText' => 'Aceptar',
-                    'confirmButtonColor' => '#42A958',
-                    'draggable' => true
-                ]));
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => '¡Éxito!',
+                    'text' => 'Banner creado exitosamente.',
+                    'confirmButtonColor' => '#42A958'
+                ]);
 
-        } catch (\Illuminate\Validation\ValidationException $ve) {
-            // Laravel validation exception already prepared; rethrow to let framework handle JSON vs redirect
-            throw $ve;
         } catch (\Exception $e) {
             Log::error('Error al crear banner: ' . $e->getMessage());
-
-            $payload = [
+            return redirect()->back()->withInput()->with('swal', [
                 'icon' => 'error',
-                'title' => '¡Error!',
-                'text' => 'Hubo un error al crear el banner: ' . $e->getMessage(),
-            ];
-
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json($payload, 500);
-            }
-
-            return redirect()->back()
-                ->withInput()
-                ->with('swal', array_merge($payload, [
-                    'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#ef4444',
-                    'draggable' => true
-                ]));
+                'title' => 'Error',
+                'text' => 'Hubo un problema al guardar el banner.',
+                'confirmButtonColor' => '#ef4444'
+            ]);
         }
-    }
-
-    /**
-     * Muestra un banner específico.
-     */
-    public function show(Banner $banner)
-    {
-        $cliente = Auth::user();
-
-        // Verificar que el banner pertenezca al cliente
-        if ($banner->establecimiento->cliente_id !== $cliente->id) {
-            abort(403, 'No tienes permisos para ver este banner');
-        }
-
-        return view('banners.show', compact('banner'));
     }
 
     /**
@@ -291,22 +184,17 @@ class BannerController extends Controller
      */
     public function edit(Banner $banner)
     {
-        $cliente = Auth::user();
+        $cliente = Auth::user()->cliente;
 
-        // Verificar que el banner pertenezca al cliente
         if ($banner->establecimiento->cliente_id !== $cliente->id) {
-            return redirect()->route('banners.index')
-                ->with('swal', [
-                    'icon' => 'error',
-                    'title' => '¡Error!',
-                    'text' => 'No tienes permisos para editar este banner',
-                    'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#ef4444',
-                    'draggable' => true
-                ]);
+            return redirect()->route('banners.index')->with('swal', [
+                'icon' => 'error',
+                'title' => 'Acceso denegado',
+                'text' => 'No tienes permisos para editar este banner.',
+                'confirmButtonColor' => '#ef4444'
+            ]);
         }
 
-        // Obtener establecimientos del cliente
         $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
             ->orderBy('nombre_establecimiento')
             ->get();
@@ -315,34 +203,17 @@ class BannerController extends Controller
     }
 
     /**
-     * Actualiza un banner específico en la base de datos.
+     * Actualiza un banner específico.
      */
     public function update(Request $request, Banner $banner)
     {
         try {
-            $cliente = Auth::user();
+            $cliente = Auth::user()->cliente;
 
-            // Verificar que el banner pertenezca al cliente
             if ($banner->establecimiento->cliente_id !== $cliente->id) {
-                $payload = [
-                    'icon' => 'error',
-                    'title' => '¡Error!',
-                    'text' => 'No tienes permisos para actualizar este banner',
-                ];
-
-                if ($request->expectsJson() || $request->ajax()) {
-                    return response()->json($payload, 403);
-                }
-
-                return redirect()->route('banners.index')
-                    ->with('swal', array_merge($payload, [
-                        'confirmButtonText' => 'Entendido',
-                        'confirmButtonColor' => '#ef4444',
-                        'draggable' => true
-                    ]));
+                abort(403);
             }
 
-            // Validar datos
             $validated = $request->validate([
                 'establecimiento_id' => 'required|exists:establecimientos,id',
                 'titulo_banner' => 'required|string|min:3|max:255',
@@ -352,178 +223,85 @@ class BannerController extends Controller
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after:fecha_inicio',
                 'activo' => 'boolean'
-            ], [
-                'establecimiento_id.required' => 'Debes seleccionar un establecimiento',
-                'titulo_banner.required' => 'El título es obligatorio',
-                'titulo_banner.min' => 'El título debe tener al menos 3 caracteres',
-                'imagen_banner.image' => 'El archivo debe ser una imagen',
-                'imagen_banner.max' => 'La imagen no puede pesar más de 5MB',
-                'fecha_fin.after' => 'La fecha de finalización debe ser posterior a la fecha de inicio'
             ]);
 
             $data = $validated;
 
-            // Procesar nueva imagen si se subió
             if ($request->hasFile('imagen_banner')) {
-                // Eliminar imagen anterior
                 if ($banner->imagen_banner && Storage::disk('public')->exists($banner->imagen_banner)) {
                     Storage::disk('public')->delete($banner->imagen_banner);
                 }
-
-                $path = $request->file('imagen_banner')->store('banners', 'public');
-                $data['imagen_banner'] = $path;
+                $data['imagen_banner'] = $request->file('imagen_banner')->store('banners', 'public');
             }
 
-            // Asegurar que activo tenga un valor
             $data['activo'] = $request->has('activo');
 
             $banner->update($data);
 
-            $successPayload = [
-                'icon' => 'success',
-                'title' => '¡Éxito!',
-                'text' => '¡Banner actualizado exitosamente!',
-            ];
-
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json($successPayload, 200);
-            }
-
             return redirect()->route('banners.index')
-                ->with('swal', array_merge($successPayload, [
-                    'confirmButtonText' => 'Aceptar',
-                    'confirmButtonColor' => '#42A958',
-                    'draggable' => true
-                ]));
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => '¡Actualizado!',
+                    'text' => 'Banner actualizado correctamente.',
+                    'confirmButtonColor' => '#42A958'
+                ]);
 
-        } catch (\Illuminate\Validation\ValidationException $ve) {
-            throw $ve;
         } catch (\Exception $e) {
-            Log::error('Error al actualizar banner: ' . $e->getMessage());
-
-            $payload = [
+            Log::error('Error update banner: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('swal', [
                 'icon' => 'error',
-                'title' => '¡Error!',
-                'text' => 'Hubo un error al actualizar el banner: ' . $e->getMessage(),
-            ];
-
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json($payload, 500);
-            }
-
-            return redirect()->back()
-                ->withInput()
-                ->with('swal', array_merge($payload, [
-                    'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#ef4444',
-                    'draggable' => true
-                ]));
+                'title' => 'Error',
+                'text' => 'No se pudo actualizar el banner.',
+                'confirmButtonColor' => '#ef4444'
+            ]);
         }
     }
 
     /**
-     * Elimina un banner de la base de datos.
+     * Elimina un banner.
      */
     public function destroy(Request $request, Banner $banner)
     {
+        $cliente = Auth::user()->cliente;
+
+        if ($banner->establecimiento->cliente_id !== $cliente->id) {
+            abort(403);
+        }
+
         try {
-            $cliente = Auth::user();
-
-            // Verificar que el banner pertenezca al cliente
-            if ($banner->establecimiento->cliente_id !== $cliente->id) {
-                $payload = [
-                    'icon' => 'error',
-                    'title' => '¡Error!',
-                    'text' => 'No tienes permisos para eliminar este banner',
-                ];
-
-                if ($request->expectsJson() || $request->ajax()) {
-                    return response()->json($payload, 403);
-                }
-
-                return redirect()->route('banners.index')
-                    ->with('swal', array_merge($payload, [
-                        'confirmButtonText' => 'Entendido',
-                        'confirmButtonColor' => '#ef4444',
-                        'draggable' => true
-                    ]));
-            }
-
-            // Eliminar imagen del storage
             if ($banner->imagen_banner && Storage::disk('public')->exists($banner->imagen_banner)) {
                 Storage::disk('public')->delete($banner->imagen_banner);
             }
-
             $banner->delete();
 
-            $successPayload = [
-                'icon' => 'success',
-                'title' => '¡Eliminado!',
-                'text' => 'Banner eliminado exitosamente',
-            ];
-
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json($successPayload, 200);
-            }
-
             return redirect()->route('banners.index')
-                ->with('swal', array_merge($successPayload, [
-                    'confirmButtonText' => 'Aceptar',
-                    'confirmButtonColor' => '#42A958',
-                    'draggable' => true
-                ]));
-
+                ->with('swal', [
+                    'icon' => 'success',
+                    'title' => 'Eliminado',
+                    'text' => 'El banner ha sido eliminado.',
+                    'confirmButtonColor' => '#42A958'
+                ]);
         } catch (\Exception $e) {
-            Log::error('Error al eliminar banner: ' . $e->getMessage());
-
-            $payload = [
+            return redirect()->back()->with('swal', [
                 'icon' => 'error',
-                'title' => '¡Error!',
-                'text' => 'Hubo un error al eliminar el banner: ' . $e->getMessage(),
-            ];
-
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json($payload, 500);
-            }
-
-            return redirect()->back()
-                ->with('swal', array_merge($payload, [
-                    'confirmButtonText' => 'Entendido',
-                    'confirmButtonColor' => '#ef4444',
-                    'draggable' => true
-                ]));
+                'title' => 'Error',
+                'text' => 'No se pudo eliminar el banner.',
+                'confirmButtonColor' => '#ef4444'
+            ]);
         }
     }
 
     /**
      * Devuelve los límites configurados para cada plan.
-     *
-     * Planes esperados: 'sin_plan', 'basico', 'premium'
-     * - básico: 2 establecimientos, 10 promociones, 3 banners
-     * - premium: 6 establecimientos, 30 promociones, 10 banners
      */
     private function planLimits(string $plan): array
     {
         $plan = strtolower($plan);
-
         $defaults = [
-            'sin_plan' => [
-                'establecimientos' => 0,
-                'promociones' => 0,
-                'banners' => 0,
-            ],
-            'basico' => [
-                'establecimientos' => 2,
-                'promociones' => 10,
-                'banners' => 3,
-            ],
-            'premium' => [
-                'establecimientos' => 6,
-                'promociones' => 30,
-                'banners' => 10,
-            ],
+            'sin_plan' => ['banners' => 0],
+            'basico'   => ['banners' => 3],
+            'premium'  => ['banners' => 10],
         ];
-
         return $defaults[$plan] ?? $defaults['sin_plan'];
     }
 }
