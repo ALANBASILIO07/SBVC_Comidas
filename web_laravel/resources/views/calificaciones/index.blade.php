@@ -1,173 +1,180 @@
+<?php
+/*
+ * Nombre del archivo        : index.blade.php
+ * Ruta                      : resources/views/calificaciones/index.blade.php
+ * Descripción               : Vista de listado de calificaciones y reseñas.
+ * Diseño                    : 
+ * - Estado Vacío: Homologado visualmente con Promociones/Banners (Icono en caja bordeada, limpio).
+ * - Estado con Datos: Estilo Dashboard (Tarjetas de resumen + Lista limpia).
+ * Fecha de creación         : 21/01/2026
+ * Versión                   : 1.2
+ * Responsable               : Alan Osvaldo Basilio Delgado
+ */
+?>
+
 <x-layouts.app :title="__('Calificaciones')">
-<div class="py-8 px-4 sm:px-6 lg:px-8">
-<div class="max-w-7xl mx-auto space-y-6">
+    <div class="py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto space-y-8">
 
-        <div class="flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-10 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
-            <flux:heading size="xl">{{ __('CALIFICACIONES') }}</flux:heading>
-        </div>
-
-        <!-- Formulario de Filtros -->
-        <form method="GET" action="{{ route('calificaciones.index') }}" class="flex gap-4 flex-wrap">
-            <!-- Filtro por Establecimiento -->
-            <flux:select name="establecimiento" class="flex-1 min-w-[200px]" onchange="this.form.submit()">
-                <option value="">Todos los establecimientos ▼</option>
-                @foreach($establecimientos as $establecimiento)
-                    <option value="{{ $establecimiento->id }}"
-                        {{ request('establecimiento') == $establecimiento->id ? 'selected' : '' }}>
-                        {{ $establecimiento->nombre_establecimiento }}
-                    </option>
-                @endforeach
-            </flux:select>
-
-            <!-- Filtro por Puntuación -->
-            <flux:select name="puntuacion" class="flex-1 min-w-[200px]" onchange="this.form.submit()">
-                <option value="">Todas las puntuaciones ▼</option>
-                <option value="5" {{ request('puntuacion') == '5' ? 'selected' : '' }}>5 estrellas</option>
-                <option value="4" {{ request('puntuacion') == '4' ? 'selected' : '' }}>4 estrellas</option>
-                <option value="3" {{ request('puntuacion') == '3' ? 'selected' : '' }}>3 estrellas</option>
-                <option value="2" {{ request('puntuacion') == '2' ? 'selected' : '' }}>2 estrellas</option>
-                <option value="1" {{ request('puntuacion') == '1' ? 'selected' : '' }}>1 estrella</option>
-            </flux:select>
-
-            <!-- Filtro por Orden -->
-            <flux:select name="orden" class="flex-1 min-w-[200px]" onchange="this.form.submit()">
-                <option value="recientes" {{ request('orden', 'recientes') == 'recientes' ? 'selected' : '' }}>Más recientes</option>
-                <option value="antiguas" {{ request('orden') == 'antiguas' ? 'selected' : '' }}>Más antiguas</option>
-                <option value="mejor" {{ request('orden') == 'mejor' ? 'selected' : '' }}>Mejor calificadas</option>
-                <option value="peor" {{ request('orden') == 'peor' ? 'selected' : '' }}>Peor calificadas</option>
-            </flux:select>
-        </form>
-
-        <!-- Tarjetas de Estadísticas -->
-        <div class="bg-white dark:bg-zinc-900 border-4 border-orange-500 rounded-2xl p-8 shadow-lg">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                <!-- Calificación Promedio -->
-                <div class="text-center p-6 bg-orange-50 dark:bg-orange-950/30 rounded-xl border-2 border-orange-300">
-                    <div class="text-6xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                        {{ $estadisticas['promedio'] }}
-                    </div>
-                    <p class="text-zinc-900 dark:text-white font-semibold mb-3">
-                        Calificación promedio
-                    </p>
-                    <div class="flex justify-center gap-1 text-3xl text-yellow-400">
-                        @php
-                            $promedio = $estadisticas['promedio'];
-                            $estrellas_llenas = floor($promedio);
-                            $tiene_media = ($promedio - $estrellas_llenas) >= 0.5;
-                        @endphp
-                        @for ($i = 1; $i <= 5; $i++)
-                            @if ($i <= $estrellas_llenas)
-                                ★
-                            @elseif ($i == $estrellas_llenas + 1 && $tiene_media)
-                                ★
-                            @else
-                                ☆
-                            @endif
-                        @endfor
-                    </div>
+            {{-- HEADER --}}
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <flux:heading size="xl">{{ __('Calificaciones') }}</flux:heading>
                 </div>
-
-                <!-- Total de Reseñas -->
-                <div class="text-center p-6 bg-orange-50 dark:bg-orange-950/30 rounded-xl border-2 border-orange-300">
-                    <div class="text-6xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                        {{ number_format($estadisticas['total']) }}
-                    </div>
-                    <p class="text-zinc-900 dark:text-white font-semibold">
-                        Total de reseñas
-                    </p>
-                </div>
-
-                <!-- Reseñas Este Mes -->
-                <div class="text-center p-6 bg-orange-50 dark:bg-orange-950/30 rounded-xl border-2 border-orange-300">
-                    <div class="text-6xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                        {{ number_format($estadisticas['este_mes']) }}
-                    </div>
-                    <p class="text-zinc-900 dark:text-white font-semibold">
-                        Este mes
-                    </p>
-                </div>
-
             </div>
-        </div>
 
-        <!-- Grid: Distribución y Reseñas -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- LÓGICA DE ESTADOS --}}
 
-            <!-- Distribución de Calificaciones -->
-            <div class="bg-white dark:bg-zinc-900 border-4 border-orange-500 rounded-2xl p-8 shadow-lg">
-                <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-6 pb-4 border-b-2 border-orange-300">
-                    Distribución de calificaciones
-                </h3>
+            @if($estadisticas['total'] == 0)
+                
+                {{-- ESTADO VACÍO (Diseño Consistente: Caja bordeada limpia) --}}
+                <div class="text-center py-12">
+                    {{-- Contenedor del Icono: Borde NEGRO aplicado --}}
+                    <div class="w-28 h-28 rounded-lg flex items-center justify-center mx-auto mb-6 border border-black dark:border-zinc-700">
+                        <flux:icon.star class="size-14 text-zinc-400 dark:text-zinc-500" />
+                    </div>
+                    
+                    {{-- Título --}}
+                    <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-white">
+                        {{ __('No tienes calificaciones aún') }}
+                    </h3>
+                    
+                    {{-- Descripción --}}
+                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto">
+                        {{ __('Las opiniones y puntuaciones de tus clientes aparecerán aquí una vez que comiencen a interactuar con tus establecimientos.') }}
+                    </p>
+                    
+                    {{-- Sin botones de acción aquí --}}
+                </div>
 
+            @else
+                
+                {{-- CONTENIDO CON DATOS (Estilo Dashboard) --}}
+                
+                {{-- 1. TARJETAS DE RESUMEN --}}
+                <div class="grid gap-6 sm:grid-cols-3">
+                    
+                    <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-5 shadow-sm relative overflow-hidden">
+                        <div class="flex items-center justify-between relative z-10">
+                            <flux:heading level="3" size="xs" class="text-xs font-medium text-black/60 dark:text-white/60">
+                                Promedio General
+                            </flux:heading>
+                            <div class="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-full">
+                                <flux:icon.star class="size-4 text-orange-500" variant="solid" />
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-baseline gap-2">
+                            <flux:text variant="strong" class="text-4xl font-black text-zinc-900 dark:text-white">
+                                {{ number_format($estadisticas['promedio'], 1) }}
+                            </flux:text>
+                            <span class="text-sm text-zinc-500">/ 5.0</span>
+                        </div>
+                        {{-- Estrellas visuales --}}
+                        <div class="flex text-yellow-400 text-sm mt-1">
+                            @for ($i = 1; $i <= 5; $i++)
+                                @if ($i <= round($estadisticas['promedio']))
+                                    ★
+                                @else
+                                    <span class="text-zinc-300 dark:text-zinc-600">★</span>
+                                @endif
+                            @endfor
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-5 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <flux:heading level="3" size="xs" class="text-xs font-medium text-black/60 dark:text-white/60">
+                                Total de Reseñas
+                            </flux:heading>
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-full">
+                                <flux:icon.users class="size-4 text-blue-500" />
+                            </div>
+                        </div>
+                        <flux:text variant="strong" class="mt-4 text-3xl font-bold text-zinc-900 dark:text-white">
+                            {{ number_format($estadisticas['total']) }}
+                        </flux:text>
+                        <p class="text-xs text-zinc-500 mt-1">Opiniones recibidas</p>
+                    </div>
+
+                    <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-5 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <flux:heading level="3" size="xs" class="text-xs font-medium text-black/60 dark:text-white/60">
+                                Nuevas este mes
+                            </flux:heading>
+                            <flux:text class="inline-flex items-center rounded-md px-2 py-1 text-[10px] font-bold bg-green-100 text-green-600 dark:bg-green-500/10 dark:text-green-400">
+                                Mensual
+                            </flux:text>
+                        </div>
+                        <flux:text variant="strong" class="mt-4 text-3xl font-bold text-zinc-900 dark:text-white">
+                            {{ number_format($estadisticas['este_mes']) }}
+                        </flux:text>
+                        <p class="text-xs text-zinc-500 mt-1">Interacción reciente</p>
+                    </div>
+                </div>
+
+                {{-- 2. LISTADO DE RESEÑAS --}}
                 <div class="space-y-4">
-                    @foreach($distribucion as $puntuacion => $datos)
-                    <!-- {{ $puntuacion }} Estrellas -->
-                    <div class="flex items-center gap-4">
-                        <span class="text-lg font-semibold text-zinc-900 dark:text-white w-8">{{ $puntuacion }}</span>
-                        <span class="text-yellow-400 text-xl">★</span>
-                        <div class="flex-1 h-8 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full"
-                                 style="width: {{ $datos['porcentaje'] }}%"></div>
+                    <h3 class="text-lg font-bold text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-700 pb-2">
+                        Últimas Opiniones
+                    </h3>
+
+                    @foreach($resenasRecientes as $resena)
+                        <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 border border-zinc-200 dark:border-zinc-700 shadow-sm transition hover:shadow-md">
+                            <div class="flex flex-col sm:flex-row gap-4 justify-between items-start">
+                                
+                                {{-- Info Cliente y Rating --}}
+                                <div class="flex gap-4">
+                                    {{-- Avatar (Iniciales) --}}
+                                    <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 font-bold text-sm flex-shrink-0">
+                                        {{ substr($resena->cliente_nombre, 0, 2) }}
+                                    </div>
+                                    
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="font-bold text-zinc-900 dark:text-white">{{ $resena->cliente_nombre }}</span>
+                                            <span class="text-xs text-zinc-400">•</span>
+                                            <span class="text-xs text-zinc-500">{{ $resena->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        
+                                        {{-- Estrellas --}}
+                                        <div class="flex text-yellow-400 text-sm mb-2">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $resena->puntuacion) ★ @else <span class="text-zinc-200 dark:text-zinc-700">★</span> @endif
+                                            @endfor
+                                        </div>
+
+                                        {{-- Comentario --}}
+                                        @if($resena->comentario)
+                                            <p class="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                                                "{{ $resena->comentario }}"
+                                            </p>
+                                        @else
+                                            <p class="text-xs text-zinc-400 italic">Sin comentario escrito.</p>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- Badge Establecimiento --}}
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                                        <flux:icon.building-storefront class="size-3" />
+                                        {{ $resena->establecimiento->nombre_establecimiento }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <span class="text-sm text-zinc-600 dark:text-zinc-400 w-16 text-right">{{ $datos['cantidad'] }}</span>
-                    </div>
                     @endforeach
-                </div>
-            </div>
 
-            <!-- Reseñas Recientes -->
-            <div class="bg-white dark:bg-zinc-900 border-4 border-orange-500 rounded-2xl p-8 shadow-lg">
-                <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-6 pb-4 border-b-2 border-orange-300">
-                    Reseñas recientes
-                </h3>
-
-                <div class="space-y-6">
-                    @forelse($resenasRecientes as $resena)
-                    <!-- Reseña -->
-                    <div class="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-xl border-2 border-zinc-200 dark:border-zinc-700">
-                        <div class="flex items-start justify-between mb-2">
-                            <div>
-                                <div class="font-bold text-zinc-900 dark:text-white">{{ $resena->cliente_nombre }}</div>
-                                <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $resena->fechaFormateada() }}</div>
-                            </div>
-                            <div class="flex gap-0.5 text-yellow-400">
-                                {!! $resena->estrellasTexto() !!}
-                            </div>
+                    {{-- Paginación --}}
+                    @if(method_exists($resenasRecientes, 'links') && $resenasRecientes->hasPages())
+                        <div class="pt-4">
+                            {{ $resenasRecientes->links() }}
                         </div>
-                        <div class="text-xs text-pink-600 dark:text-pink-400 mb-2">
-                            📍 {{ $resena->establecimiento->nombre_establecimiento }}
-                        </div>
-                        <p class="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                            {{ $resena->comentario }}
-                        </p>
-                    </div>
-                    @empty
-                    <div class="text-center py-8 text-zinc-500 dark:text-zinc-400">
-                        <p>No hay reseñas aún</p>
-                    </div>
-                    @endforelse
+                    @endif
                 </div>
 
-                <!-- Botón Ver Más -->
-                @if($resenasRecientes->count() > 0)
-                <div class="mt-6 text-center">
-                    <flux:button
-                        href="{{ route('calificaciones.todas', request()->query()) }}"
-                        variant="ghost"
-                        class="bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 dark:text-orange-400"
-                    >
-                        Ver todas las reseñas
-                    </flux:button>
-                </div>
-                @endif
-            </div>
+            @endif
 
         </div>
-
     </div>
-</div>
 </x-layouts.app>

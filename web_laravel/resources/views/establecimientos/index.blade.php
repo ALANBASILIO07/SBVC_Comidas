@@ -43,7 +43,10 @@
             @if($establecimientos->count() === 0)
                 {{-- VISTA VACÍA --}}
                 <div class="text-center py-12">
-                    <flux:icon.building-storefront class="mx-auto size-20 text-zinc-400 dark:text-zinc-500" />
+                    {{-- Contenedor del Icono con Borde Negro --}}
+                    <div class="w-28 h-28 rounded-lg flex items-center justify-center mx-auto mb-6 border border-black dark:border-zinc-700">
+                        <flux:icon.building-storefront class="size-14 text-zinc-400 dark:text-zinc-500" />
+                    </div>
 
                     <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-white">
                         {{ __('No tienes establecimientos aún') }}

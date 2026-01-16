@@ -3,15 +3,14 @@
  * Nombre del archivo        : index.blade.php
  * Ruta                      : resources/views/banners/index.blade.php
  * Descripción               : Vista de listado de banners.
- * Diseño homologado al 100% con Promociones.
- * Lógica de botones:
- * - Si no hay banners: Botón en Header + Botón Central.
- * - Si hay banners: Botón en Header DESAPARECE, se muestra en la Tabla.
- * - Vigencia formateada sin decimales.
+ * Diseño homologado con Promociones.
+ * Lógica de visualización:
+ * 1. Si no hay banners: Se muestra el estado vacío con 2 botones (uno en header, uno al centro).
+ * Al hacer clic, el controlador intercepta si faltan establecimientos.
+ * 2. Si hay banners: El botón del header desaparece y se mueve a la tabla.
  * Autor                     : Alan Osvaldo Basilio Delgado
  * Fecha de creación         : 2026-01-14
- * Versión                   : 2.5 (Final Polish)
- * Responsable               : Alan Osvaldo Basilio Delgado
+ * Versión                   : 2.7 (Final Logic)
  */
 ?>
 
@@ -20,19 +19,16 @@
         <div class="max-w-7xl mx-auto space-y-6">
 
             {{-- ========================================================================
-                 HEADER: Título y Botón "Nuevo" (Solo si NO hay banners)
+                 HEADER
+                 Botón "Nuevo": Solo visible si NO hay banners (Empty State Mode).
+                 Si hay banners, este botón desaparece y se usa el de la tabla.
                  ======================================================================== --}}
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <div class="flex items-center gap-3">
                     <flux:heading size="xl">{{ __('Banners') }}</flux:heading>
                 </div>
 
-                {{-- 
-                    LÓGICA CORREGIDA: 
-                    El botón del header SOLO se muestra si hay establecimientos PERO NO hay banners.
-                    Cuando hay banners, este botón desaparece y se usa el de la tabla.
-                --}}
-                @if(isset($establecimientos) && $establecimientos->isNotEmpty() && $banners->isEmpty())
+                @if($banners->isEmpty())
                     <a href="{{ route('banners.create') }}"
                        class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium shadow-sm transition">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -47,40 +43,13 @@
                  LÓGICA DE ESTADOS
                  ======================================================================== --}}
 
-            {{-- CASO 1: NO HAY ESTABLECIMIENTOS (Bloqueo Inicial - Prioridad Alta) --}}
-            @if(!isset($establecimientos) || $establecimientos->isEmpty())
-                
-                <div class="text-center py-12">
-                    <div class="w-28 h-28 rounded-lg flex items-center justify-center mx-auto mb-6 border border-zinc-200 dark:border-zinc-700">
-                        {{-- Icono Tienda --}}
-                        <flux:icon.building-storefront class="size-14 text-zinc-400 dark:text-zinc-500" />
-                    </div>
-                    
-                    <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-white">
-                        {{ __('No tienes establecimientos') }}
-                    </h3>
-                    
-                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto">
-                        {{ __('Para poder crear banners publicitarios, primero necesitas registrar al menos un establecimiento.') }}
-                    </p>
-                    
-                    <div class="mt-6">
-                        <a href="{{ route('establecimientos.create') }}"
-                           class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-black hover:bg-zinc-900 text-white text-sm font-semibold shadow-md transition">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            {{ __('Crear establecimiento') }}
-                        </a>
-                    </div>
-                </div>
-
-            {{-- CASO 2: HAY ESTABLECIMIENTOS PERO NO BANNERS (Empty State) --}}
-            @elseif($banners->isEmpty())
+            {{-- CASO 1: NO HAY BANNERS (Empty State) --}}
+            {{-- Mostramos esto incluso si no hay establecimientos. El botón activará la validación. --}}
+            @if($banners->isEmpty())
 
                 <div class="text-center py-12">
-                    {{-- Icono gris limpio --}}
-                    <div class="w-28 h-28 rounded-lg flex items-center justify-center mx-auto mb-6 border border-zinc-700 dark:border-zinc-600">
+                    {{-- Icono con borde NEGRO --}}
+                    <div class="w-28 h-28 rounded-lg flex items-center justify-center mx-auto mb-6 border border-black dark:border-zinc-700">
                         <flux:icon.megaphone class="size-14 text-zinc-400 dark:text-zinc-500" />
                     </div>
                     
@@ -92,7 +61,7 @@
                         {{ __('Comienza creando tu primer banner publicitario para destacar tu negocio.') }}
                     </p>
                     
-                    {{-- Botón Negro Grande (Call to Action Principal) --}}
+                    {{-- Botón Negro Central (Call to Action) --}}
                     <div class="mt-6">
                         <a href="{{ route('banners.create') }}"
                            class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-black hover:bg-zinc-900 text-white text-sm font-semibold shadow-md transition">
@@ -104,16 +73,17 @@
                     </div>
                 </div>
 
-            {{-- CASO 3: HAY BANNERS (Listado de Datos) --}}
+            {{-- CASO 2: LISTADO DE DATOS (Tabla) --}}
             @else
                 
                 <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                     
-                    {{-- Barra superior de la tabla (Buscador + Botón Nuevo) --}}
+                    {{-- Barra superior de la tabla: Buscador + Botón Nuevo --}}
                     <div class="p-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center gap-4 justify-between">
                         <div class="flex-1 min-w-[260px]">
                             <flux:input icon="magnifying-glass" placeholder="{{ __('Buscar banners...') }}" />
                         </div>
+                        {{-- Botón integrado en la tabla --}}
                         <a href="{{ route('banners.create') }}"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium shadow-sm transition">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -161,14 +131,13 @@
                                             </div>
                                         </td>
 
-                                        {{-- Vigencia (SIN DECIMALES) --}}
+                                        {{-- Vigencia (Formateada sin decimales) --}}
                                         <td class="px-6 py-4">
                                             <div class="text-sm text-zinc-700 dark:text-zinc-300">
                                                 {{ $banner->fecha_inicio->format('d/m/Y') }} - {{ $banner->fecha_fin->format('d/m/Y') }}
                                             </div>
                                             <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                                                 @if($banner->fecha_fin->isFuture())
-                                                    {{-- intval para eliminar decimales --}}
                                                     Vence en {{ intval(now()->diffInDays($banner->fecha_fin)) }} días
                                                 @else
                                                     Expiró hace {{ intval(now()->diffInDays($banner->fecha_fin)) }} días
@@ -236,7 +205,7 @@
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        {{-- Manejo de Alertas de Sesión --}}
+        {{-- Manejo de Alertas de Sesión (Importante para mostrar el error de redirección desde Create) --}}
         @if(session('swal'))
             <script>
                 document.addEventListener('DOMContentLoaded', () => {

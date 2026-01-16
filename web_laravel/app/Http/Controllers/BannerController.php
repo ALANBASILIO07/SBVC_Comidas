@@ -3,15 +3,15 @@
  * Nombre del archivo        : BannerController.php
  * Ruta                      : app/Http/Controllers/BannerController.php
  * Descripción               : Controlador para gestionar Banners.
- * - Valida existencia de perfil de cliente.
- * - Relación correcta Cliente -> Establecimientos.
- * - Manejo de límites de plan.
+ * - index(): Carga la vista sin bloquear por falta de establecimientos.
+ * - create(): Valida si existen establecimientos. Si no, redirige con SweetAlert.
+ * - Valida límites del plan contratado.
  * Fecha de creación         : 2026-01-14
- * Versión                   : 2.1 (Fix Namespace & Logic)
+ * Versión                   : 2.3 (Lógica Diferida y Redirección)
  * Responsable               : Alan Osvaldo Basilio Delgado
  */
 
-namespace App\Http\Controllers; // <--- Namespace Correcto
+namespace App\Http\Controllers;
 
 use App\Models\Banner;
 use App\Models\Establecimientos;
@@ -23,40 +23,40 @@ use Illuminate\Support\Facades\Log;
 class BannerController extends Controller
 {
     /**
-     * Muestra la lista de banners del usuario autenticado.
+     * Muestra la lista de banners.
+     * No redirige automáticamente; permite ver el estado vacío.
      */
     public function index()
     {
         $cliente = Auth::user()->cliente;
 
-        // Validación de seguridad: Si no ha completado registro
+        // Validación de seguridad: Perfil incompleto
         if (!$cliente) {
             return redirect()->route('registro.completar')
                 ->with('swal', [
                     'icon' => 'warning',
                     'title' => 'Atención',
                     'text' => 'Primero debes completar tu registro de cliente.',
-                    'confirmButtonColor' => '#F7941D'
+                    'confirmButtonColor' => '#000000'
                 ]);
         }
 
-        // Obtener banners vinculados a los establecimientos de ESTE cliente
+        // Obtener banners
         $banners = Banner::whereHas('establecimiento', function ($query) use ($cliente) {
             $query->where('cliente_id', $cliente->id);
         })->with('establecimiento')
             ->orderByDesc('created_at')
             ->get();
 
-        // Obtener establecimientos para validar si existen (usando cliente_id)
-        $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
-            ->orderBy('nombre_establecimiento')
-            ->get();
+        // Pasamos establecimientos por si se requiere en el futuro, aunque la validación está en create
+        $establecimientos = Establecimientos::where('cliente_id', $cliente->id)->get();
 
         return view('banners.index', compact('banners', 'establecimientos'));
     }
 
     /**
      * Muestra el formulario para crear un nuevo banner.
+     * AQUÍ se valida la existencia de establecimientos.
      */
     public function create(Request $request)
     {
@@ -66,18 +66,18 @@ class BannerController extends Controller
             return redirect()->route('registro.completar');
         }
 
-        // Obtener establecimientos del cliente
         $establecimientos = Establecimientos::where('cliente_id', $cliente->id)
             ->orderBy('nombre_establecimiento')
             ->get();
 
-        // 1. Validar si tiene establecimientos
+        // 1. VALIDACIÓN CRÍTICA: Si no hay establecimientos, redirigir
         if ($establecimientos->isEmpty()) {
             $payload = [
                 'icon' => 'info',
                 'title' => 'Necesitas un establecimiento',
-                'text' => 'Primero debes crear un establecimiento para poder agregar banners.',
-                'confirmButtonColor' => '#F7941D'
+                'text' => 'Para poder crear banners, primero debes registrar al menos un establecimiento.',
+                'confirmButtonText' => 'Crear establecimiento',
+                'confirmButtonColor' => '#000000' // Negro por consistencia
             ];
 
             if ($request->expectsJson() || $request->ajax()) {
@@ -126,7 +126,6 @@ class BannerController extends Controller
         try {
             $cliente = Auth::user()->cliente;
 
-            // Validar datos
             $validated = $request->validate([
                 'establecimiento_id' => 'required|exists:establecimientos,id',
                 'titulo_banner' => 'required|string|min:3|max:255',
@@ -138,7 +137,7 @@ class BannerController extends Controller
                 'activo' => 'boolean'
             ]);
 
-            // Verificar propiedad del establecimiento
+            // Verificar propiedad
             $establecimiento = Establecimientos::findOrFail($validated['establecimiento_id']);
             if ($establecimiento->cliente_id !== $cliente->id) {
                 return redirect()->back()->with('swal', [
@@ -165,7 +164,7 @@ class BannerController extends Controller
                     'icon' => 'success',
                     'title' => '¡Éxito!',
                     'text' => 'Banner creado exitosamente.',
-                    'confirmButtonColor' => '#42A958'
+                    'confirmButtonColor' => '#16a34a'
                 ]);
 
         } catch (\Exception $e) {
@@ -243,7 +242,7 @@ class BannerController extends Controller
                     'icon' => 'success',
                     'title' => '¡Actualizado!',
                     'text' => 'Banner actualizado correctamente.',
-                    'confirmButtonColor' => '#42A958'
+                    'confirmButtonColor' => '#16a34a'
                 ]);
 
         } catch (\Exception $e) {
@@ -279,7 +278,7 @@ class BannerController extends Controller
                     'icon' => 'success',
                     'title' => 'Eliminado',
                     'text' => 'El banner ha sido eliminado.',
-                    'confirmButtonColor' => '#42A958'
+                    'confirmButtonColor' => '#16a34a'
                 ]);
         } catch (\Exception $e) {
             return redirect()->back()->with('swal', [
@@ -291,9 +290,6 @@ class BannerController extends Controller
         }
     }
 
-    /**
-     * Devuelve los límites configurados para cada plan.
-     */
     private function planLimits(string $plan): array
     {
         $plan = strtolower($plan);

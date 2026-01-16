@@ -2,17 +2,14 @@
 /*
  * Nombre del archivo        : index.blade.php
  * Ruta                      : resources/views/promociones/index.blade.php
- * Descripción               : Vista de listado de promociones. Adaptada visualmente
- *                            para que coincida con el estilo de Establecimientos.
- *                            - Soporte modo oscuro.
- *                            - Botón "Nueva promoción" naranja cuando hay registros (en la cabecera).
- *                            - Botón negro grande en estado vacío ("Crear mi primera promoción").
- *                            - Todas las alertas/confirmaciones manejadas con SweetAlert2.
- *                            - Visualización de imagen corregida (sin debug).
+ * Descripción               : Vista de listado de promociones.
+ * - Diseño homologado con Banners.
+ * - Lógica diferida: El estado "Sin establecimientos" se maneja en el controlador.
+ * - Estado Vacío: Icono en borde negro + Botones de acción.
+ * - Estado con Datos: Tabla + Botón integrado.
  * Autor                     : Alan Osvaldo Basilio Delgado
  * Fecha de creación         : 2026-01-14
- * Versión                   : 1.7
- * Responsable               : Alan Osvaldo Basilio Delgado
+ * Versión                   : 2.1 (Diseño Final)
  */
 ?>
 
@@ -20,13 +17,13 @@
     <div class="py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto space-y-6">
 
-            {{-- Header: título --}}
+            {{-- HEADER: Título y Botón "Nuevo" (Solo visible si NO hay datos) --}}
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <div class="flex items-center gap-3">
                     <flux:heading size="xl">{{ __('Promociones') }}</flux:heading>
                 </div>
 
-                @if($promociones->count() === 0)
+                @if($promociones->isEmpty())
                     <a href="{{ route('promociones.create') }}"
                        class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium shadow-sm transition">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -37,15 +34,26 @@
                 @endif
             </div>
 
-            @if($promociones->count() === 0)
-                {{-- VISTA VACÍA --}}
+            {{-- LÓGICA DE ESTADOS --}}
+
+            @if($promociones->isEmpty())
+                
+                {{-- ESTADO VACÍO (Diseño Limpio, Borde Negro) --}}
                 <div class="text-center py-12">
-                    <div class="w-28 h-28 rounded-lg flex items-center justify-center mx-auto mb-6 border border-zinc-700">
+                    <div class="w-28 h-28 rounded-lg flex items-center justify-center mx-auto mb-6 border border-black dark:border-zinc-700">
                         <flux:icon.gift class="size-14 text-zinc-400 dark:text-zinc-500" />
                     </div>
-                    <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-white">{{ __('No tienes promociones aún') }}</h3>
-                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{{ __('Comienza creando tu primera promoción para atraer más clientes.') }}</p>
+                    
+                    <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-white">
+                        {{ __('No tienes promociones aún') }}
+                    </h3>
+                    
+                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400 max-w-md mx-auto">
+                        {{ __('Comienza creando tu primera promoción para atraer más clientes.') }}
+                    </p>
+                    
                     <div class="mt-6">
+                        {{-- Botón Central Negro --}}
                         <a href="{{ route('promociones.create') }}"
                            class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-black hover:bg-zinc-900 text-white text-sm font-semibold shadow-md transition">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -55,10 +63,13 @@
                         </a>
                     </div>
                 </div>
+
             @else
-                {{-- VISTA CON DATOS --}}
+                
+                {{-- LISTADO DE DATOS (Tabla) --}}
                 <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
 
+                    {{-- Barra superior: Buscador + Botón Nuevo Integrado --}}
                     <div class="p-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center gap-4 justify-between">
                         <div class="flex-1 min-w-[260px]">
                             <flux:input icon="magnifying-glass" placeholder="{{ __('Buscar promociones...') }}" />
@@ -72,6 +83,7 @@
                         </a>
                     </div>
 
+                    {{-- Tabla --}}
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -88,7 +100,7 @@
                                 @foreach($promociones as $promo)
                                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
                                         <td class="px-6 py-4">
-                                            {{-- Contenedor de imagen optimizado --}}
+                                            {{-- Contenedor de imagen --}}
                                             <div class="w-20 h-14 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-sm">
                                                 @if($promo->imagen)
                                                     <img src="{{ asset('storage/' . $promo->imagen) }}" 
@@ -132,10 +144,16 @@
 
                                         <td class="px-6 py-4 text-right">
                                             <div class="flex justify-end gap-2">
-                                                <a href="{{ route('promociones.edit', $promo->id) }}" class="px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition">{{ __('Editar') }}</a>
+                                                <a href="{{ route('promociones.edit', $promo->id) }}" 
+                                                   class="px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium transition shadow-sm">
+                                                    {{ __('Editar') }}
+                                                </a>
                                                 <form action="{{ route('promociones.destroy', $promo->id) }}" method="POST" class="inline form-eliminar-promocion">
                                                     @csrf @method('DELETE')
-                                                    <button type="submit" class="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition">{{ __('Eliminar') }}</button>
+                                                    <button type="submit" 
+                                                            class="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition shadow-sm">
+                                                        {{ __('Eliminar') }}
+                                                    </button>
                                                 </form>
                                             </div>
                                         </td>
@@ -146,7 +164,9 @@
                     </div>
 
                     @if(method_exists($promociones, 'links') && $promociones->hasPages())
-                        <div class="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800">{{ $promociones->links() }}</div>
+                        <div class="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800">
+                            {{ $promociones->links() }}
+                        </div>
                     @endif
                 </div>
             @endif
@@ -154,17 +174,28 @@
     </div>
 
     @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        {{-- 
+            Manejo de Alertas de Sesión
+            Aquí aplicamos el FIX: confirmButtonColor = '#000000'
+            Esto asegura que la alerta de "Crear establecimiento" tenga el botón negro.
+        --}}
         @if(session('swal'))
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
-                    Swal.fire(@json(session('swal')));
+                    const config = @json(session('swal'));
+                    config.confirmButtonColor = '#000000'; // FORZAR NEGRO
+                    Swal.fire(config);
                 });
             </script>
         @endif
 
+        {{-- Confirmación de Eliminación --}}
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('.form-eliminar-promocion').forEach(form => {
+                const forms = document.querySelectorAll('.form-eliminar-promocion');
+                forms.forEach(form => {
                     form.addEventListener('submit', (e) => {
                         e.preventDefault();
                         Swal.fire({
@@ -172,7 +203,7 @@
                             text: "{{ __('Esta acción eliminará la promoción permanentemente.') }}",
                             icon: 'warning',
                             showCancelButton: true,
-                            confirmButtonColor: '#d33',
+                            confirmButtonColor: '#d33', // Rojo para acción destructiva
                             cancelButtonColor: '#3085d6',
                             confirmButtonText: '{{ __("Sí, eliminar") }}',
                             cancelButtonText: '{{ __("Cancelar") }}',
