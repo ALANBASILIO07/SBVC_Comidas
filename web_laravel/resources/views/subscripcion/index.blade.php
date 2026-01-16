@@ -37,8 +37,8 @@
         {{-- Header --}}
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-3">
-                <flux:icon.currency-dollar class="size-10 text-orange-500" />
-                <flux:heading size="xl">{{ __('PLANES Y SUSCRIPCIÓN') }}</flux:heading>
+                {{-- <flux:icon.currency-dollar class="size-10 text-orange-500" /> --}}
+                <flux:heading size="xl">{{ __('Subscripción') }}</flux:heading>
             </div>
 
             <div class="flex items-center gap-2 px-4 py-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
